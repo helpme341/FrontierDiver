@@ -36,7 +36,7 @@ class UMainInventoryInterfaceBase : public UInterface
 /**
  * 
  */
-class FRONTIERDIVER_API IMainInventoryInterfaceBase
+class FRONTIERDIVER_API IMainInventoryInterfaceBase : public IInventoryInterfaceBase
 {
 	GENERATED_BODY()
 };

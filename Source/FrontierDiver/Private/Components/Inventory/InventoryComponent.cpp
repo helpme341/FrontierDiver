@@ -15,6 +15,25 @@ UInventoryComponent::UInventoryComponent()
 }
 
 
+bool UInventoryComponent::AddItemToInventory(FItemInfoBase ItemInfo)
+{
+	switch (ItemInfo.InventoryItemClass)
+	{
+	case EInventoryItemClass::Cylinder:
+		// Пример явного преобразования
+		if (ItemInfo.InventoryItemClass == EInventoryItemClass::Cylinder)
+		{
+			const FInventoryCylinderInfo& CylinderInfo = dynamic_cast<const FInventoryCylinderInfo&>(ItemInfo);
+			// Делаем что-то с CylinderInfo
+			// Например, сохраняем его в вашем инвентаре или выполняем другие операции
+		}
+		break;
+	default:
+		break;
+	}
+	return false;
+}
+
 // Called when the game starts
 void UInventoryComponent::BeginPlay()
 {

@@ -40,6 +40,20 @@ struct  FCostumeItemDataTibleSettings : public FTableRowBase
 	FCostumeItemDataTibleBase CostumeItemSettings;
 };
 
+USTRUCT(BlueprintType)
+struct  FInventoryCostumeInfo : public FItemInfoBase
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "None")
+	float NowCapacity;
+
+	FInventoryCostumeInfo()
+	{
+		InventoryItemClass = EInventoryItemClass::Costume;
+	}
+};
+
 
 UINTERFACE(MinimalAPI)
 class UMainInventoryCostumeInterface : public UInterface
@@ -50,7 +64,7 @@ class UMainInventoryCostumeInterface : public UInterface
 /**
  * 
  */
-class FRONTIERDIVER_API IMainInventoryCostumeInterface
+class FRONTIERDIVER_API IMainInventoryCostumeInterface : public IMainInventoryInterfaceBase
 {
 	GENERATED_BODY()
 public:
