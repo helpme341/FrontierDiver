@@ -1,11 +1,23 @@
-﻿// Fill out your copyright notice in the Description page of Project Settings.
+// Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "Components/Inventory/InventoryComponent.h"
-#include "Components/Inventory/ItemsObjectTypes/CylinderInventory/InventoryCylinderItemObjectBase.h"
-#include "Components/Inventory/ItemsObjectTypes/MainInventory/MainInventoryOutfitItemObject.h"
+#include "Components/Inventory/Items/Bases/ItemBase.h"
+#include "Components/Inventory/Items/Interfaces/PickupDropItemIFBase.h"
 
-bool UInventoryComponent::AddItemToInvenory()
+bool UInventoryComponent::AddItemToInventory(ItemBase* Item)
 {
-    return false;
+	if (Item->AddThisItemToInventory(this)) { return true; }
+	return false;
+}
+
+bool UInventoryComponent::RemoveItemFromInventory(ItemBase* Item)
+{
+	if (Item->RemoveThisItemFromInvenory(this)) { return true; }
+	return false;
+}
+
+bool UInventoryComponent::DropItemFromInventory(ItemBase* Item)
+{
+	IPickupDropItemIFBase* TEst =  dynamic_cast<IPickupDropItemIFBase*>(Item);
 }
