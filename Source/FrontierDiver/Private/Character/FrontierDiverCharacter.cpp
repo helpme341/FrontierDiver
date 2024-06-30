@@ -13,6 +13,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/PhysicsVolume.h"
 #include "Components/Inventory/InventoryComponent.h"
+#include <Components/Inventory/Items/Items/JewelryItem.h>
 
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
 
@@ -55,6 +56,12 @@ void AFrontierDiverCharacter::BeginPlay()
 		{
 			Subsystem->AddMappingContext(DefaultMappingContext, 0);
 		}
+ 	}
+	UJewelryItem* Test = NewObject<UJewelryItem>();
+	Test->ItemDynamicInfo.ItemTypeName = "1";
+	if (FrontierDiverInventoryComponent->AddItemToInventory(Test))
+	{
+		Test->ItemDynamicInfo.ItemTypeName = "2";
 	}
 }
 

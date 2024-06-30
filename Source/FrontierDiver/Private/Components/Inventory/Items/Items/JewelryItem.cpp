@@ -4,22 +4,17 @@
 #include "Components/Inventory/Items/Items/JewelryItem.h"
 #include "Components/Inventory/Items/WorldItems/JewelryWorldItem.h"
 
-UJewelryItem::UJewelryItem()
-{
-	TemplateItem.Owner = this;
-}
-
 bool UJewelryItem::AddThisItemToInventory(UInventoryComponent* Inventory)
 {
-	return TemplateItem.AddThisItemToInventory(Inventory);
+	return AddItemToInventory(Inventory);
 }
 
 bool UJewelryItem::RemoveThisItemFromInventory(UInventoryComponent* Inventory)
 {
-	return TemplateItem.RemoveThisItemFromInventory(Inventory);
+	return RemoveItemFromInventory(Inventory);
 }
 
 bool UJewelryItem::DropThisItemFromInventory(UInventoryComponent* Inventory)
 {
-	return TemplateItem.DropThisItem(Inventory);
+	return DropItem(Inventory);
 }

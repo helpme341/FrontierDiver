@@ -47,9 +47,11 @@ class FRONTIERDIVER_API UInventoryComponent : public UCharacterComponentBase
 
 public:
 	
-	TArray<UDataTable*> DataTablesInfo;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TMap<TSubclassOf<UItemBase>, UDataTable* > DataTablesInfo;
 
 	TMap<EContainerType, FContainerBase> Inventory;
+
 
 
 	FTransform PlayerDropLocationOffset;
@@ -62,24 +64,5 @@ public:
 
 	bool DropItemFromInventory(UItemBase* Item);
 
-	template<typename T>
-	UDataTable* FindDataTableByStructType();
+	UDataTable* FindDataTableByStructType(TSubclassOf<UItemBase> Item);
 };
-
-
-template<typename T>
-inline UDataTable* UInventoryComponent::FindDataTableByStructType()
-{
-	for (UDataTable* DataTable : DataTablesInfo)
-	{
-		if (DataTable)
-		{
-			const UScriptStruct* RowStruct = DataTable->GetRowStruct();
-			if (RowStruct && RowStruct->IsChildOf(T::StaticStruct()))
-			{
-				return DataTable;
-			}
-		}
-	}
-	return nullptr;
-}

@@ -31,12 +31,10 @@ struct FJewelryItemTableRowInfo : public FItemTableRowInfoBase
  * 
  */
 UCLASS()
-class FRONTIERDIVER_API UJewelryItem : public UItemBase
+class FRONTIERDIVER_API UJewelryItem : public UItemBase, public TTemplateItem<UJewelryItem, FJewelryItemDynamicInfo, FJewelryItemStaticInfo, FJewelryItemTableRowInfo, AJewelryWorldItem>
 {
-	GENERATED_BODY()
-
+    GENERATED_BODY()
 protected:
-    UJewelryItem();
 
     virtual bool AddThisItemToInventory(UInventoryComponent* Inventory) override;
 
@@ -44,6 +42,4 @@ protected:
 
     virtual bool DropThisItemFromInventory(UInventoryComponent* Inventory) override;
 
-
-    TTemplateItem<FJewelryItemDynamicInfo, FJewelryItemStaticInfo, FJewelryItemTableRowInfo, AJewelryWorldItem> TemplateItem;
 };

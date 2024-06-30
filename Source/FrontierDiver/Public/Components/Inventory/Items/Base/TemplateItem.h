@@ -8,17 +8,17 @@
 /**
  * 
  */
-template<typename DT, typename ST, typename DTT, typename WT = AActor>
+template<typename OWT, typename DT, typename ST, typename DTT, typename WT = AActor>
 class FRONTIERDIVER_API TTemplateItem
 {
 public:
     DT ItemDynamicInfo;
     ST* ItemStaticInfo;
-    UItemBase* Owner;
+    OWT* Owner;
 
-    bool AddThisItemToInventory(UInventoryComponent* Inventory);
-    bool RemoveThisItemFromInventory(UInventoryComponent* Inventory);
-    bool DropThisItem(UInventoryComponent* Inventory);
+    bool AddItemToInventory(UInventoryComponent* Inventory);
+    bool RemoveItemFromInventory(UInventoryComponent* Inventory);
+    bool DropItem(UInventoryComponent* Inventory);
 
     void SpawnDropItem(UInventoryComponent* Inventory);
 
@@ -27,8 +27,8 @@ public:
 
 class UItemBase;
 
-template<typename DT, typename ST, typename DTT, typename WT>
-inline bool TTemplateItem<DT, ST, DTT, WT>::AddThisItemToInventory(UInventoryComponent* Inventory)
+template<typename OWT, typename DT, typename ST, typename DTT, typename WT>
+inline bool TTemplateItem<OWT, DT, ST, DTT, WT>::AddItemToInventory(UInventoryComponent* Inventory)
 {
     if (ThisItemID == 99)
     {
@@ -46,8 +46,8 @@ inline bool TTemplateItem<DT, ST, DTT, WT>::AddThisItemToInventory(UInventoryCom
     return false;
 }
 
-template<typename DT, typename ST, typename DTT, typename WT>
-inline bool TTemplateItem<DT, ST, DTT, WT>::RemoveThisItemFromInventory(UInventoryComponent* Inventory)
+template<typename OWT, typename DT, typename ST, typename DTT, typename WT>
+inline bool TTemplateItem<OWT, DT, ST, DTT, WT>::RemoveItemFromInventory(UInventoryComponent* Inventory)
 {
     if (ThisItemID != 99)
     {
@@ -59,16 +59,16 @@ inline bool TTemplateItem<DT, ST, DTT, WT>::RemoveThisItemFromInventory(UInvento
     return false;
 }
 
-template<typename DT, typename ST, typename DTT, typename WT>
-inline bool TTemplateItem<DT, ST, DTT, WT>::DropThisItem(UInventoryComponent* Inventory)
+template<typename OWT, typename DT, typename ST, typename DTT, typename WT>
+inline bool TTemplateItem<OWT, DT, ST, DTT, WT>::DropItem(UInventoryComponent* Inventory)
 {
     if (!ItemStaticInfo && ItemDynamicInfo.ItemTypeName != "None")
     {
-        ItemStaticInfo = Inventory->FindDataTableByStructType<DTT>()->FindRow<ST>(ItemDynamicInfo.ItemTypeName, "");
+        ItemStaticInfo = Inventory->FindDataTableByStructType(OWT::StaticClass())->FindRow<ST>(ItemDynamicInfo.ItemTypeName, "");
     }
     if (ItemStaticInfo && ItemStaticInfo->bIsPlayerCanDropAndTakeIt)
     {
-        if (RemoveThisItemFromInventory(Inventory))
+        if (RemoveItemFromInventory(Inventory))
         {
             SpawnDropItem(Inventory);
 
@@ -79,8 +79,8 @@ inline bool TTemplateItem<DT, ST, DTT, WT>::DropThisItem(UInventoryComponent* In
 }
 
 
-template<typename DT, typename ST, typename DTT, typename WT>
-inline void TTemplateItem<DT, ST, DTT, WT>::SpawnDropItem(UInventoryComponent* Inventory)
+template<typename OWT, typename DT, typename ST, typename DTT, typename WT>
+inline void TTemplateItem<OWT, DT, ST, DTT, WT>::SpawnDropItem(UInventoryComponent* Inventory)
 {
     WT* WorldItem = Inventory->GetWorld()->SpawnActor<WT>();
     WorldItem->SetActorTransform(Inventory->GetOwner()->GetActorTransform() + Inventory->PlayerDropLocationOffset);

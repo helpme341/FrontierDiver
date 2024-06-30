@@ -30,3 +30,11 @@ bool UInventoryComponent::DropItemFromInventory(UItemBase* Item)
 	return false;
 }
 
+UDataTable* UInventoryComponent::FindDataTableByStructType(TSubclassOf<UItemBase> Item)
+{
+	if (DataTablesInfo.Contains(Item))
+	{
+		return DataTablesInfo[Item];
+	}
+	return nullptr;
+}
