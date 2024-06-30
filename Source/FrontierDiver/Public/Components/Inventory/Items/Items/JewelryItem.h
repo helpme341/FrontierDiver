@@ -25,6 +25,10 @@ USTRUCT(BlueprintType)
 struct FJewelryItemTableRowInfo : public FItemTableRowInfoBase
 {
     GENERATED_BODY()
+
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite)
+    FJewelryItemStaticInfo ItemStaticSettings;
 };
 
 /**
@@ -34,6 +38,7 @@ UCLASS()
 class FRONTIERDIVER_API UJewelryItem : public UItemBase, public TTemplateItem<UJewelryItem, FJewelryItemDynamicInfo, FJewelryItemStaticInfo, FJewelryItemTableRowInfo, AJewelryWorldItem>
 {
     GENERATED_BODY()
+
 protected:
 
     virtual bool AddThisItemToInventory(UInventoryComponent* Inventory) override;

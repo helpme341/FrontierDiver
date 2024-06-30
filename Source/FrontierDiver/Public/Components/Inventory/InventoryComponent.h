@@ -50,8 +50,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TMap<TSubclassOf<UItemBase>, UDataTable* > DataTablesInfo;
 
-	TMap<EContainerType, FContainerBase> Inventory;
-
+	TMap<EContainerType, TVariant<UItemBase*, FContainerBase>> Inventory;
 
 
 	FTransform PlayerDropLocationOffset;

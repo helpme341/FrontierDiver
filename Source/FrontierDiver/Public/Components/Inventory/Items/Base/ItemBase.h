@@ -9,9 +9,10 @@
 UENUM(BlueprintType)
 enum class EContainerType : uint8
 {
-    Inventory,
+    Slot,
+    ClothingOne,
+    ClothingTwo,
     Array,
-    Map,
 };
 
 USTRUCT(BlueprintType)
@@ -41,8 +42,7 @@ struct FItemTableRowInfoBase : public FTableRowBase
 {
     GENERATED_BODY()
 
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Inventory")
-    bool bIsPlayerCanDropAndTakeIt;
+
 };
 
 
