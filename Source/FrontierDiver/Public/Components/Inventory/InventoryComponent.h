@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Components/Base/CharacterComponentBase.h"
+#include "Components/Inventory/Items/Base/ItemBase.h"
 #include "InventoryComponent.generated.h"
 
 
@@ -30,11 +31,15 @@ enum class ECylinderInventorySlotType : uint8
 };
 
 
-class ItemBase;
 
-/**
- * 
- */
+USTRUCT(BlueprintType)
+struct FContainerBase
+{
+	GENERATED_BODY()
+
+	TArray<UItemBase*> Inventory;
+};
+
 UCLASS()
 class FRONTIERDIVER_API UInventoryComponent : public UCharacterComponentBase
 {
@@ -42,19 +47,39 @@ class FRONTIERDIVER_API UInventoryComponent : public UCharacterComponentBase
 
 public:
 	
-	ItemBase* WearCostume;
+	TArray<UDataTable*> DataTablesInfo;
 
-	ItemBase* WearFlipper;
-
-	TMap<EInventorySlotType, ItemBase*> Inventory;
-
-	TMap<ECylinderInventorySlotType, ItemBase*> CylinderInventory;
-
-	bool AddItemToInventory(ItemBase* Item);
-
-	bool RemoveItemFromInventory(ItemBase* Item);
-
-	bool DropItemFromInventory(ItemBase* Item);
+	TMap<EContainerType, FContainerBase> Inventory;
 
 
+	FTransform PlayerDropLocationOffset;
+
+	bool AddItemToInventory(UItemBase* Item);
+
+	bool AddItemToInventory(AWorldItemBase* Item);
+
+	bool RemoveItemFromInventory(UItemBase* Item);
+
+	bool DropItemFromInventory(UItemBase* Item);
+
+	template<typename T>
+	UDataTable* FindDataTableByStructType();
 };
+
+
+template<typename T>
+inline UDataTable* UInventoryComponent::FindDataTableByStructType()
+{
+	for (UDataTable* DataTable : DataTablesInfo)
+	{
+		if (DataTable)
+		{
+			const UScriptStruct* RowStruct = DataTable->GetRowStruct();
+			if (RowStruct && RowStruct->IsChildOf(T::StaticStruct()))
+			{
+				return DataTable;
+			}
+		}
+	}
+	return nullptr;
+}

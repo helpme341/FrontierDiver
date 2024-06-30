@@ -12,6 +12,7 @@
 #include "Engine/LocalPlayer.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/PhysicsVolume.h"
+#include "Components/Inventory/InventoryComponent.h"
 
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
 
@@ -28,6 +29,8 @@ AFrontierDiverCharacter::AFrontierDiverCharacter()
 	FrontierDiverCameraComponent->SetupAttachment(GetCapsuleComponent());
 	FrontierDiverCameraComponent->SetRelativeLocation(FVector(-10.f, 0.f, 60.f)); // Position the camera
 	FrontierDiverCameraComponent->bUsePawnControlRotation = true;
+
+	FrontierDiverInventoryComponent = CreateDefaultSubobject<UInventoryComponent>(TEXT("InventoryComponent"));
 
 	// Create a mesh component that will be used when being viewed from a '1st person' view (when controlling this pawn)
 	Mesh1P = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("CharacterMesh1P"));
