@@ -59,10 +59,8 @@ void AFrontierDiverCharacter::BeginPlay()
  	}
 	UJewelryItem* Test = NewObject<UJewelryItem>();
 	Test->ItemDynamicInfo.ItemTypeName = "1";
-	if (FrontierDiverInventoryComponent->AddItemToInventory(Test))
-	{
-		Test->ItemDynamicInfo.ItemTypeName = "2";
-	}
+	FrontierDiverInventoryComponent->AddItemToInventory(Test);
+	FrontierDiverInventoryComponent->RemoveItemFromInventory(Test);
 }
 
 void AFrontierDiverCharacter::Tick(float DeltaTime)

@@ -16,26 +16,17 @@ struct FJewelryItemDynamicInfo : public FItemDynamicInfoBase
 };
 
 USTRUCT(BlueprintType)
-struct FJewelryItemStaticInfo : public FItemStaticInfoBase
-{
-    GENERATED_BODY()
-};
-
-USTRUCT(BlueprintType)
 struct FJewelryItemTableRowInfo : public FItemTableRowInfoBase
 {
     GENERATED_BODY()
 
-
-    UPROPERTY(EditAnywhere, BlueprintReadWrite)
-    FJewelryItemStaticInfo ItemStaticSettings;
 };
 
 /**
  * 
  */
 UCLASS()
-class FRONTIERDIVER_API UJewelryItem : public UItemBase, public TTemplateItem<UJewelryItem, FJewelryItemDynamicInfo, FJewelryItemStaticInfo, FJewelryItemTableRowInfo, AJewelryWorldItem>
+class FRONTIERDIVER_API UJewelryItem : public UItemBase, public TTemplateItem<UJewelryItem, FJewelryItemDynamicInfo, FJewelryItemTableRowInfo, AJewelryWorldItem>
 {
     GENERATED_BODY()
 

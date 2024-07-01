@@ -8,16 +8,15 @@
 /**
  *  OWT = Owner Type (class)
  *  DT = Owner Dynamic Info Type (struct)
- *  ST = Owner Static Info Type (struct)
  *  DTT = Owner Table Row Type (struct)
  *  WT = Owner World Actor Type (class)
  */
-template<typename OWT, typename DT, typename ST, typename DTT, typename WT = AActor>
+template<typename OWT, typename DT, typename TRT, typename WT = AActor>
 class FRONTIERDIVER_API TTemplateItem
 {
 public:
     DT ItemDynamicInfo;
-    ST* ItemStaticInfo;
+    TRT* ItemTableRowInfo;
     OWT* Owner;
 
     bool AddItemToInventory(UInventoryComponent* Inventory);
@@ -32,36 +31,34 @@ public:
 class UItemBase;
 
 
-/**
-* OWT = Owner Class
-* 
-*/
-template<typename OWT, typename DT, typename ST, typename DTT, typename WT>
-inline bool TTemplateItem<OWT, DT, ST, DTT, WT>::AddItemToInventory(UInventoryComponent* Inventory)
+
+template<typename OWT, typename DT, typename TRT, typename WT>
+inline bool TTemplateItem<OWT, DT, TRT, WT>::AddItemToInventory(UInventoryComponent* Inventory)
 {
     if (ThisItemID == 99)
     {
-        if (!ItemStaticInfo && ItemDynamicInfo.ItemTypeName != "None")
+        if (!ItemTableRowInfo && ItemDynamicInfo.ItemTypeName != "None")
         {
-            ItemStaticInfo = Inventory->FindDataTableByStructType(OWT::StaticClass())->FindRow<ST>(ItemDynamicInfo.ItemTypeName, "");
+            ItemTableRowInfo = Inventory->FindDataTableByStructType(OWT::StaticClass())->FindRow<TRT>(ItemDynamicInfo.ItemTypeName, "");
         }
-        if (ItemStaticInfo)
+        if (ItemTableRowInfo && Inventory->Inventory.Contains(ItemTableRowInfo->ItemContainerType))
         {
-            if (ItemStaticInfo->ItemContainerType == EContainerType::ClothingOne ||
-                ItemStaticInfo->ItemContainerType == EContainerType::ClothingTwo)
+            if (ItemTableRowInfo->ItemContainerType == EContainerType::ClothingOne ||
+                ItemTableRowInfo->ItemContainerType == EContainerType::ClothingTwo)
             {
-                Inventory->Inventory[ItemStaticInfo->ItemContainerType].Set<UItemBase*>(Owner);
+                Inventory->Inventory[ItemTableRowInfo->ItemContainerType].Item.Set<UItemBase*>(Owner);
+                ThisItemID = 0;
+                return true;
             }
-            else if (ItemStaticInfo->ItemContainerType == EContainerType::Array)
+            else if (ItemTableRowInfo->ItemContainerType == EContainerType::Array)
             {
-                TArray<UItemBase*>& Container = Inventory->Inventory[ItemStaticInfo->ItemContainerType].Get<FContainerBase>().Inventory;;
-                if (!Container.IsEmpty())
+                if (!Inventory->Inventory[ItemTableRowInfo->ItemContainerType].Item.Get<FContainerBase>().Inventory.IsEmpty())
                 {
-                    for (int32 Counter = 0; Counter < Container.Num(); Counter++)
+                    for (int32 Counter = 0; Counter < Inventory->Inventory[ItemTableRowInfo->ItemContainerType].Item.Get<FContainerBase>().Inventoryr.Num(); Counter++)
                     {
-                        if (!Container[Counter])
+                        if (!Inventory->Inventory[ItemTableRowInfo->ItemContainerType].Item.Get<FContainerBase>().Inventory[Counter])
                         {
-                            Container[Counter] = Owner;
+                            Inventory->Inventory[ItemTableRowInfo->ItemContainerType].Item.Set<FContainerBase>();/////////////////////////
                             ThisItemID = Counter;
                             return true;
                         }
@@ -73,29 +70,49 @@ inline bool TTemplateItem<OWT, DT, ST, DTT, WT>::AddItemToInventory(UInventoryCo
     return false;
 }
 
-template<typename OWT, typename DT, typename ST, typename DTT, typename WT>
-inline bool TTemplateItem<OWT, DT, ST, DTT, WT>::RemoveItemFromInventory(UInventoryComponent* Inventory)
+template<typename OWT, typename DT, typename TRT, typename WT>
+inline bool TTemplateItem<OWT, DT, TRT, WT>::RemoveItemFromInventory(UInventoryComponent* Inventory)
 {
     if (ThisItemID != 99)
     {
-        /**
-        Inventory->Inventory.Find(ItemStaticInfo->ItemContainerType)->Inventory[ThisItemID] = nullptr;
-        Inventory->Inventory.Find(ItemStaticInfo->ItemContainerType)->Inventory[ThisItemID]->ConditionalBeginDestroy();
-        ThisItemID = 99;
-        return true;
-        */
+        if (!ItemTableRowInfo && ItemDynamicInfo.ItemTypeName != "None")
+        {
+            ItemTableRowInfo = Inventory->FindDataTableByStructType(OWT::StaticClass())->FindRow<TRT>(ItemDynamicInfo.ItemTypeName, "");
+        }
+        if (Inventory->Inventory.Contains(ItemTableRowInfo->ItemContainerType))
+        {
+            if (ItemTableRowInfo->ItemContainerType == EContainerType::ClothingOne ||
+                ItemTableRowInfo->ItemContainerType == EContainerType::ClothingTwo)
+            {
+                Inventory->Inventory[ItemTableRowInfo->ItemContainerType].Item.Set<UItemBase*>(nullptr);
+                ThisItemID = 99;
+                return true;
+            }
+            else if (ItemTableRowInfo->ItemContainerType == EContainerType::Array)
+            {
+                TArray<UItemBase*> Container = Inventory->Inventory[ItemTableRowInfo->ItemContainerType].Item.Get<FContainerBase>().Inventory;
+
+                if (!Container.IsEmpty())
+                {
+                    Container[ThisItemID] = nullptr;
+                    ThisItemID = 99;
+                    return true;
+                }
+            }
+        }
     }
     return false;
 }
 
-template<typename OWT, typename DT, typename ST, typename DTT, typename WT>
-inline bool TTemplateItem<OWT, DT, ST, DTT, WT>::DropItem(UInventoryComponent* Inventory)
+template<typename OWT, typename DT, typename TRT, typename WT>
+inline bool TTemplateItem<OWT, DT, TRT, WT>::DropItem(UInventoryComponent* Inventory)
 {
-    if (!ItemStaticInfo && ItemDynamicInfo.ItemTypeName != "None")
+    /**
+    if (!ItemTableRowInfo && ItemDynamicInfo.ItemTypeName != "None")
     {
-        ItemStaticInfo = Inventory->FindDataTableByStructType(OWT::StaticClass())->FindRow<ST>(ItemDynamicInfo.ItemTypeName, "");
+        ItemTableRowInfo = Inventory->FindDataTableByStructType(OWT::StaticClass())->FindRow<TRT>(ItemDynamicInfo.ItemTypeName, "");
     }
-    if (ItemStaticInfo && ItemStaticInfo->bIsPlayerCanDropAndTakeIt)
+    if (ItemTableRowInfo && ItemTableRowInfo->bIsPlayerCanDropAndTakeIt)
     {
         if (RemoveItemFromInventory(Inventory))
         {
@@ -104,12 +121,13 @@ inline bool TTemplateItem<OWT, DT, ST, DTT, WT>::DropItem(UInventoryComponent* I
             return true;
         }
     }
+    */
     return false;
 }
 
 
-template<typename OWT, typename DT, typename ST, typename DTT, typename WT>
-inline void TTemplateItem<OWT, DT, ST, DTT, WT>::SpawnDropItem(UInventoryComponent* Inventory)
+template<typename OWT, typename DT, typename TRT, typename WT>
+inline void TTemplateItem<OWT, DT, TRT, WT>::SpawnDropItem(UInventoryComponent* Inventory)
 {
     WT* WorldItem = Inventory->GetWorld()->SpawnActor<WT>();
     WorldItem->SetActorTransform(Inventory->GetOwner()->GetActorTransform() + Inventory->PlayerDropLocationOffset);

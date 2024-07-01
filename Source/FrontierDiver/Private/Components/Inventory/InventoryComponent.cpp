@@ -5,7 +5,6 @@
 #include "Components/Inventory/Items/Base/ItemBase.h"
 
 
-
 bool UInventoryComponent::AddItemToInventory(UItemBase* Item)
 {
 	if (Item) { if (Item->AddThisItemToInventory(this)) { return true; } }

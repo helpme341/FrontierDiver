@@ -30,14 +30,17 @@ enum class ECylinderInventorySlotType : uint8
 	ThighMount,
 };
 
-
-
 USTRUCT(BlueprintType)
 struct FContainerBase
 {
 	GENERATED_BODY()
 
 	TArray<UItemBase*> Inventory;
+};
+
+struct FItemVariantBase
+{
+	TVariant<UItemBase*, FContainerBase> Item;
 };
 
 UCLASS()
@@ -50,8 +53,13 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TMap<TSubclassOf<UItemBase>, UDataTable* > DataTablesInfo;
 
-	TMap<EContainerType, TVariant<UItemBase*, FContainerBase>> Inventory;
+	TMap<EContainerType, FItemVariantBase> Inventory{
+		  { EContainerType::ClothingOne, FItemVariantBase()},
+		  { EContainerType::ClothingTwo, FItemVariantBase()},
+		  { EContainerType::Array, FItemVariantBase()}
+	};
 
+	TVariant<UItemBase*, FContainerBase> Test;
 
 	FTransform PlayerDropLocationOffset;
 

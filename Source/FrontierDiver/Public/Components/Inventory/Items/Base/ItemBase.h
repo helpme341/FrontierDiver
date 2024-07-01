@@ -26,7 +26,7 @@ struct FItemDynamicInfoBase
 };
 
 USTRUCT(BlueprintType)
-struct FItemStaticInfoBase
+struct FItemTableRowInfoBase : public FTableRowBase
 {
     GENERATED_BODY()
 
@@ -35,14 +35,6 @@ struct FItemStaticInfoBase
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Inventory")
     EContainerType ItemContainerType;
-};
-
-USTRUCT(BlueprintType)
-struct FItemTableRowInfoBase : public FTableRowBase
-{
-    GENERATED_BODY()
-
-
 };
 
 
