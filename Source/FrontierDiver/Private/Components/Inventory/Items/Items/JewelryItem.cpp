@@ -4,6 +4,11 @@
 #include "Components/Inventory/Items/Items/JewelryItem.h"
 #include "Components/Inventory/Items/WorldItems/JewelryWorldItem.h"
 
+UJewelryItem::UJewelryItem()
+{
+	Owner = this;
+}
+
 bool UJewelryItem::AddThisItemToInventory(UInventoryComponent* Inventory)
 {
 	return AddItemToInventory(Inventory);

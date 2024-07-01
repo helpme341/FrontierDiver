@@ -35,12 +35,42 @@ struct FContainerBase
 {
 	GENERATED_BODY()
 
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Inventory")
 	TArray<UItemBase*> Inventory;
+
+	FContainerBase() {}
+
+	FContainerBase(const TArray<UItemBase*>& InInventory)
+	{
+		Inventory = InInventory;
+	}
+
+	FContainerBase(int32 InventorySlots)
+	{
+		for (int32 Counter = 0; Counter < InventorySlots; Counter++)
+		{
+			Inventory.Add(nullptr);
+		}
+	}
 };
 
 struct FItemVariantBase
 {
 	TVariant<UItemBase*, FContainerBase> Item;
+	
+
+	FItemVariantBase() {}
+
+	FItemVariantBase(UItemBase* InItem)
+	{
+		Item.Set<UItemBase*>(InItem);
+	}
+
+	FItemVariantBase(const FContainerBase& InContainerBase)
+	{
+		Item.Set<FContainerBase>(InContainerBase);
+	}
 };
 
 UCLASS()
@@ -55,11 +85,9 @@ public:
 
 	TMap<EContainerType, FItemVariantBase> Inventory{
 		  { EContainerType::ClothingOne, FItemVariantBase()},
-		  { EContainerType::ClothingTwo, FItemVariantBase()},
-		  { EContainerType::Array, FItemVariantBase()}
+		  { EContainerType::ClothingTwo, FItemVariantBase(nullptr)},
+		  { EContainerType::Array, FItemVariantBase(FContainerBase(5))}
 	};
-
-	TVariant<UItemBase*, FContainerBase> Test;
 
 	FTransform PlayerDropLocationOffset;
 

@@ -32,6 +32,8 @@ class FRONTIERDIVER_API UJewelryItem : public UItemBase, public TTemplateItem<UJ
 
 protected:
 
+    UJewelryItem();
+
     virtual bool AddThisItemToInventory(UInventoryComponent* Inventory) override;
 
     virtual bool RemoveThisItemFromInventory(UInventoryComponent* Inventory) override;

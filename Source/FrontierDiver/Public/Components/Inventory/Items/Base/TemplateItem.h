@@ -52,13 +52,14 @@ inline bool TTemplateItem<OWT, DT, TRT, WT>::AddItemToInventory(UInventoryCompon
             }
             else if (ItemTableRowInfo->ItemContainerType == EContainerType::Array)
             {
-                if (!Inventory->Inventory[ItemTableRowInfo->ItemContainerType].Item.Get<FContainerBase>().Inventory.IsEmpty())
+                TArray<UItemBase*>& ContainerArray = Inventory->Inventory[ItemTableRowInfo->ItemContainerType].Item.TryGet<FContainerBase>()->Inventory;
+                if (!ContainerArray.IsEmpty())
                 {
-                    for (int32 Counter = 0; Counter < Inventory->Inventory[ItemTableRowInfo->ItemContainerType].Item.Get<FContainerBase>().Inventoryr.Num(); Counter++)
+                    for (int32 Counter = 0; Counter < ContainerArray.Num(); Counter++)
                     {
-                        if (!Inventory->Inventory[ItemTableRowInfo->ItemContainerType].Item.Get<FContainerBase>().Inventory[Counter])
+                        if (!ContainerArray[Counter])
                         {
-                            Inventory->Inventory[ItemTableRowInfo->ItemContainerType].Item.Set<FContainerBase>();/////////////////////////
+                            ContainerArray[Counter] = Owner;
                             ThisItemID = Counter;
                             return true;
                         }
@@ -90,11 +91,11 @@ inline bool TTemplateItem<OWT, DT, TRT, WT>::RemoveItemFromInventory(UInventoryC
             }
             else if (ItemTableRowInfo->ItemContainerType == EContainerType::Array)
             {
-                TArray<UItemBase*> Container = Inventory->Inventory[ItemTableRowInfo->ItemContainerType].Item.Get<FContainerBase>().Inventory;
+                TArray<UItemBase*> ContainerArray = Inventory->Inventory[ItemTableRowInfo->ItemContainerType].Item.TryGet<FContainerBase>()->Inventory;
 
-                if (!Container.IsEmpty())
+                if (!ContainerArray.IsEmpty())
                 {
-                    Container[ThisItemID] = nullptr;
+                    ContainerArray[ThisItemID] = nullptr;
                     ThisItemID = 99;
                     return true;
                 }

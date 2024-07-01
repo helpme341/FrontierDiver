@@ -6,6 +6,9 @@
 #include "GameFramework/Actor.h"
 #include "WorldItemBase.generated.h"
 
+class UInventoryComponent;
+class UItemBase;
+
 UCLASS()
 class FRONTIERDIVER_API AWorldItemBase : public AActor
 {
@@ -15,12 +18,11 @@ public:
 	// Sets default values for this actor's properties
 	AWorldItemBase();
 
-protected:
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	UStaticMeshComponent* StaticMesh;
 
-public:	
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
+	 UItemBase* Item;
+
+	virtual bool AddThisItemToInventory(UInventoryComponent* Inventory);
 
 };

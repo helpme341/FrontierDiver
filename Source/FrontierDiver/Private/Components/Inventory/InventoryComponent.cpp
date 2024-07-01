@@ -3,6 +3,7 @@
 
 #include "Components/Inventory/InventoryComponent.h"
 #include "Components/Inventory/Items/Base/ItemBase.h"
+#include "Components/Inventory/Items/WorldItems/WorldItemBase.h"
 
 
 bool UInventoryComponent::AddItemToInventory(UItemBase* Item)
@@ -13,7 +14,7 @@ bool UInventoryComponent::AddItemToInventory(UItemBase* Item)
 
 bool UInventoryComponent::AddItemToInventory(AWorldItemBase* Item)
 {
-	//if (Item) { if (Item->AddThisItemToInventory(this)) { return true; } }
+	if (Item) { if (Item->AddThisItemToInventory(this)) { return true; } }
 	return false;
 }
 
