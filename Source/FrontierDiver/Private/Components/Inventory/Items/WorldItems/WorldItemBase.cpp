@@ -3,7 +3,8 @@
 
 #include "Components/Inventory/Items/WorldItems/WorldItemBase.h"
 #include "Components/Inventory/InventoryComponent.h"
-#include "Components/Inventory/Items/Base/ItemBase.h"
+#include "Components/Inventory/Items/Base/InventoryItemClassBase.h"
+#include "Components/Inventory/Items/Items/ItemBase.h"
 
 // Sets default values
 AWorldItemBase::AWorldItemBase()

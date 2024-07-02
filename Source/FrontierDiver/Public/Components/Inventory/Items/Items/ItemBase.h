@@ -40,12 +40,13 @@ struct FItemTableRowInfoBase : public FTableRowBase
 
 class AWorldItemBase;
 class UInventoryComponent;
+class InventoryItemClassBase;
 
 /**
  * 
  */
 UCLASS()
-class FRONTIERDIVER_API UItemBase : public UObject
+class FRONTIERDIVER_API UItemBase : public UObject, public InventoryItemClassBase
 {
 	GENERATED_BODY()
 

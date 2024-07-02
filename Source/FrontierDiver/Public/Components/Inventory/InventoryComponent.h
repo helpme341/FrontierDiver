@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Components/Base/CharacterComponentBase.h"
-#include "Components/Inventory/Items/Base/ItemBase.h"
+#include "Components/Inventory/Items/Items/ItemBase.h"
 #include "InventoryComponent.generated.h"
 
 
@@ -30,18 +30,14 @@ enum class ECylinderInventorySlotType : uint8
 	ThighMount,
 };
 
-USTRUCT(BlueprintType)
 struct FContainerBase
 {
-	GENERATED_BODY()
 
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Inventory")
-	TArray<UItemBase*> Inventory;
+	TArray<InventoryItemClassBase*> Inventory;
 
 	FContainerBase() {}
 
-	FContainerBase(const TArray<UItemBase*>& InInventory)
+	FContainerBase(const TArray<InventoryItemClassBase*>& InInventory)
 	{
 		Inventory = InInventory;
 	}
@@ -57,14 +53,14 @@ struct FContainerBase
 
 struct FItemVariantBase
 {
-	TVariant<UItemBase*, FContainerBase> Item;
+	TVariant<InventoryItemClassBase*, FContainerBase> Item;
 	
 
 	FItemVariantBase() {}
 
-	FItemVariantBase(UItemBase* InItem)
+	FItemVariantBase(InventoryItemClassBase* InItem)
 	{
-		Item.Set<UItemBase*>(InItem);
+		Item.Set<InventoryItemClassBase*>(InItem);
 	}
 
 	FItemVariantBase(const FContainerBase& InContainerBase)
@@ -72,6 +68,8 @@ struct FItemVariantBase
 		Item.Set<FContainerBase>(InContainerBase);
 	}
 };
+
+class InventoryItemClassBase;
 
 UCLASS()
 class FRONTIERDIVER_API UInventoryComponent : public UCharacterComponentBase
@@ -91,11 +89,9 @@ public:
 
 	FTransform PlayerDropLocationOffset;
 
-	bool AddItemToInventory(UItemBase* Item);
+	bool AddItemToInventory(InventoryItemClassBase* Item);
 
-	bool AddItemToInventory(AWorldItemBase* Item);
-
-	bool RemoveItemFromInventory(UItemBase* Item);
+	bool RemoveItemFromInventory(InventoryItemClassBase* Item);
 
 	bool DropItemFromInventory(UItemBase* Item);
 

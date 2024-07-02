@@ -5,13 +5,17 @@
 #include "CoreMinimal.h"
 #include "Components/Inventory/InventoryComponent.h"
 
+class InventoryItemClassBase;
+class AWorldItemBase;
+
+
 /**
  *  OWT = Owner Type (class)
  *  DT = Owner Dynamic Info Type (struct)
  *  DTT = Owner Table Row Type (struct)
  *  WT = Owner World Actor Type (class)
  */
-template<typename OWT, typename DT, typename TRT, typename WT = AActor>
+template<typename OWT, typename DT, typename TRT, typename WT = AWorldItemBase>
 class FRONTIERDIVER_API TTemplateItem
 {
 public:
@@ -28,10 +32,6 @@ public:
     int32 ThisItemID = 99;
 };
 
-class UItemBase;
-
-
-
 template<typename OWT, typename DT, typename TRT, typename WT>
 inline bool TTemplateItem<OWT, DT, TRT, WT>::AddItemToInventory(UInventoryComponent* Inventory)
 {
@@ -46,13 +46,13 @@ inline bool TTemplateItem<OWT, DT, TRT, WT>::AddItemToInventory(UInventoryCompon
             if (ItemTableRowInfo->ItemContainerType == EContainerType::ClothingOne ||
                 ItemTableRowInfo->ItemContainerType == EContainerType::ClothingTwo)
             {
-                Inventory->Inventory[ItemTableRowInfo->ItemContainerType].Item.Set<UItemBase*>(Owner);
+                Inventory->Inventory[ItemTableRowInfo->ItemContainerType].Item.Set<InventoryItemClassBase*>(Owner);
                 ThisItemID = 0;
                 return true;
             }
             else if (ItemTableRowInfo->ItemContainerType == EContainerType::Array)
             {
-                TArray<UItemBase*>& ContainerArray = Inventory->Inventory[ItemTableRowInfo->ItemContainerType].Item.TryGet<FContainerBase>()->Inventory;
+                TArray<InventoryItemClassBase*>& ContainerArray = Inventory->Inventory[ItemTableRowInfo->ItemContainerType].Item.TryGet<FContainerBase>()->Inventory;
                 if (!ContainerArray.IsEmpty())
                 {
                     for (int32 Counter = 0; Counter < ContainerArray.Num(); Counter++)
@@ -85,13 +85,13 @@ inline bool TTemplateItem<OWT, DT, TRT, WT>::RemoveItemFromInventory(UInventoryC
             if (ItemTableRowInfo->ItemContainerType == EContainerType::ClothingOne ||
                 ItemTableRowInfo->ItemContainerType == EContainerType::ClothingTwo)
             {
-                Inventory->Inventory[ItemTableRowInfo->ItemContainerType].Item.Set<UItemBase*>(nullptr);
+                Inventory->Inventory[ItemTableRowInfo->ItemContainerType].Item.Set<InventoryItemClassBase*>(nullptr);
                 ThisItemID = 99;
                 return true;
             }
             else if (ItemTableRowInfo->ItemContainerType == EContainerType::Array)
             {
-                TArray<UItemBase*> ContainerArray = Inventory->Inventory[ItemTableRowInfo->ItemContainerType].Item.TryGet<FContainerBase>()->Inventory;
+                TArray<InventoryItemClassBase*> ContainerArray = Inventory->Inventory[ItemTableRowInfo->ItemContainerType].Item.TryGet<FContainerBase>()->Inventory;
 
                 if (!ContainerArray.IsEmpty())
                 {

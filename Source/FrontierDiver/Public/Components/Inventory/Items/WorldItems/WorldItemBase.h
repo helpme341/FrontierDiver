@@ -7,10 +7,12 @@
 #include "WorldItemBase.generated.h"
 
 class UInventoryComponent;
+class InventoryItemClassBase;
 class UItemBase;
 
+
 UCLASS()
-class FRONTIERDIVER_API AWorldItemBase : public AActor
+class FRONTIERDIVER_API AWorldItemBase : public AActor, public InventoryItemClassBase
 {
 	GENERATED_BODY()
 	
@@ -21,8 +23,7 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	UStaticMeshComponent* StaticMesh;
 
-	 UItemBase* Item;
+	UItemBase* Item;
 
 	virtual bool AddThisItemToInventory(UInventoryComponent* Inventory);
-
 };
