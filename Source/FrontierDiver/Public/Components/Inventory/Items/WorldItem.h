@@ -4,13 +4,14 @@
 
 #include "CoreMinimal.h"
 #include "Components/Inventory/Items/ItemBase.h"
+#include "Character/Interfaces/InteractionIF.h"
 #include "WorldItem.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class FRONTIERDIVER_API AWorldItem : public AActor
+class FRONTIERDIVER_API AWorldItem : public AActor, public IInteractionIF
 {
 	GENERATED_BODY()
 
@@ -20,7 +21,7 @@ public:
 
 	void BeginPlay() override;
 
-	virtual void OnConstruction(const FTransform& Transform) override;
+	void Interaction(AFrontierDiverCharacter* Character) override;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UStaticMeshComponent* StaticMesh;

@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Components/Base/CharacterComponentBase.h"
 #include "Components/Inventory/Items/ItemBase.h"
+#include "Components/Inventory/Items/WorldItem.h"
 #include "InventoryComponent.generated.h"
 
 
@@ -98,5 +99,14 @@ public:
 
 	bool DropItemFromInventory(UItemBase* Item);
 
+	UFUNCTION(BlueprintCallable)
 	UDataTable* FindDataTableByItemType(TSubclassOf<UItemBase> Item);
+
+private:
+	// бызывие релизации функций придметов 
+
+	bool BaseAddItemToInventory(UItemBase* NewItem);
+
+	bool BaseRemoveItemFromInventory(UItemBase* NewItem, bool DestroyItem);
 };
+

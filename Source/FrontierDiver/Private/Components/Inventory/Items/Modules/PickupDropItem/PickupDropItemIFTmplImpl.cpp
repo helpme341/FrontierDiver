@@ -2,4 +2,3 @@
 
 
 #include "Components/Inventory/Items//Modules/PickupDropItem/PickupDropItemIFTmplImpl.h"
-#include "Components/Inventory/InventoryComponent.h"

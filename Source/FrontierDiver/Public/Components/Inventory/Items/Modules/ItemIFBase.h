@@ -4,12 +4,18 @@
 
 #include "CoreMinimal.h"
 #include "UObject/Interface.h"
+#include "ItemIFBase.generated.h"
+
+UINTERFACE(MinimalAPI)
+class UItemIFBase : public UInterface
+{
+	GENERATED_BODY()
+};
 
 /**
  * 
  */
-
 class FRONTIERDIVER_API IItemIFBase : public IInterface
 {
-
+	GENERATED_BODY()
 };

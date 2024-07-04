@@ -10,6 +10,16 @@ UJewelryItem::UJewelryItem()
 	TPickupDropItemIFTmplImpl::Owner = this;
 }
 
+bool UJewelryItem::PickupItem(UInventoryComponent* Inventory, AWorldItem* Item)
+{
+	return TPickupDropItemIFTmplImpl::PickupItem(Inventory, Item);
+}
+
+bool UJewelryItem::DropItem(UInventoryComponent* Inventory)
+{
+	return TPickupDropItemIFTmplImpl::DropItem(Inventory);
+}
+
 bool UJewelryItem::FindDataTableByItemType(UInventoryComponent* Inventory)
 {
 	if (!ItemTableRowInfo && ItemDynamicInfo.ItemTypeName != "None")

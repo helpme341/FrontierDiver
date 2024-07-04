@@ -13,7 +13,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/PhysicsVolume.h"
 #include "Components/Inventory/InventoryComponent.h"
-#include <Components/Inventory/Items/ItemsTypes/JewelryItem.h>
+#include "Character/Interfaces/InteractionIF.h"
 
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
 
@@ -57,12 +57,6 @@ void AFrontierDiverCharacter::BeginPlay()
 			Subsystem->AddMappingContext(DefaultMappingContext, 0);
 		}
  	}
-	UJewelryItem* Test = NewObject<UJewelryItem>();
-	Test->ItemDynamicInfo.ItemTypeName = "1";
-	UJewelryItem* Test1 = NewObject<UJewelryItem>();
-	Test1->ItemDynamicInfo.ItemTypeName = "1";
-	FrontierDiverInventoryComponent->AddItemToInventory(Test);
-	FrontierDiverInventoryComponent->AddItemToInventory(Test1);
 }
 
 void AFrontierDiverCharacter::Tick(float DeltaTime)
@@ -118,6 +112,21 @@ void AFrontierDiverCharacter::Look(const FInputActionValue& Value)
 	}
 }
 
+void AFrontierDiverCharacter::Interact()
+{
+	FVector StartLocation = GetActorLocation();
+	FVector EndLocation = StartLocation + GetControlRotation().Vector() * 75.0f;
+	FCollisionQueryParams TraceParams(FName(TEXT("SphereTrace")), false, GetOwner());
+	FHitResult HitResult;
+
+	float SphereRadius = 25.0f;
+
+	if (GetWorld()->SweepSingleByChannel(HitResult, StartLocation, EndLocation, FQuat::Identity, ECollisionChannel::ECC_Visibility, FCollisionShape::MakeSphere(15.0f), TraceParams))
+	{
+		Cast<IInteractionIF>(HitResult.GetActor())->Interaction(this);
+	}
+}
+
 void AFrontierDiverCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
@@ -133,6 +142,9 @@ void AFrontierDiverCharacter::SetupPlayerInputComponent(UInputComponent* PlayerI
 
 		// Looking
 		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &AFrontierDiverCharacter::Look);
+
+		//Interact
+		EnhancedInputComponent->BindAction(InteractAction, ETriggerEvent::Started, this, &AFrontierDiverCharacter::Interact);
 	}
 	else
 	{

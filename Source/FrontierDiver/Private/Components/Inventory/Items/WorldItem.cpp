@@ -30,9 +30,11 @@ void AWorldItem::BeginPlay()
 	}
 }
 
-void AWorldItem::OnConstruction(const FTransform& Transform)
+void AWorldItem::Interaction(AFrontierDiverCharacter* Character)
 {
+	Character->GetComponentByClass<UInventoryComponent>()->PickupItemToInventory(this);
 }
+
 
 void AWorldItem::LoadDataToWorldItem(FItemDynamicInfoBase DynamicInfo, TSubclassOf<UItemBase> NewItemType, UStaticMesh* NewItemMesh)
 {

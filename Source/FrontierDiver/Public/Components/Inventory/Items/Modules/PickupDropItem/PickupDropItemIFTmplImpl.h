@@ -3,18 +3,18 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Components/Inventory/Items/Modules/PickupDropItem/PickupDropItemIF.h"
 #include "Components/Inventory/Items/WorldItem.h"
 #include "Components/Inventory/Items/ItemTmpl.h"
+#include "Components/Inventory/InventoryComponent.h"
 #include "Components/Inventory/Items/Modules/ItemTmplBase.h"
 
-class UInventoryComponent;
+
 
 /**
  * 
  */
-template<typename OWT, typename DST, typename TRST>
-class FRONTIERDIVER_API TPickupDropItemIFTmplImpl : public TItemTmplBase, public IPickupDropItemIF
+template<typename OWT>
+class FRONTIERDIVER_API TPickupDropItemIFTmplImpl : public TItemTmplBase
 {
 protected:
 
@@ -23,29 +23,33 @@ protected:
 public:
 
 
-	bool PickupItem(UInventoryComponent* Inventory, AWorldItem* Item) override;
+	bool PickupItem(UInventoryComponent* Inventory, AWorldItem* Item);
 
-	bool DropItem(UInventoryComponent* Inventory) override;
+	bool DropItem(UInventoryComponent* Inventory);
 
 	template<typename T>
 	T PickupDropIFTmplImpl();
 };
 
-template<typename OWT, typename DST, typename TRST>
-inline bool TPickupDropItemIFTmplImpl<OWT, DST, TRST>::PickupItem(UInventoryComponent* Inventory, AWorldItem* Item)
+template<typename OWT>
+inline bool TPickupDropItemIFTmplImpl<OWT>::PickupItem(UInventoryComponent* Inventory, AWorldItem* Item)
 {
-	Owner->GetItemTmpl()->ItemDynamicInfo.ItemTypeName = Item->ItemDynamicInfo.ItemTypeName;
-	if (Owner->AddThisItemToInventory(Inventory))
+	if (auto* ItemTmpl = Owner->GetItemTmpl())
 	{
-		Item->Destroy();
-		return true;
+		ItemTmpl->ItemDynamicInfo.ItemTypeName = Item->ItemTypeName;
+		if (Inventory->AddItemToInventory(Owner))
+		{
+			Item->Destroy();
+			return true;
+		}
+		Owner->ConditionalBeginDestroy();
 	}
-	Owner->ConditionalBeginDestroy();
+
 	return false;
 }
 
-template<typename OWT, typename DST, typename TRST>
-inline bool TPickupDropItemIFTmplImpl<OWT, DST, TRST>::DropItem(UInventoryComponent* Inventory)
+template<typename OWT>
+inline bool TPickupDropItemIFTmplImpl<OWT>::DropItem(UInventoryComponent* Inventory)
 {
 	AWorldItem* NewWorldItem = Owner->GetWorld()->SpawnActor<AWorldItem>();
 	if (Owner->FindDataTableByItemType(Inventory))
@@ -54,15 +58,15 @@ inline bool TPickupDropItemIFTmplImpl<OWT, DST, TRST>::DropItem(UInventoryCompon
 		if (ItemTmpl)
 		{
 			NewWorldItem->LoadDataToWorldItem(ItemTmpl->ItemDynamicInfo, OWT::StaticClass(), ItemTmpl->ItemTableRowInfo->ItemWorldStaticMesh);
-			return Owner->RemoveThisItemFromInventory(Inventory, true);
+			return Inventory->RemoveItemFromInventory(Owner, true);
 		}
 	}
 	return false;
 }
 
-template<typename OWT, typename DST, typename TRST>
+template<typename OWT>
 template<typename T>
-inline T TPickupDropItemIFTmplImpl<OWT, DST, TRST>::PickupDropIFTmplImpl()
+inline T TPickupDropItemIFTmplImpl<OWT>::PickupDropIFTmplImpl()
 {
 	return this;
 }

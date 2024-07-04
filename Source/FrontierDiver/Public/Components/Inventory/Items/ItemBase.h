@@ -51,7 +51,7 @@ class FRONTIERDIVER_API UItemBase : public UObject
 {
 	GENERATED_BODY()
 
-protected:
+public:
 
     int32 ThisItemID = 99;
 
@@ -59,9 +59,18 @@ protected:
 
     virtual FItemTableRowInfoBase* GetItemStaticInfo();
 
-public:
+    bool bUseCustomAddThisItemToInventory = false;
+
+    bool bUseCustomRemoveThisItemFromInventory = false;
 
 	virtual bool AddThisItemToInventory(UInventoryComponent* Inventory);
 
 	virtual bool RemoveThisItemFromInventory(UInventoryComponent* Inventory, bool DestroyItem);
+
+
+    //template<typename T>
+    //bool PickupItem(UInventoryComponent* Inventory, AWorldItem* Item);
+
+    //template<typename T>
+    //bool DropItem(UInventoryComponent* Inventory);
 };
