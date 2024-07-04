@@ -3,13 +3,13 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "UObject/Interface.h"
 
 /**
  * 
  */
-class FRONTIERDIVER_API TemplateItemBase
+
+class FRONTIERDIVER_API IItemIFBase : public IInterface
 {
-public:
-	TemplateItemBase();
-	~TemplateItemBase();
+
 };

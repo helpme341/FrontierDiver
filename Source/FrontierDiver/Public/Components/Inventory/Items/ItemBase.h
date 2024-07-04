@@ -34,28 +34,34 @@ struct FItemTableRowInfoBase : public FTableRowBase
     bool bIsPlayerCanDropAndTakeIt;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Inventory")
+    UStaticMesh* ItemWorldStaticMesh;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Inventory")
     EContainerType ItemContainerType;
 };
 
 
-class AWorldItemBase;
 class UInventoryComponent;
-class InventoryItemClassBase;
 
 /**
  * 
  */
 UCLASS()
-class FRONTIERDIVER_API UItemBase : public UObject, public InventoryItemClassBase
+class FRONTIERDIVER_API UItemBase : public UObject
 {
 	GENERATED_BODY()
 
-public: 
+protected:
+
+    int32 ThisItemID = 99;
+
+    virtual bool FindDataTableByItemType(UInventoryComponent* Inventory);
+
+    virtual FItemTableRowInfoBase* GetItemStaticInfo();
+
+public:
 
 	virtual bool AddThisItemToInventory(UInventoryComponent* Inventory);
 
-	virtual bool RemoveThisItemFromInventory(UInventoryComponent* Inventory);
-
-	virtual bool DropThisItemFromInventory(UInventoryComponent* Inventory);
-	
+	virtual bool RemoveThisItemFromInventory(UInventoryComponent* Inventory, bool DestroyItem);
 };

@@ -2,35 +2,40 @@
 
 
 #include "Components/Inventory/InventoryComponent.h"
-#include "Components/Inventory/Items/WorldItems/WorldItemBase.h"
-#include "Components/Inventory/Items/Base/InventoryItemClassBase.h"
-#include "Components/Inventory/Items/Base/TemplateClasses/TemplateItemClasses/TemplateItem.h"
+#include "Components/Inventory/Items/WorldItem.h"
+#include "Components/Inventory/Items/Modules/PickupDropItem/PickupDropItemIF.h"
 
 
-bool UInventoryComponent::AddItemToInventory(InventoryItemClassBase* Item)
+bool UInventoryComponent::AddItemToInventory(UItemBase* Item)
 {
-	
 	if (Item) { if (Item->AddThisItemToInventory(this)) { return true; } }
 	return false;
 }
 
-bool UInventoryComponent::RemoveItemFromInventory(InventoryItemClassBase* Item)
+bool UInventoryComponent::RemoveItemFromInventory(UItemBase* Item, bool DestroyItem)
 {
-	if (Item) { if (Item->RemoveThisItemFromInventory(this)) { return true; } }
+	if (Item) { if (Item->RemoveThisItemFromInventory(this, DestroyItem)) { return true; } }
 	return false;
 }
 
-bool UInventoryComponent::DropItemFromInventory(InventoryItemClassBase* Item)
+bool UInventoryComponent::PickupItemToInventory(AWorldItem* Item)
 {
-	if (Item) { if (Item->DropThisItemFromInventory(this)) { return true; } }
-	return false;
-}
-
-UDataTable* UInventoryComponent::FindDataTableByStructType(TSubclassOf<UItemBase> Item)
-{
-	if (DataTablesInfo.Contains(Item))
+	if (Item)
 	{
-		return DataTablesInfo[Item];
+		UItemBase* NewItem = NewObject<UItemBase>(this, Item->ItemType);
+		if (NewItem) { if (Cast<IPickupDropItemIF>(NewItem)->PickupItem(this, Item)) { return true; } }
 	}
+	return false;
+}
+
+bool UInventoryComponent::DropItemFromInventory(UItemBase* Item)
+{
+	if (Item) { if (Cast<IPickupDropItemIF>(Item)->DropItem(this)) { return true; } }
+	return false;
+}
+
+UDataTable* UInventoryComponent::FindDataTableByItemType(TSubclassOf<UItemBase> Item)
+{
+	if (DataTablesInfo.Contains(Item)) { return DataTablesInfo[Item]; }
 	return nullptr;
 }

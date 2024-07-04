@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Components/Base/CharacterComponentBase.h"
-#include "Components/Inventory/Items/Items/ItemBase.h"
+#include "Components/Inventory/Items/ItemBase.h"
 #include "InventoryComponent.generated.h"
 
 
@@ -33,11 +33,11 @@ enum class ECylinderInventorySlotType : uint8
 struct FContainerBase
 {
 
-	TArray<InventoryItemClassBase*> Inventory;
+	TArray<UItemBase*> Inventory;
 
 	FContainerBase() {}
 
-	FContainerBase(const TArray<InventoryItemClassBase*>& InInventory)
+	FContainerBase(const TArray<UItemBase*>& InInventory)
 	{
 		Inventory = InInventory;
 	}
@@ -53,14 +53,14 @@ struct FContainerBase
 
 struct FItemVariantBase
 {
-	TVariant<InventoryItemClassBase*, FContainerBase> Item;
+	TVariant<UItemBase*, FContainerBase> Item;
 	
 
 	FItemVariantBase() {}
 
-	FItemVariantBase(InventoryItemClassBase* InItem)
+	FItemVariantBase(UItemBase* InItem)
 	{
-		Item.Set<InventoryItemClassBase*>(InItem);
+		Item.Set<UItemBase*>(InItem);
 	}
 
 	FItemVariantBase(const FContainerBase& InContainerBase)
@@ -69,7 +69,8 @@ struct FItemVariantBase
 	}
 };
 
-class InventoryItemClassBase;
+class UItemBase;
+class AWorldItem;
 
 UCLASS()
 class FRONTIERDIVER_API UInventoryComponent : public UCharacterComponentBase
@@ -89,11 +90,13 @@ public:
 
 	FTransform PlayerDropLocationOffset;
 
-	bool AddItemToInventory(InventoryItemClassBase* Item);
+	bool AddItemToInventory(UItemBase* Item);
 
-	bool RemoveItemFromInventory(InventoryItemClassBase* Item);
+	bool RemoveItemFromInventory(UItemBase* Item, bool DestroyItem);
+
+	bool PickupItemToInventory(AWorldItem* Item);
 
 	bool DropItemFromInventory(UItemBase* Item);
 
-	UDataTable* FindDataTableByStructType(TSubclassOf<UItemBase> Item);
+	UDataTable* FindDataTableByItemType(TSubclassOf<UItemBase> Item);
 };

@@ -13,7 +13,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/PhysicsVolume.h"
 #include "Components/Inventory/InventoryComponent.h"
-#include <Components/Inventory/Items/Items/JewelryItem.h>
+#include <Components/Inventory/Items/ItemsTypes/JewelryItem.h>
 
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
 
