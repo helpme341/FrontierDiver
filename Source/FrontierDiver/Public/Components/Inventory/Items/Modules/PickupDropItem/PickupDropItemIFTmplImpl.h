@@ -27,8 +27,7 @@ public:
 
 	bool DropItem(UInventoryComponent* Inventory);
 
-	template<typename T>
-	T PickupDropIFTmplImpl();
+	TPickupDropItemIFTmplImpl<OWT> PickupDropIFTmplImpl();
 };
 
 template<typename OWT>
@@ -65,8 +64,7 @@ inline bool TPickupDropItemIFTmplImpl<OWT>::DropItem(UInventoryComponent* Invent
 }
 
 template<typename OWT>
-template<typename T>
-inline T TPickupDropItemIFTmplImpl<OWT>::PickupDropIFTmplImpl()
+inline TPickupDropItemIFTmplImpl<OWT> TPickupDropItemIFTmplImpl<OWT>::PickupDropIFTmplImpl()
 {
 	return this;
 }

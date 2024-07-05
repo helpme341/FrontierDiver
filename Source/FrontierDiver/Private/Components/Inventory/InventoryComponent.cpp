@@ -70,26 +70,15 @@ bool UInventoryComponent::BaseAddItemToInventory(UItemBase* Item)
 			FItemTableRowInfoBase* ItemTableRowInfo = Item->GetItemStaticInfo();
 			if (ItemTableRowInfo && Inventory.Contains(ItemTableRowInfo->ItemContainerType))
 			{
-				if (ItemTableRowInfo->ItemContainerType == EContainerType::ClothingOne ||
-					ItemTableRowInfo->ItemContainerType == EContainerType::ClothingTwo)
+				if (!Inventory[ItemTableRowInfo->ItemContainerType].ContainerInventory.IsEmpty())
 				{
-					Inventory[ItemTableRowInfo->ItemContainerType].Item.Set<UItemBase*>(Item);
-					Item->ThisItemID = 0;
-					return true;
-				}
-				else if (ItemTableRowInfo->ItemContainerType == EContainerType::Array)
-				{
-					TArray<UItemBase*>& ContainerArray = Inventory[ItemTableRowInfo->ItemContainerType].Item.TryGet<FContainerBase>()->Inventory;
-					if (!ContainerArray.IsEmpty())
+					for (int32 Counter = 0; Counter < Inventory[ItemTableRowInfo->ItemContainerType].ContainerInventory.Num(); Counter++)
 					{
-						for (int32 Counter = 0; Counter < ContainerArray.Num(); Counter++)
+						if (!Inventory[ItemTableRowInfo->ItemContainerType].ContainerInventory[Counter])
 						{
-							if (!ContainerArray[Counter])
-							{
-								ContainerArray[Counter] = Item;
-								Item->ThisItemID = Counter;
-								return true;
-							}
+							Inventory[ItemTableRowInfo->ItemContainerType].ContainerInventory[Counter] = Item;
+							Item->ThisItemID = Counter;
+							return true;
 						}
 					}
 				}
@@ -108,26 +97,10 @@ bool UInventoryComponent::BaseRemoveItemFromInventory(UItemBase* Item, bool Dest
 			FItemTableRowInfoBase* ItemTableRowInfo = Item->GetItemStaticInfo();
 			if (ItemTableRowInfo && Inventory.Contains(ItemTableRowInfo->ItemContainerType))
 			{
-				if (ItemTableRowInfo->ItemContainerType == EContainerType::ClothingOne ||
-					ItemTableRowInfo->ItemContainerType == EContainerType::ClothingTwo)
-				{
-					Inventory[ItemTableRowInfo->ItemContainerType].Item.Set<UItemBase*>(nullptr);
-					Item->ThisItemID = 99;
-					if (DestroyItem) { Item->ConditionalBeginDestroy(); }
-					return true;
-				}
-				else if (ItemTableRowInfo->ItemContainerType == EContainerType::Array)
-				{
-					TArray<UItemBase*> ContainerArray = Inventory[ItemTableRowInfo->ItemContainerType].Item.TryGet<FContainerBase>()->Inventory;
-
-					if (!ContainerArray.IsEmpty())
-					{
-						ContainerArray[Item->ThisItemID] = nullptr;
-						Item->ThisItemID = 99;
-						if (DestroyItem) { Item->ConditionalBeginDestroy(); }
-						return true;
-					}
-				}
+				Inventory[ItemTableRowInfo->ItemContainerType].ContainerInventory[Item->ThisItemID] = nullptr;
+				Item->ThisItemID = 99;
+				if (DestroyItem) { Item->ConditionalBeginDestroy(); }
+				return true;
 			}
 		}
 	}

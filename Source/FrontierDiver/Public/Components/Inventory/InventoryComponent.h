@@ -34,39 +34,17 @@ enum class ECylinderInventorySlotType : uint8
 struct FContainerBase
 {
 
-	TArray<UItemBase*> Inventory;
+	TArray<UItemBase*> ContainerInventory;
 
 	FContainerBase() {}
 
-	FContainerBase(const TArray<UItemBase*>& InInventory)
-	{
-		Inventory = InInventory;
-	}
 
-	FContainerBase(int32 InventorySlots)
+    FContainerBase(int32 InventorySlots)
 	{
 		for (int32 Counter = 0; Counter < InventorySlots; Counter++)
 		{
-			Inventory.Add(nullptr);
+			ContainerInventory.Add(nullptr);
 		}
-	}
-};
-
-struct FItemVariantBase
-{
-	TVariant<UItemBase*, FContainerBase> Item;
-	
-
-	FItemVariantBase() {}
-
-	FItemVariantBase(UItemBase* InItem)
-	{
-		Item.Set<UItemBase*>(InItem);
-	}
-
-	FItemVariantBase(const FContainerBase& InContainerBase)
-	{
-		Item.Set<FContainerBase>(InContainerBase);
 	}
 };
 
@@ -83,10 +61,10 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TMap<TSubclassOf<UItemBase>, UDataTable* > DataTablesInfo;
 
-	TMap<EContainerType, FItemVariantBase> Inventory{
-		  { EContainerType::ClothingOne, FItemVariantBase()},
-		  { EContainerType::ClothingTwo, FItemVariantBase(nullptr)},
-		  { EContainerType::Array, FItemVariantBase(FContainerBase(5))}
+	TMap<EContainerType, FContainerBase> Inventory{
+		  { EContainerType::ClothingOne, FContainerBase(1)},
+		  { EContainerType::ClothingTwo, FContainerBase(1)},
+		  { EContainerType::Array, FContainerBase(5)}
 	};
 
 	FTransform PlayerDropLocationOffset;
