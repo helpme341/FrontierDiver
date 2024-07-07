@@ -4,8 +4,8 @@
 #include "Components/Inventory/InventoryComponent.h"
 #include "Components/Inventory/Items/WorldItem.h"
 #include "Components/Inventory/Items/Modules/PickupDropItem/PickupDropItemIF.h"
+#include "Components/Inventory/Widgets/InventoryWidget.h"
 #include "Components/Inventory/Items/ItemsTypes/JewelryItem.h"
-
 
 bool UInventoryComponent::AddItemToInventory(UItemBase* Item)
 {
@@ -58,6 +58,28 @@ UDataTable* UInventoryComponent::FindDataTableByItemType(TSubclassOf<UItemBase> 
 {
 	if (DataTablesInfo.Contains(Item)) { return DataTablesInfo[Item]; }
 	return nullptr;
+}
+
+void UInventoryComponent::BeginPlay()
+{
+	Super::BeginPlay();
+	if (InventoryWidgetClass)
+	{
+		APlayerController* PlayerController = GetWorld()->GetFirstPlayerController();
+		if (PlayerController)
+		{
+			InventoryWidget = CreateWidget<UInventoryWidget>(PlayerController, InventoryWidgetClass);
+
+			if (InventoryWidget)
+			{
+				InventoryWidget->InventoryComponent = this;
+				InventoryWidget->LoadWidgestSlots();
+				InventoryWidget->CreateWidgets();
+				InventoryWidget->UpdateAllWidgets();
+				InventoryWidget->AddToViewport(0);
+			}
+		}
+	}
 }
 
 // бызывие релизации функций придметов 

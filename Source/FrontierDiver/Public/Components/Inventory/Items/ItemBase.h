@@ -63,14 +63,12 @@ public:
 
     bool bUseCustomRemoveThisItemFromInventory = false;
 
+    bool bUseCustomUpdateWidgetForThisItem = false;
+
+    virtual void UpdateItemWidget(class UInventoryItemWidget* ItemWidget);
+
 	virtual bool AddThisItemToInventory(UInventoryComponent* Inventory);
 
 	virtual bool RemoveThisItemFromInventory(UInventoryComponent* Inventory, bool DestroyItem);
 
-
-    //template<typename T>
-    //bool PickupItem(UInventoryComponent* Inventory, AWorldItem* Item);
-
-    //template<typename T>
-    //bool DropItem(UInventoryComponent* Inventory);
 };

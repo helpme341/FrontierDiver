@@ -5,7 +5,12 @@
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
 #include "Components/Inventory/Items/ItemBase.h"
+#include "Components/CanvasPanel.h"
+#include "Components/TextBlock.h"
+#include "Components/Button.h"
+#include "Components/Image.h"
 #include "InventoryItemWidget.generated.h"
+
 
 /**
  * 
@@ -17,12 +22,19 @@ class FRONTIERDIVER_API UInventoryItemWidget : public UUserWidget
 
 public: 
 
+	UInventoryItemWidget(const FObjectInitializer& ObjectInitializer);
+
+	UPROPERTY(meta = (BindWidget))
+	UCanvasPanel* WidgetCanvasPanel;
+
+	UPROPERTY(meta = (BindWidget))
+	UTextBlock* WidgetTextBlock;
+
+	UPROPERTY(meta = (BindWidget))
+	UButton* WidgetButton;
+
+	UPROPERTY(meta = (BindWidget))
+	UImage* WidgetImage;
 
 	void SetWidgetState();
-
-	void SetWidgetState(FItemTableRowInfoBase* ItemTableRowInfo);
-
-
-
-	
 };

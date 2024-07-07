@@ -6,23 +6,37 @@
 #include "Blueprint/UserWidget.h"
 #include "Components/Inventory/Items/ItemBase.h"
 #include "Components/Inventory/Widgets/InventoryItemWidget.h"
-#include "Components/Inventory/InventoryComponent.h"
 #include "Components/CanvasPanel.h"
 #include "InventoryWidget.generated.h"
 
+
 USTRUCT(BlueprintType)
-struct FWidgestContainerSettings
+struct FWidgetContainerSettings
 {                                                             
     GENERATED_BODY()
 
+    UPROPERTY(EditAnywhere, BlueprintReadWrite)
     FVector2D ContainerStartPosition = FVector2D(100.0f, 100.0f);
 
-    bool bIsQuickInventory;
-
+    UPROPERTY(EditAnywhere, BlueprintReadWrite)
     FVector2D ContainerSkipBetweenWidgets = FVector2D(100.0f, 100.0f);
 
-    int32 MaxWidgesInOneLine = 1;
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Size")
+    FVector2D WidgetSize = FVector2D(1.0f, 1.0f);
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Anchors")
+    FVector2D MinimumAnchors;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Anchors")
+    FVector2D MaximumAnchors;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite)
+    bool bIsQuickInventory;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite)
+    int32 MaxWidgetsInOneLine = 1;
 };
+
 
 USTRUCT(BlueprintType)
 struct FWidgestContainer
@@ -32,39 +46,45 @@ struct FWidgestContainer
     TArray<UInventoryItemWidget*> Array;
 };
 
+class UInventoryComponent;
+
 UCLASS()
 class FRONTIERDIVER_API UInventoryWidget : public UUserWidget
 {
     GENERATED_BODY()
 
 public:
+
     UInventoryWidget(const FObjectInitializer& ObjectInitializer);
 
-    UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
-    TMap<EContainerType, FWidgestContainerSettings> WidgestContainersSettings;
-    TMap<EContainerType, FWidgestContainer> Widgests;
+    UPROPERTY(EditAnywhere, BlueprintReadWrite)
+    TMap<EContainerType, FWidgetContainerSettings> WidgetContainersSettings;
 
-    void UpdateWidgetByID(EContainerType ContainerType, int32 ItemID, FItemTableRowInfoBase* ItemTableRowInfo);
-    void UpdateAllWidgets();
-    void UpdateWidget(UItemBase* Item, UInventoryItemWidget* ItemWidget);
-    void SetQuickInventoryVisibility(bool Hide);
-    void CreateWidgests();
-    void SetAllInvenotoryVisibility(bool Hide);
-
-    bool bIsWidgestsCreated;
-    bool bIsInventoryHidden;
-    bool bIsAllInventoryHidden;
-
-private:
-    UInventoryComponent* InventoryComponent;
-
-protected:
-    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
-    class UCanvasPanel* ParentCanvasPanel;
+    UPROPERTY(meta = (BindWidget))
+    UCanvasPanel* ParentCanvasPanel;
 
     UFUNCTION(BlueprintCallable)
     UInventoryComponent* GetInventoryComponent() { return InventoryComponent; }
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite)
     TSubclassOf<UInventoryItemWidget> InventoryItemWidgetClass;
+
+    TMap<EContainerType, FWidgestContainer> Widgets;
+
+    void UpdateWidgetByID(EContainerType ContainerType, int32 ItemID, FItemTableRowInfoBase* ItemTableRowInfo);
+    void UpdateAllWidgets();
+    void UpdateWidget(UItemBase* Item, UInventoryItemWidget* ItemWidget);
+    void CreateWidgets();
+    void LoadWidgestSlots();
+
+    UFUNCTION(BlueprintCallable)
+    void SetQuickInventoryVisibility(bool Hide);
+    UFUNCTION(BlueprintCallable)
+    void SetAllInvenotoryVisibility(bool Hide);
+
+    bool bIsWidgetsCreated;
+    bool bIsInventoryHidden;
+    bool bIsAllInventoryHidden;
+
+    UInventoryComponent* InventoryComponent;
 };

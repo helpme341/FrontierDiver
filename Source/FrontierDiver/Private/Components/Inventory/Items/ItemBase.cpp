@@ -3,6 +3,7 @@
 
 #include "Components/Inventory/Items/ItemBase.h"
 #include "Components/Inventory/InventoryComponent.h"
+#include "Components/Inventory/Widgets/InventoryItemWidget.h"
 
 bool UItemBase::FindDataTableByItemType(UInventoryComponent* Inventory)
 {
@@ -12,6 +13,12 @@ bool UItemBase::FindDataTableByItemType(UInventoryComponent* Inventory)
 FItemTableRowInfoBase* UItemBase::GetItemStaticInfo()
 {
     return nullptr;
+}
+
+
+
+void  UItemBase::UpdateItemWidget(UInventoryItemWidget* ItemWidget)
+{
 }
 
 bool UItemBase::AddThisItemToInventory(UInventoryComponent* Inventory)

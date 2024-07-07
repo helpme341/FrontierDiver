@@ -50,6 +50,7 @@ struct FContainerBase
 
 class UItemBase;
 class AWorldItem;
+class UInventoryWidget;
 
 UCLASS()
 class FRONTIERDIVER_API UInventoryComponent : public UCharacterComponentBase
@@ -57,9 +58,18 @@ class FRONTIERDIVER_API UInventoryComponent : public UCharacterComponentBase
 	GENERATED_BODY()
 
 public:
-	
+	UFUNCTION(BlueprintCallable)
+	UInventoryWidget* GetInventoryWidget() { return InventoryWidget; }
+
+	UPROPERTY(EditDefaultsOnly, Category = "UI")
+	TSubclassOf<UInventoryWidget> InventoryWidgetClass;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TMap<TSubclassOf<UItemBase>, UDataTable* > DataTablesInfo;
+	TMap<TSubclassOf<UItemBase>, UDataTable*> DataTablesInfo;
+
+	UInventoryWidget* InventoryWidget;
+
+	void BeginPlay() override;
 
 	TMap<EContainerType, FContainerBase> Inventory{
 		  { EContainerType::ClothingOne, FContainerBase(1)},

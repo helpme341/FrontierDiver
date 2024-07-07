@@ -3,10 +3,11 @@
 
 #include "Components/Inventory/Widgets/InventoryItemWidget.h"
 
-void UInventoryItemWidget::SetWidgetState()
+UInventoryItemWidget::UInventoryItemWidget(const FObjectInitializer& ObjectInitializer)
+    : Super(ObjectInitializer)
 {
 }
 
-void UInventoryItemWidget::SetWidgetState(FItemTableRowInfoBase* ItemTableRowInfo)
+void UInventoryItemWidget::SetWidgetState()
 {
 }
