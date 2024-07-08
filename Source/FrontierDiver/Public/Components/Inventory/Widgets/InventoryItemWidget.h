@@ -22,7 +22,7 @@ class FRONTIERDIVER_API UInventoryItemWidget : public UUserWidget
 
 public: 
 
-	UInventoryItemWidget(const FObjectInitializer& ObjectInitializer);
+	//UInventoryItemWidget(const FObjectInitializer& ObjectInitializer);
 
 	UPROPERTY(meta = (BindWidget))
 	UCanvasPanel* WidgetCanvasPanel;
@@ -36,5 +36,9 @@ public:
 	UPROPERTY(meta = (BindWidget))
 	UImage* WidgetImage;
 
-	void SetWidgetState();
+	void ClearInformationAboutItem();
+
+	void LoadInformationAboutItem(class UItemBase* Item);
+
+	bool bIsThisEmptyWidget;
 };

@@ -60,6 +60,9 @@ public:
     UPROPERTY(EditAnywhere, BlueprintReadWrite)
     TMap<EContainerType, FWidgetContainerSettings> WidgetContainersSettings;
 
+    UPROPERTY(EditAnywhere, BlueprintReadWrite)
+    UTexture2D* DefaultItemWidgetTexture;
+
     UPROPERTY(meta = (BindWidget))
     UCanvasPanel* ParentCanvasPanel;
 
@@ -71,14 +74,14 @@ public:
 
     TMap<EContainerType, FWidgestContainer> Widgets;
 
-    void UpdateWidgetByID(EContainerType ContainerType, int32 ItemID, FItemTableRowInfoBase* ItemTableRowInfo);
+    void UpdateWidgetByItem(UItemBase* Item);
     void UpdateAllWidgets();
     void UpdateWidget(UItemBase* Item, UInventoryItemWidget* ItemWidget);
     void CreateWidgets();
     void LoadWidgestSlots();
 
     UFUNCTION(BlueprintCallable)
-    void SetQuickInventoryVisibility(bool Hide);
+    void SetNotQuickInventoryVisibility(bool Hide);
     UFUNCTION(BlueprintCallable)
     void SetAllInvenotoryVisibility(bool Hide);
 

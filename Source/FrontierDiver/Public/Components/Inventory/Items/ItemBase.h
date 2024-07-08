@@ -20,8 +20,11 @@ struct FItemDynamicInfoBase
 {
     GENERATED_BODY()
 
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Inventory")
-    FName ItemTypeName;
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "DefaultSettings")
+    FName ItemTypeName = "None";
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "DefaultSettings")
+    int32 QuantityItems = 0;
 
 };
 
@@ -29,17 +32,19 @@ USTRUCT(BlueprintType)
 struct FItemTableRowInfoBase : public FTableRowBase
 {
     GENERATED_BODY()
+    
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "DefaultSettings")
+    UTexture2D* ItemWidgetTexture;
 
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Inventory")
-    bool bIsPlayerCanDropAndTakeIt;
-
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Inventory")
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "DefaultSettings")
     UStaticMesh* ItemWorldStaticMesh;
 
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Inventory")
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "DefaultSettings")
     EContainerType ItemContainerType;
-};
 
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "DefaultSettings")
+    int32 MaxQuantityItemsInSlot = 1;
+};
 
 class UInventoryComponent;
 
@@ -58,6 +63,8 @@ public:
     virtual bool FindDataTableByItemType(UInventoryComponent* Inventory);
 
     virtual FItemTableRowInfoBase* GetItemStaticInfo();
+
+    virtual FItemDynamicInfoBase* GetItemDynamicInfo();
 
     bool bUseCustomAddThisItemToInventory = false;
 

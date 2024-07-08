@@ -14,56 +14,14 @@ UInventoryWidget::UInventoryWidget(const FObjectInitializer& ObjectInitializer)
 {
 }
 
-void UInventoryWidget::UpdateWidgetByID(EContainerType ContainerType, int32 ItemID, FItemTableRowInfoBase* ItemTableRowInfo)
-{
-    //Widgets[ContainerType].Array[ItemID]->SetWidgetState(ItemTableRowInfo);
-}
 
-void UInventoryWidget::UpdateAllWidgets()
+void UInventoryWidget::LoadWidgestSlots()
 {
     for (auto& Elem : InventoryComponent->Inventory)
     {
-        for (int32 Counter = 0; Counter < Elem.Value.ContainerInventory.Num(); Counter++)
-        {
-            UpdateWidget(Elem.Value.ContainerInventory[Counter], Widgets[Elem.Key].Array[Counter]);
-        }
+        Widgets.Add(Elem.Key);
+        Widgets[Elem.Key].Array.SetNum(InventoryComponent->Inventory[Elem.Key].ContainerInventory.Num());
     }
-}
-
-void UInventoryWidget::UpdateWidget(UItemBase* Item, UInventoryItemWidget* ItemWidget)
-{
-    if (Item)
-    {
-        if (Item->bUseCustomUpdateWidgetForThisItem) { Item->UpdateItemWidget(ItemWidget); }
-        else
-        {
-            // void BaseUpdateItemWidget(class UInventoryItemWidget* ItemWidget, UItemBase* Item)
-        }
-    }
-    else
-    {
-        ItemWidget->SetWidgetState();
-    }
-}
-
-void UInventoryWidget::SetQuickInventoryVisibility(bool Hide)
-{
-    if (bIsInventoryHidden && Hide || !bIsInventoryHidden && !Hide) { return; }
-    ESlateVisibility NewWidgetsState = Hide ? ESlateVisibility::Hidden : ESlateVisibility::Visible;
-    for (auto& ContainerSettings : WidgetContainersSettings)
-    {
-        if (!ContainerSettings.Value.bIsQuickInventory)
-        {
-            for (int32 Counter = 0; Counter < Widgets[ContainerSettings.Key].Array.Num(); Counter++)
-            {
-                if (Widgets[ContainerSettings.Key].Array[Counter])
-                {
-                    Widgets[ContainerSettings.Key].Array[Counter]->SetVisibility(NewWidgetsState);
-                }
-            }
-        }
-    }
-    bIsInventoryHidden = Hide;
 }
 
 void UInventoryWidget::CreateWidgets()
@@ -110,6 +68,65 @@ void UInventoryWidget::CreateWidgets()
     }
 }
 
+void UInventoryWidget::UpdateAllWidgets()
+{
+    for (auto& Elem : InventoryComponent->Inventory)
+    {
+        for (int32 Counter = 0; Counter < Elem.Value.ContainerInventory.Num(); Counter++)
+        {
+            UpdateWidget(Elem.Value.ContainerInventory[Counter], Widgets[Elem.Key].Array[Counter]);
+        }
+    }
+}
+
+void UInventoryWidget::UpdateWidgetByItem(UItemBase* Item)
+{
+    UpdateWidget(Item, Widgets[Item->GetItemStaticInfo()->ItemContainerType].Array[Item->ThisItemID]);
+}
+
+void UInventoryWidget::UpdateWidget(UItemBase* Item, UInventoryItemWidget* ItemWidget)
+{
+    if (ItemWidget)
+    {
+        if (Item && ItemWidget->bIsThisEmptyWidget)
+        {
+            if (Item->bUseCustomUpdateWidgetForThisItem) { Item->UpdateItemWidget(ItemWidget); }
+            else
+            {
+                ItemWidget->WidgetImage->SetBrushFromTexture(Item->GetItemStaticInfo()->ItemWidgetTexture);
+                ItemWidget->WidgetTextBlock->SetText(FText::FromString(FString::Printf(TEXT("%03d"), Item->GetItemDynamicInfo()->QuantityItems)));
+                ItemWidget->LoadInformationAboutItem(Item);
+            }
+        }
+        else if (!ItemWidget->bIsThisEmptyWidget)
+        {
+            ItemWidget->WidgetImage->SetBrushFromTexture(DefaultItemWidgetTexture);
+            ItemWidget->WidgetTextBlock->SetText(FText());
+            ItemWidget->ClearInformationAboutItem();
+        }
+    }
+}
+
+void UInventoryWidget::SetNotQuickInventoryVisibility(bool Hide)
+{
+    if (bIsInventoryHidden && Hide || !bIsInventoryHidden && !Hide) { return; }
+    ESlateVisibility NewWidgetsState = Hide ? ESlateVisibility::Hidden : ESlateVisibility::Visible;
+    for (auto& ContainerSettings : WidgetContainersSettings)
+    {
+        if (!ContainerSettings.Value.bIsQuickInventory)
+        {
+            for (int32 Counter = 0; Counter < Widgets[ContainerSettings.Key].Array.Num(); Counter++)
+            {
+                if (Widgets[ContainerSettings.Key].Array[Counter])
+                {
+                    Widgets[ContainerSettings.Key].Array[Counter]->SetVisibility(NewWidgetsState);
+                }
+            }
+        }
+    }
+    bIsInventoryHidden = Hide;
+}
+
 void UInventoryWidget::SetAllInvenotoryVisibility(bool Hide)
 {
     if (bIsAllInventoryHidden && Hide || !bIsAllInventoryHidden && !Hide) { return; }
@@ -126,13 +143,3 @@ void UInventoryWidget::SetAllInvenotoryVisibility(bool Hide)
     }
     bIsAllInventoryHidden = Hide;
 }
-
-void UInventoryWidget::LoadWidgestSlots()
-{
-    for (auto& Elem : InventoryComponent->Inventory)
-    {
-        Widgets.Add(Elem.Key);
-        Widgets[Elem.Key].Array.SetNum(InventoryComponent->Inventory[Elem.Key].ContainerInventory.Num());
-    }
-}
-
