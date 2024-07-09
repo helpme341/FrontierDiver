@@ -36,6 +36,14 @@ bool UInventoryComponent::RemoveItemFromInventory(UItemBase* Item, bool DestroyI
 bool UInventoryComponent::PickupItemToInventory(AWorldItem* Item)
 {
 	UItemBase* NewItem = NewObject<UItemBase>(this, Item->ItemType);
+    //FItemDynamicInfoBase* NewItemDynamicInfo = NewItem->GetItemDynamicInfo();
+    //FItemDynamicInfoBase* ExistingItemDynamicInfo = &Item->ItemDynamicInfo;
+    //ExistingItemDynamicInfo->ItemTypeName = Item->ItemTypeName;
+
+    //if (NewItemDynamicInfo && ExistingItemDynamicInfo)
+    //{
+    //    *NewItemDynamicInfo = *ExistingItemDynamicInfo;
+    //}
 
 	if (IPickupDropItemIF* PickupDropItemIF = Cast<IPickupDropItemIF>(NewItem))
 	{
@@ -146,10 +154,11 @@ bool UInventoryComponent::BaseRemoveItemFromInventory(UItemBase* Item, bool Dest
             if (ItemTableRowInfo && ItemDynamicInfo)
             {
 
-                if (ItemTableRowInfo->MaxQuantityItemsInSlot > 1 && (ItemDynamicInfo->QuantityItems - 1) > 1)
+                if (ItemTableRowInfo->MaxQuantityItemsInSlot > 1 && ItemDynamicInfo->QuantityItems - 1 >= 1)
                 {
                     ItemDynamicInfo->QuantityItems--;
                     InventoryWidget->UpdateWidgetByItem(Item, false);
+                    return true;
                 }
                 else if (Inventory.Contains(ItemTableRowInfo->ItemContainerType))
                 {
@@ -160,7 +169,6 @@ bool UInventoryComponent::BaseRemoveItemFromInventory(UItemBase* Item, bool Dest
                     return true;
                 }
             }
-
 		}
 	}
 	return false;

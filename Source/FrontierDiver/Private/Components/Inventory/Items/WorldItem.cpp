@@ -36,7 +36,7 @@ void AWorldItem::Interaction(AFrontierDiverCharacter* Character)
 }
 
 
-void AWorldItem::LoadDataToWorldItem(FItemDynamicInfoBase DynamicInfo, TSubclassOf<UItemBase> NewItemType, UStaticMesh* NewItemMesh)
+void AWorldItem::LoadDataToWorldItem(FItemDynamicInfoBase& DynamicInfo, TSubclassOf<UItemBase> NewItemType, UStaticMesh* NewItemMesh)
 {
 	ItemType = NewItemType;
 	ItemDynamicInfo = DynamicInfo;

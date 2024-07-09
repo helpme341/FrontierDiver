@@ -35,7 +35,9 @@ inline bool TPickupDropItemIFTmplImpl<OWT>::PickupItem(UInventoryComponent* Inve
 {
 	if (auto* ItemTmpl = Owner->GetItemTmpl())
 	{
-		ItemTmpl->ItemDynamicInfo.ItemTypeName = Item->ItemTypeName;
+		if (Item->ItemTypeName != "None") { ItemTmpl->ItemDynamicInfo.ItemTypeName = Item->ItemTypeName; }
+		else if (Item->ItemDynamicInfo.ItemTypeName != "None") { ItemTmpl->ItemDynamicInfo.ItemTypeName = Item->ItemDynamicInfo.ItemTypeName; }
+		else { return false; }
 		if (Inventory->AddItemToInventory(Owner))
 		{
 			Item->Destroy();
@@ -53,11 +55,11 @@ inline bool TPickupDropItemIFTmplImpl<OWT>::DropItem(UInventoryComponent* Invent
 	AWorldItem* NewWorldItem = Owner->GetWorld()->SpawnActor<AWorldItem>();
 	if (Owner->FindDataTableByItemType(Inventory))
 	{
-		auto* ItemTmpl = Owner->GetItemTmpl();
-		if (ItemTmpl)
+		if (Inventory->RemoveItemFromInventory(Owner, true))
 		{
-			NewWorldItem->LoadDataToWorldItem(ItemTmpl->ItemDynamicInfo, OWT::StaticClass(), ItemTmpl->ItemTableRowInfo->ItemWorldStaticMesh);
-			return Inventory->RemoveItemFromInventory(Owner, true);
+			FItemDynamicInfoBase ItemDynamic = *Owner->GetItemDynamicInfo();
+			ItemDynamic.QuantityItems = 1;
+			NewWorldItem->LoadDataToWorldItem(ItemDynamic, OWT::StaticClass(), Owner->GetItemStaticInfo()->ItemWorldStaticMesh);
 		}
 	}
 	return false;
