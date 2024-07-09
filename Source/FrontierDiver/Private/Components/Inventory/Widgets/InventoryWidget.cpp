@@ -6,6 +6,12 @@
 #include "Components/CanvasPanelSlot.h"
 #include "Character/FrontierDiverCharacter.h"
 #include "Components/Inventory/InventoryComponent.h"
+#include "Components/Inventory/Items/ItemBase.h"
+#include "Components/Inventory/Widgets/InventoryItemWidget.h"
+#include "Components/CanvasPanel.h"
+#include "Components/TextBlock.h"
+#include "Components/Image.h"
+#include "Components/Inventory/Items/Modules/PickupDropItem/PickupDropItemIF.h"
 
 
 
@@ -24,6 +30,77 @@ void UInventoryWidget::LoadWidgestSlots()
     }
 }
 
+void UInventoryWidget::ShowItemInfo(UItemBase* Item)
+{
+    if (Item && !bIsInventoryHidden && !bIsShowingItemInfo)
+    {
+        FItemTableRowInfoBase* ItemStaticInfo = Item->GetItemStaticInfo();
+        if (ItemStaticInfo)
+        {
+            if (ItemImage) { ItemImage->SetBrushFromTexture(ItemStaticInfo->ItemWidgetTexture); }
+
+            if (ItemDescription) { ItemDescription->SetText(ItemStaticInfo->ItemDescription); }
+        }
+        else { return; }
+
+
+        FItemDynamicInfoBase* ItemDynamicInfo = Item->GetItemDynamicInfo();
+        if (ItemDynamicInfo)
+        {
+            if (ItemNameTextBlock) { ItemNameTextBlock->SetText(FText::FromName(ItemDynamicInfo->ItemTypeName)); }
+        }
+        else { return; }
+
+        FString QuantityString = FString::Printf(TEXT("%d/%d"), ItemDynamicInfo->QuantityItems, ItemStaticInfo->MaxQuantityItemsInSlot);
+        if (ItemQuantityTextBlock) { ItemQuantityTextBlock->SetText(FText::FromString(QuantityString)); }
+
+
+        if (ItemImage) { ItemImage->SetVisibility(ESlateVisibility::Visible); }
+        if (ItemNameTextBlock) { ItemNameTextBlock->SetVisibility(ESlateVisibility::Visible); }
+        if (ItemQuantityTextBlock) { ItemQuantityTextBlock->SetVisibility(ESlateVisibility::Visible); }
+        if (ItemDescription) { ItemDescription->SetVisibility(ESlateVisibility::Visible); }
+        bIsShowingItemInfo = true;
+    }
+    else if (!bIsInventoryHidden && bIsShowingItemInfo)
+    {
+        if (ItemImage)
+        {
+            ItemImage->SetBrushFromTexture(DefaultItemWidgetTexture);
+            ItemImage->SetVisibility(ESlateVisibility::Hidden);
+        }
+        if (ItemNameTextBlock)
+        {
+            ItemNameTextBlock->SetText(FText::GetEmpty());
+            ItemNameTextBlock->SetVisibility(ESlateVisibility::Hidden);
+        }
+        if (ItemQuantityTextBlock)
+        {
+            ItemQuantityTextBlock->SetText(FText::GetEmpty());
+            ItemQuantityTextBlock->SetVisibility(ESlateVisibility::Hidden);
+        }
+        if (ItemDescription)
+        {
+            ItemDescription->SetText(FText::GetEmpty());
+            ItemDescription->SetVisibility(ESlateVisibility::Hidden);
+        }
+        bIsShowingItemInfo = false;
+    }
+}
+
+void UInventoryWidget::DropItemFromWidget(UItemBase* Item)
+{
+    if (Item && !bIsInventoryHidden)
+    {
+        if (IPickupDropItemIF* ItemIF = Cast<IPickupDropItemIF>(Item))
+        {
+            if (ItemIF->DropItem(InventoryComponent))
+            {
+                if (bIsShowingItemInfo) { ShowItemInfo(nullptr); }
+            }
+        }
+    }
+}
+
 void UInventoryWidget::CreateWidgets()
 {
     for (auto& Elem : Widgets)
@@ -36,32 +113,30 @@ void UInventoryWidget::CreateWidgets()
 
             for (int32 Counter = 0; Counter < Elem.Value.Array.Num(); Counter++)
             {
-
                 UInventoryItemWidget* NewWidget = CreateWidget<UInventoryItemWidget>(this, InventoryItemWidgetClass);
 
                 NewWidget->WidgetCanvasPanel->RenderTransform.Scale = Settings.WidgetSize;
+                NewWidget->InventoryWidget = this;
+                NewWidget->Item = InventoryComponent->Inventory[Elem.Key].ContainerInventory[Counter];
 
                 UCanvasPanelSlot* CanvasSlot = ParentCanvasPanel->AddChildToCanvas(NewWidget);
                 CanvasSlot->SetPosition(CurrentPosition);
 
-                CanvasSlot->SetAnchors(FAnchors(Settings.MaximumAnchors, Settings.MaximumAnchors));
+                CanvasSlot->SetAnchors(FAnchors(Settings.MinimumAnchors, Settings.MaximumAnchors));
 
-
-                if (WidgetsInCurrentLine == Settings.MaxWidgetsInOneLine)
+                WidgetsInCurrentLine++;
+                if (WidgetsInCurrentLine >= Settings.MaxWidgetsInOneLine)
                 {
                     CurrentPosition.Y += Settings.ContainerSkipBetweenWidgets.Y;
                     CurrentPosition.X = Settings.ContainerStartPosition.X;
                     WidgetsInCurrentLine = 0;
                 }
-                else if (WidgetsInCurrentLine == 0)
-                {
-                    WidgetsInCurrentLine++;
-                }
                 else
                 {
                     CurrentPosition.X += Settings.ContainerSkipBetweenWidgets.X;
-                    WidgetsInCurrentLine++;
                 }
+
+                if (!Settings.bIsQuickInventory) { NewWidget->SetVisibility(ESlateVisibility::Hidden); }
                 Widgets[Elem.Key].Array[Counter] = NewWidget;
             }
         }
@@ -79,30 +154,40 @@ void UInventoryWidget::UpdateAllWidgets()
     }
 }
 
-void UInventoryWidget::UpdateWidgetByItem(UItemBase* Item)
+void UInventoryWidget::UpdateWidgetByItem(UItemBase* Item, bool Clear)
 {
-    UpdateWidget(Item, Widgets[Item->GetItemStaticInfo()->ItemContainerType].Array[Item->ThisItemID]);
+    if (Clear)
+    {
+        UpdateWidget(nullptr, Widgets[Item->GetItemStaticInfo()->ItemContainerType].Array[Item->ThisItemID]);
+    }
+    else
+    {
+        UpdateWidget(Item, Widgets[Item->GetItemStaticInfo()->ItemContainerType].Array[Item->ThisItemID]);
+    }
 }
 
 void UInventoryWidget::UpdateWidget(UItemBase* Item, UInventoryItemWidget* ItemWidget)
 {
     if (ItemWidget)
     {
-        if (Item && ItemWidget->bIsThisEmptyWidget)
+        if (Item)
         {
             if (Item->bUseCustomUpdateWidgetForThisItem) { Item->UpdateItemWidget(ItemWidget); }
             else
             {
                 ItemWidget->WidgetImage->SetBrushFromTexture(Item->GetItemStaticInfo()->ItemWidgetTexture);
                 ItemWidget->WidgetTextBlock->SetText(FText::FromString(FString::Printf(TEXT("%03d"), Item->GetItemDynamicInfo()->QuantityItems)));
-                ItemWidget->LoadInformationAboutItem(Item);
+                ItemWidget->Item = Item;
+                ItemWidget->WidgetTextBlock->SetText(FText::AsNumber(Item->GetItemDynamicInfo()->QuantityItems));
+                ItemWidget->bIsThisEmptyWidget = false;
             }
         }
         else if (!ItemWidget->bIsThisEmptyWidget)
         {
             ItemWidget->WidgetImage->SetBrushFromTexture(DefaultItemWidgetTexture);
             ItemWidget->WidgetTextBlock->SetText(FText());
-            ItemWidget->ClearInformationAboutItem();
+            ItemWidget->Item = nullptr;
+            ItemWidget->bIsThisEmptyWidget = true;
         }
     }
 }
@@ -124,6 +209,7 @@ void UInventoryWidget::SetNotQuickInventoryVisibility(bool Hide)
             }
         }
     }
+    if (Hide && bIsShowingItemInfo) { ShowItemInfo(nullptr); }
     bIsInventoryHidden = Hide;
 }
 

@@ -4,9 +4,8 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
-#include "Components/Inventory/Items/ItemBase.h"
 #include "Components/Inventory/Widgets/InventoryItemWidget.h"
-#include "Components/CanvasPanel.h"
+#include "Components/Inventory/Items/ItemBase.h"
 #include "InventoryWidget.generated.h"
 
 
@@ -43,10 +42,12 @@ struct FWidgestContainer
 {
     GENERATED_BODY()
 
+    UPROPERTY(EditAnywhere, BlueprintReadWrite)
     TArray<UInventoryItemWidget*> Array;
 };
 
 class UInventoryComponent;
+class UTextBlock;
 
 UCLASS()
 class FRONTIERDIVER_API UInventoryWidget : public UUserWidget
@@ -61,24 +62,41 @@ public:
     TMap<EContainerType, FWidgetContainerSettings> WidgetContainersSettings;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite)
-    UTexture2D* DefaultItemWidgetTexture;
+    class UTexture2D* DefaultItemWidgetTexture;
 
     UPROPERTY(meta = (BindWidget))
-    UCanvasPanel* ParentCanvasPanel;
+    class UCanvasPanel* ParentCanvasPanel;
+
+    UPROPERTY(meta = (BindWidget))
+    class UImage* ItemImage;
+
+    UPROPERTY(meta = (BindWidget))
+    UTextBlock* ItemNameTextBlock;
+
+    UPROPERTY(meta = (BindWidget))
+    UTextBlock* ItemQuantityTextBlock;
+
+    UPROPERTY(meta = (BindWidget))
+    UTextBlock* ItemDescription;
+
+
 
     UFUNCTION(BlueprintCallable)
-    UInventoryComponent* GetInventoryComponent() { return InventoryComponent; }
+    class UInventoryComponent* GetInventoryComponent() { return InventoryComponent; }
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite)
     TSubclassOf<UInventoryItemWidget> InventoryItemWidgetClass;
 
+    UPROPERTY(EditAnywhere, BlueprintReadWrite)
     TMap<EContainerType, FWidgestContainer> Widgets;
 
-    void UpdateWidgetByItem(UItemBase* Item);
+    void UpdateWidgetByItem(UItemBase* Item, bool Clear);
     void UpdateAllWidgets();
     void UpdateWidget(UItemBase* Item, UInventoryItemWidget* ItemWidget);
     void CreateWidgets();
     void LoadWidgestSlots();
+    void ShowItemInfo(UItemBase* Item);
+    void DropItemFromWidget(UItemBase* Item);
 
     UFUNCTION(BlueprintCallable)
     void SetNotQuickInventoryVisibility(bool Hide);
@@ -86,8 +104,9 @@ public:
     void SetAllInvenotoryVisibility(bool Hide);
 
     bool bIsWidgetsCreated;
-    bool bIsInventoryHidden;
+    bool bIsInventoryHidden = true;
     bool bIsAllInventoryHidden;
+    bool bIsShowingItemInfo;
 
     UInventoryComponent* InventoryComponent;
 };

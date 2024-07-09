@@ -4,11 +4,6 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
-#include "Components/Inventory/Items/ItemBase.h"
-#include "Components/CanvasPanel.h"
-#include "Components/TextBlock.h"
-#include "Components/Button.h"
-#include "Components/Image.h"
 #include "InventoryItemWidget.generated.h"
 
 
@@ -22,23 +17,35 @@ class FRONTIERDIVER_API UInventoryItemWidget : public UUserWidget
 
 public: 
 
-	//UInventoryItemWidget(const FObjectInitializer& ObjectInitializer);
+	UInventoryItemWidget(const FObjectInitializer& ObjectInitializer);
+
+	virtual void NativeConstruct() override;
 
 	UPROPERTY(meta = (BindWidget))
-	UCanvasPanel* WidgetCanvasPanel;
+	class UCanvasPanel* WidgetCanvasPanel;
 
 	UPROPERTY(meta = (BindWidget))
-	UTextBlock* WidgetTextBlock;
+	class UTextBlock* WidgetTextBlock;
 
 	UPROPERTY(meta = (BindWidget))
-	UButton* WidgetButton;
+	class UImage* WidgetImage;
 
 	UPROPERTY(meta = (BindWidget))
-	UImage* WidgetImage;
+	class UButton* WidgetButton;
 
-	void ClearInformationAboutItem();
 
-	void LoadInformationAboutItem(class UItemBase* Item);
+	UFUNCTION()
+	void OnButtonPressed();
 
-	bool bIsThisEmptyWidget;
+	UFUNCTION()
+	void OnButtonHovered();
+
+	UFUNCTION()
+	void OnButtonUnhovered();
+
+	class UItemBase* Item;
+
+	class UInventoryWidget* InventoryWidget;
+
+	bool bIsThisEmptyWidget = true;
 };

@@ -27,10 +27,16 @@ bool UJewelryItem::FindDataTableByItemType(UInventoryComponent* Inventory)
 		ItemTableRowInfo = Inventory->FindDataTableByItemType(UJewelryItem::StaticClass())->FindRow<FJewelryItemTableRowInfo>(ItemDynamicInfo.ItemTypeName, "");
 		return true;
 	}
+	else if (ItemTableRowInfo) { return true; }
 	return false;
 }
 
 FItemTableRowInfoBase* UJewelryItem::GetItemStaticInfo()
 {
 	return ItemTableRowInfo;
+}
+
+FItemDynamicInfoBase* UJewelryItem::GetItemDynamicInfo()
+{
+	return &ItemDynamicInfo;
 }

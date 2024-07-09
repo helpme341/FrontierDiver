@@ -14,6 +14,7 @@
 #include "GameFramework/PhysicsVolume.h"
 #include "Components/Inventory/InventoryComponent.h"
 #include "Character/Interfaces/InteractionIF.h"
+#include "Components/Inventory/Widgets/InventoryWidget.h"
 
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
 
@@ -101,14 +102,17 @@ void AFrontierDiverCharacter::Move(const FInputActionValue& Value)
 
 void AFrontierDiverCharacter::Look(const FInputActionValue& Value)
 {
-	// input is a Vector2D
-	FVector2D LookAxisVector = Value.Get<FVector2D>();
-
-	if (Controller != nullptr)
+	if (FrontierDiverInventoryComponent->InventoryWidget->bIsInventoryHidden)
 	{
-		// add yaw and pitch input to controller
-		AddControllerYawInput(LookAxisVector.X);
-		AddControllerPitchInput(LookAxisVector.Y);
+		// input is a Vector2D
+		FVector2D LookAxisVector = Value.Get<FVector2D>();
+
+		if (Controller != nullptr)
+		{
+			// add yaw and pitch input to controller
+			AddControllerYawInput(LookAxisVector.X);
+			AddControllerPitchInput(LookAxisVector.Y);
+		}
 	}
 }
 
@@ -124,6 +128,30 @@ void AFrontierDiverCharacter::Interact()
 	if (GetWorld()->SweepSingleByChannel(HitResult, StartLocation, EndLocation, FQuat::Identity, ECollisionChannel::ECC_Visibility, FCollisionShape::MakeSphere(15.0f), TraceParams))
 	{
 		Cast<IInteractionIF>(HitResult.GetActor())->Interaction(this);
+	}
+}
+
+void AFrontierDiverCharacter::InventoryInteract()
+{
+	if (FrontierDiverInventoryComponent->InventoryWidget->bIsInventoryHidden) {
+		APlayerController* PlayerController = GetWorld()->GetFirstPlayerController();
+		if (PlayerController)
+		{
+			PlayerController->bShowMouseCursor = true;
+			PlayerController->bEnableClickEvents = true;
+			PlayerController->bEnableMouseOverEvents = true;
+			FrontierDiverInventoryComponent->InventoryWidget->SetNotQuickInventoryVisibility(false);
+		}
+	}
+	else { 
+		APlayerController* PlayerController = GetWorld()->GetFirstPlayerController();
+		if (PlayerController)
+		{
+			PlayerController->bShowMouseCursor = false;
+			PlayerController->bEnableClickEvents = false;
+			PlayerController->bEnableMouseOverEvents = false;
+			FrontierDiverInventoryComponent->InventoryWidget->SetNotQuickInventoryVisibility(true);
+		}
 	}
 }
 
@@ -145,6 +173,10 @@ void AFrontierDiverCharacter::SetupPlayerInputComponent(UInputComponent* PlayerI
 
 		//Interact
 		EnhancedInputComponent->BindAction(InteractAction, ETriggerEvent::Started, this, &AFrontierDiverCharacter::Interact);
+
+
+		//Inventory Interact
+		EnhancedInputComponent->BindAction(InventoryInteractAction, ETriggerEvent::Started, this, &AFrontierDiverCharacter::InventoryInteract);
 	}
 	else
 	{

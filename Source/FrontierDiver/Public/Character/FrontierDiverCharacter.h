@@ -46,9 +46,13 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* MoveAction;
 
-	/** Jump Input Action */
+	/** Interact Action */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* InteractAction;
+
+	/** Inventory Interact Action */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* InventoryInteractAction;
 
 
 public:
@@ -73,6 +77,8 @@ protected:
 	void Look(const FInputActionValue& Value);
 
 	void Interact();
+
+	void InventoryInteract();
 
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;

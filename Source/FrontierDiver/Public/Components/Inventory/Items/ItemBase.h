@@ -24,7 +24,7 @@ struct FItemDynamicInfoBase
     FName ItemTypeName = "None";
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "DefaultSettings")
-    int32 QuantityItems = 0;
+    int32 QuantityItems = 1;
 
 };
 
@@ -41,6 +41,9 @@ struct FItemTableRowInfoBase : public FTableRowBase
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "DefaultSettings")
     EContainerType ItemContainerType;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "DefaultSettings")
+    FText ItemDescription;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "DefaultSettings")
     int32 MaxQuantityItemsInSlot = 1;

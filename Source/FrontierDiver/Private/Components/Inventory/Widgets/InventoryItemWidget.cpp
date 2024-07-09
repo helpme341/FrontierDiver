@@ -3,19 +3,44 @@
 
 #include "Components/Inventory/Widgets/InventoryItemWidget.h"
 #include "Components/Inventory/Items/ItemBase.h"
+#include "Components/Inventory/Widgets/InventoryWidget.h"
+#include "Components/Inventory/Items/ItemBase.h"
+#include "Components/CanvasPanel.h"
+#include "Components/TextBlock.h"
+#include "Components/Button.h"
+#include "Components/Image.h"
 
-/**
+
+
 UInventoryItemWidget::UInventoryItemWidget(const FObjectInitializer& ObjectInitializer)
     : Super(ObjectInitializer)
 {
 }
-*/
 
-void UInventoryItemWidget::ClearInformationAboutItem()
+void UInventoryItemWidget::NativeConstruct()
 {
+    Super::NativeConstruct();
+
+    if (WidgetButton)
+    {
+        WidgetButton->OnHovered.AddDynamic(this, &UInventoryItemWidget::OnButtonHovered);
+        WidgetButton->OnUnhovered.AddDynamic(this, &UInventoryItemWidget::OnButtonUnhovered);
+        WidgetButton->OnPressed.AddDynamic(this, &UInventoryItemWidget::OnButtonPressed);
+    }
 }
 
-void UInventoryItemWidget::LoadInformationAboutItem(UItemBase* Item)
+void UInventoryItemWidget::OnButtonPressed()
 {
+    if (Item) { InventoryWidget->DropItemFromWidget(Item); }
+}
+
+void UInventoryItemWidget::OnButtonHovered()
+{
+    InventoryWidget->ShowItemInfo(Item);
+}
+
+void UInventoryItemWidget::OnButtonUnhovered()
+{
+    InventoryWidget->ShowItemInfo(nullptr);
 }
 

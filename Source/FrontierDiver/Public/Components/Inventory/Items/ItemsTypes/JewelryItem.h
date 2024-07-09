@@ -47,4 +47,5 @@ public:
 
     FItemTableRowInfoBase* GetItemStaticInfo() override;
 
+    FItemDynamicInfoBase* GetItemDynamicInfo() override;
 };
