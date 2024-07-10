@@ -156,7 +156,8 @@ void UInventoryWidget::CreateWidgets()
 
                 NewWidget->WidgetCanvasPanel->RenderTransform.Scale = Settings.WidgetSize;
                 NewWidget->InventoryWidget = this;
-                NewWidget->Item = InventoryComponent->Inventory[Elem.Key].ContainerInventory[Counter];
+                NewWidget->ItemContainerType = Elem.Key;
+                NewWidget->ItemID = Counter;
 
                 UCanvasPanelSlot* CanvasSlot = ParentCanvasPanel->AddChildToCanvas(NewWidget);
                 CanvasSlot->SetPosition(CurrentPosition);
@@ -234,7 +235,9 @@ void UInventoryWidget::UpdateWidget(UItemBase* Item, UInventoryItemWidget* ItemW
             {
                 ItemWidget->WidgetImage->SetBrushFromTexture(Item->GetItemStaticInfo()->ItemWidgetTexture);
                 ItemWidget->WidgetTextBlock->SetText(FText::FromString(FString::Printf(TEXT("%03d"), Item->GetItemDynamicInfo()->QuantityItems)));
-                ItemWidget->Item = Item;
+                ItemWidget->ItemContainerType = Item->GetItemStaticInfo()->ItemContainerType;
+                ItemWidget->ItemID = Item->ThisItemID;
+
                 ItemWidget->WidgetTextBlock->SetText(FText::AsNumber(Item->GetItemDynamicInfo()->QuantityItems));
                 ItemWidget->bIsThisEmptyWidget = false;
             }
@@ -243,7 +246,7 @@ void UInventoryWidget::UpdateWidget(UItemBase* Item, UInventoryItemWidget* ItemW
         {
             ItemWidget->WidgetImage->SetBrushFromTexture(DefaultItemWidgetTexture);
             ItemWidget->WidgetTextBlock->SetText(FText());
-            ItemWidget->Item = nullptr;
+            ItemWidget->ItemID = -1;
             ItemWidget->bIsThisEmptyWidget = true;
         }
     }

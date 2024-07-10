@@ -73,7 +73,11 @@ bool UInventoryComponent::DropItemFromInventory(UItemBase* Item)
 {
     if (IPickupDropItemIF* PickupDropItemIF = Cast<IPickupDropItemIF>(Item))
     {
-        return PickupDropItemIF->DropItem(this);
+        if (PickupDropItemIF->DropItem(this))
+        {
+            if (Item->GetItemDynamicInfo()->QuantityItems == 0) { Item->ConditionalBeginDestroy(); }
+            return true;
+        }
     }
     UE_LOG(LogInventoryComponent, Warning, TEXT("Failed to cast Item to IPickupDropItemIF or Item is nullptr"));
     return false;

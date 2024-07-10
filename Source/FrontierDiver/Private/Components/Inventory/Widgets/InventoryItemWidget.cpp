@@ -9,6 +9,7 @@
 #include "Components/TextBlock.h"
 #include "Components/Button.h"
 #include "Components/Image.h"
+#include "Components/Inventory/InventoryComponent.h"
 
 
 
@@ -31,16 +32,25 @@ void UInventoryItemWidget::NativeConstruct()
 
 void UInventoryItemWidget::OnButtonPressed()
 {
-    if (Item) { InventoryWidget->DropItemFromWidget(Item); }
+    if (ItemID != -1)
+    {
+        InventoryWidget->DropItemFromWidget(InventoryWidget->GetInventoryComponent()->Inventory[ItemContainerType].ContainerInventory[ItemID]);
+    }
 }
 
 void UInventoryItemWidget::OnButtonHovered()
 {
-    if (Item) { InventoryWidget->ShowItemInfo(Item); }
+    if (ItemID != -1)
+    {
+        InventoryWidget->ShowItemInfo(InventoryWidget->GetInventoryComponent()->Inventory[ItemContainerType].ContainerInventory[ItemID]);
+    }
 }
 
 void UInventoryItemWidget::OnButtonUnhovered()
 {
-    if (Item) { InventoryWidget->ShowItemInfo(nullptr); }
+    if (ItemID != -1)
+    {
+        InventoryWidget->ShowItemInfo(nullptr);
+    }
 }
 
