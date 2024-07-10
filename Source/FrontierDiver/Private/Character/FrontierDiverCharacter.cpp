@@ -102,7 +102,7 @@ void AFrontierDiverCharacter::Move(const FInputActionValue& Value)
 
 void AFrontierDiverCharacter::Look(const FInputActionValue& Value)
 {
-	if (FrontierDiverInventoryComponent->InventoryWidget->bIsInventoryHidden)
+	if (FrontierDiverInventoryComponent->InventoryWidget->InventoryIsHidden())
 	{
 		// input is a Vector2D
 		FVector2D LookAxisVector = Value.Get<FVector2D>();
@@ -119,7 +119,8 @@ void AFrontierDiverCharacter::Look(const FInputActionValue& Value)
 void AFrontierDiverCharacter::Interact()
 {
 	FVector StartLocation = GetActorLocation();
-	FVector EndLocation = StartLocation + GetControlRotation().Vector() * 75.0f;
+	StartLocation.Z += 60;
+	FVector EndLocation = StartLocation + GetControlRotation().Vector() * InteractDistance;
 	FCollisionQueryParams TraceParams(FName(TEXT("SphereTrace")), false, GetOwner());
 	FHitResult HitResult;
 
@@ -133,23 +134,25 @@ void AFrontierDiverCharacter::Interact()
 
 void AFrontierDiverCharacter::InventoryInteract()
 {
-	if (FrontierDiverInventoryComponent->InventoryWidget->bIsInventoryHidden) {
-		APlayerController* PlayerController = GetWorld()->GetFirstPlayerController();
-		if (PlayerController)
+	APlayerController* PlayerController = GetWorld()->GetFirstPlayerController();
+	if (PlayerController)
+	{
+		if (FrontierDiverInventoryComponent->InventoryWidget->InventoryIsHidden())
 		{
+			// Открытие инвентаря
 			PlayerController->bShowMouseCursor = true;
 			PlayerController->bEnableClickEvents = true;
 			PlayerController->bEnableMouseOverEvents = true;
+			PlayerController->SetInputMode(FInputModeGameAndUI().SetWidgetToFocus(FrontierDiverInventoryComponent->InventoryWidget->TakeWidget()).SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock));
 			FrontierDiverInventoryComponent->InventoryWidget->SetNotQuickInventoryVisibility(false);
 		}
-	}
-	else { 
-		APlayerController* PlayerController = GetWorld()->GetFirstPlayerController();
-		if (PlayerController)
+		else
 		{
+			// Закрытие инвентаря
 			PlayerController->bShowMouseCursor = false;
 			PlayerController->bEnableClickEvents = false;
 			PlayerController->bEnableMouseOverEvents = false;
+			PlayerController->SetInputMode(FInputModeGameOnly());
 			FrontierDiverInventoryComponent->InventoryWidget->SetNotQuickInventoryVisibility(true);
 		}
 	}

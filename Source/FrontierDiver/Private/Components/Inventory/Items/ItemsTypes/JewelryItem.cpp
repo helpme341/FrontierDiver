@@ -20,15 +20,9 @@ bool UJewelryItem::DropItem(UInventoryComponent* Inventory)
 	return TPickupDropItemIFTmplImpl::DropItem(Inventory);
 }
 
-bool UJewelryItem::FindDataTableByItemType(UInventoryComponent* Inventory)
+bool UJewelryItem::FindDataTableByItemType()
 {
-	if (!ItemTableRowInfo && ItemDynamicInfo.ItemTypeName != "None")
-	{
-		ItemTableRowInfo = Inventory->FindDataTableByItemType(UJewelryItem::StaticClass())->FindRow<FJewelryItemTableRowInfo>(ItemDynamicInfo.ItemTypeName, "");
-		return true;
-	}
-	else if (ItemTableRowInfo) { return true; }
-	return false;
+	return BaseFindDataTableByItemType<UJewelryItem, FJewelryItemTableRowInfo>();
 }
 
 FItemTableRowInfoBase* UJewelryItem::GetItemStaticInfo()

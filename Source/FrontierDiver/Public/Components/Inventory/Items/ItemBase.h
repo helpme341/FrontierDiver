@@ -4,7 +4,11 @@
 
 #include "CoreMinimal.h"
 #include "UObject/NoExportTypes.h"
+#include "Kismet/GameplayStatics.h"
+#include "Components/Inventory/InventoryDataTableItemManager.h"
+#include "Character/FrontierDiverCharacter.h"
 #include "ItemBase.generated.h"
+
 
 UENUM(BlueprintType)
 enum class EContainerType : uint8
@@ -49,7 +53,6 @@ struct FItemTableRowInfoBase : public FTableRowBase
     int32 MaxQuantityItemsInSlot = 1;
 };
 
-class UInventoryComponent;
 
 /**
  * 
@@ -63,7 +66,7 @@ public:
 
     int32 ThisItemID = 99;
 
-    virtual bool FindDataTableByItemType(UInventoryComponent* Inventory);
+    virtual bool FindDataTableByItemType();
 
     virtual FItemTableRowInfoBase* GetItemStaticInfo();
 
@@ -81,4 +84,27 @@ public:
 
 	virtual bool RemoveThisItemFromInventory(UInventoryComponent* Inventory, bool DestroyItem);
 
+protected:
+
+    template<typename T, typename FT>
+    bool BaseFindDataTableByItemType();
 };
+
+template<typename T, typename FT>
+inline bool UItemBase::BaseFindDataTableByItemType()
+{
+    T* Item = Cast<T>(this);
+    if (!Item->ItemTableRowInfo && Item->ItemDynamicInfo.ItemTypeName != "None")
+    {
+        TArray<AActor*> FoundActors;
+        UGameplayStatics::GetAllActorsOfClass(GetWorld(), AInventoryDataTableItemManager::StaticClass(),FoundActors);
+        if (FoundActors.Num() > 0)
+        {
+            AInventoryDataTableItemManager* FoundActor = Cast<AInventoryDataTableItemManager>(FoundActors[0]);
+            Item->ItemTableRowInfo = FoundActor->FindDataTableByItemType(T::StaticClass())->FindRow<FT>(Item->ItemDynamicInfo.ItemTypeName, "");
+            return true;
+        }
+    }
+    else if (Item->ItemTableRowInfo) { return true; }
+    return false;
+}

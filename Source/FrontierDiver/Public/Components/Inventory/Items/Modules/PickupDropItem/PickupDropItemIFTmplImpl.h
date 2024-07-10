@@ -33,33 +33,42 @@ public:
 template<typename OWT>
 inline bool TPickupDropItemIFTmplImpl<OWT>::PickupItem(UInventoryComponent* Inventory, AWorldItem* Item)
 {
-	if (auto* ItemTmpl = Owner->GetItemTmpl())
-	{
-		if (Item->ItemTypeName != "None") { ItemTmpl->ItemDynamicInfo.ItemTypeName = Item->ItemTypeName; }
-		else if (Item->ItemDynamicInfo.ItemTypeName != "None") { ItemTmpl->ItemDynamicInfo.ItemTypeName = Item->ItemDynamicInfo.ItemTypeName; }
-		else { return false; }
-		if (Inventory->AddItemToInventory(Owner))
-		{
-			Item->Destroy();
-			return true;
-		}
-		Owner->ConditionalBeginDestroy();
-	}
+    if (Item->ItemTypeName != "None")
+    {
+        Owner->ItemDynamicInfo.ItemTypeName = Item->ItemTypeName;
+    }
+    else if (Item->ItemDynamicInfo.ItemTypeName != "None")
+    {
+        Owner->ItemDynamicInfo.ItemTypeName = Item->ItemDynamicInfo.ItemTypeName;
+    }
+    else
+    {
+        return false;
+    }
 
-	return false;
+    if (Inventory->AddItemToInventory(Owner, false))
+    {
+        Item->Destroy();
+        return true;
+    }
+    // Если не удалось добавить в инвентарь, не уничтожаем Item здесь
+    // Owner не уничтожаем здесь, а уничтожаем в другом месте, если нужно
+    // Owner->ConditionalBeginDestroy();
+    return false;
 }
 
 template<typename OWT>
 inline bool TPickupDropItemIFTmplImpl<OWT>::DropItem(UInventoryComponent* Inventory)
 {
-	AWorldItem* NewWorldItem = Owner->GetWorld()->SpawnActor<AWorldItem>();
-	if (Owner->FindDataTableByItemType(Inventory))
+	AWorldItem* NewWorldItem = Owner->GetWorld()->SpawnActor<AWorldItem>(); ////// найти утечки памети 
+	if (Owner->FindDataTableByItemType())
 	{
-		if (Inventory->RemoveItemFromInventory(Owner, true))
+		if (Inventory->RemoveItemFromInventory(Owner, false))
 		{
 			FItemDynamicInfoBase ItemDynamic = *Owner->GetItemDynamicInfo();
 			ItemDynamic.QuantityItems = 1;
 			NewWorldItem->LoadDataToWorldItem(ItemDynamic, OWT::StaticClass(), Owner->GetItemStaticInfo()->ItemWorldStaticMesh);
+			return true;
 		}
 	}
 	return false;

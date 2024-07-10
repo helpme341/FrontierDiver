@@ -48,9 +48,11 @@ struct FContainerBase
 	}
 };
 
-class UItemBase;
 class AWorldItem;
 class UInventoryWidget;
+class AFrontierDiverCharacter;
+
+DECLARE_LOG_CATEGORY_EXTERN(LogInventoryComponent, Log, All);
 
 UCLASS()
 class FRONTIERDIVER_API UInventoryComponent : public UCharacterComponentBase
@@ -58,43 +60,37 @@ class FRONTIERDIVER_API UInventoryComponent : public UCharacterComponentBase
 	GENERATED_BODY()
 
 public:
-	UFUNCTION(BlueprintCallable)
-	UInventoryWidget* GetInventoryWidget() { return InventoryWidget; }
-
-	UPROPERTY(EditDefaultsOnly, Category = "UI")
+	UPROPERTY(EditDefaultsOnly, Category = "Settings")
+	FTransform PlayerDropLocationOffset;
+	UPROPERTY(EditDefaultsOnly, Category = "Settings|UI") 
 	TSubclassOf<UInventoryWidget> InventoryWidgetClass;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TMap<TSubclassOf<UItemBase>, UDataTable*> DataTablesInfo;
 
-	UInventoryWidget* InventoryWidget;
-
-	void BeginPlay() override;
-
-	TMap<EContainerType, FContainerBase> Inventory{
-		  { EContainerType::ClothingOne, FContainerBase(1)},
-		  { EContainerType::ClothingTwo, FContainerBase(1)},
-		  { EContainerType::Array, FContainerBase(5)}
-	};
-
-	FTransform PlayerDropLocationOffset;
-
-	bool AddItemToInventory(UItemBase* Item);
-
-	bool RemoveItemFromInventory(UItemBase* Item, bool DestroyItem);
-
-	bool PickupItemToInventory(AWorldItem* Item);
-
-	bool DropItemFromInventory(UItemBase* Item);
 
 	UFUNCTION(BlueprintCallable)
-	UDataTable* FindDataTableByItemType(TSubclassOf<UItemBase> Item);
+	UInventoryWidget* GetInventoryWidget() { return InventoryWidget; }
+	UFUNCTION(BlueprintCallable)
+	AFrontierDiverCharacter* GetOwnerCharacter() { return Cast<AFrontierDiverCharacter>(GetOwner()); }
 
+
+	void BeginPlay() override;
+	bool AddItemToInventory(UItemBase* Item, bool DestroyItem);
+	bool RemoveItemFromInventory(UItemBase* Item, bool DestroyItem);
+	bool PickupItemToInventory(AWorldItem* Item);
+	bool DropItemFromInventory(UItemBase* Item);
+	bool TakeItemToHandsByID(int32& ID);
+	bool RemoveItemFromHands();
+
+	TMap<EContainerType, FContainerBase> Inventory{
+	  { EContainerType::ClothingOne, FContainerBase(1)},
+	  { EContainerType::ClothingTwo, FContainerBase(1)},
+	  { EContainerType::Array, FContainerBase(5)}
+	};
+	UInventoryWidget* InventoryWidget;
+	UItemBase* ItemInHandsNow;
 private:
-	// бызывие релизации функций придметов 
 
-	bool BaseAddItemToInventory(UItemBase* NewItem);
-
+	bool BaseAddItemToInventory(UItemBase* NewItem, bool DestroyItem);
 	bool BaseRemoveItemFromInventory(UItemBase* NewItem, bool DestroyItem);
 };
 

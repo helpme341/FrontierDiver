@@ -5,27 +5,28 @@
 #include "Kismet/GameplayStatics.h"
 #include  "Character/FrontierDiverCharacter.h"
 #include "Components/Inventory/InventoryComponent.h"
+#include "Components/Inventory/Items/ItemBase.h"
+#include "Components/Inventory/InventoryDataTableItemManager.h"
+
 
 AWorldItem::AWorldItem()
 {
 	StaticMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("StaticMeshComponent"));
 }
 
-void AWorldItem::BeginPlay()
+void AWorldItem::OnConstruction(const FTransform& Transform)
 {
-	Super::BeginPlay();
+	Super::OnConstruction(Transform);
 
 	if (ItemTypeName != "None")
 	{
-		if (AFrontierDiverCharacter* Character = Cast<AFrontierDiverCharacter>(UGameplayStatics::GetPlayerPawn(GetWorld(), 0)))
+		TArray<AActor*> FoundActors;
+		UGameplayStatics::GetAllActorsOfClass(GetWorld(), AInventoryDataTableItemManager::StaticClass(), FoundActors);
+		if (FoundActors.Num() > 0)
 		{
-			if (UDataTable* ItemDataTable = Character->GetComponentByClass<UInventoryComponent>()->FindDataTableByItemType(ItemType))
-			{
-				if (FItemTableRowInfoBase* TableRow = ItemDataTable->FindRow<FItemTableRowInfoBase>(ItemTypeName, ""))
-				{
-					StaticMesh->SetStaticMesh(TableRow->ItemWorldStaticMesh);
-				}
-			}
+			AInventoryDataTableItemManager* FoundActor = Cast<AInventoryDataTableItemManager>(FoundActors[0]);
+			FoundActor->FindDataTableByItemType(ItemType)->FindRow<FItemTableRowInfoBase>(ItemTypeName, "");
+			StaticMesh->SetStaticMesh(FoundActor->FindDataTableByItemType(ItemType)->FindRow<FItemTableRowInfoBase>(ItemTypeName, "")->ItemWorldStaticMesh);
 		}
 	}
 }

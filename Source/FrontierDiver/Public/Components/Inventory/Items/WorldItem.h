@@ -3,9 +3,10 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Components/Inventory/Items/ItemBase.h"
 #include "Character/Interfaces/InteractionIF.h"
 #include "WorldItem.generated.h"
+
+class UItemBase;
 
 /**
  * 
@@ -19,7 +20,7 @@ public:
 
 	AWorldItem();
 
-	void BeginPlay() override;
+	virtual void OnConstruction(const FTransform& Transform) override;
 
 	void Interaction(AFrontierDiverCharacter* Character) override;
 
@@ -35,5 +36,4 @@ public:
 	FItemDynamicInfoBase ItemDynamicInfo;
 
 	void LoadDataToWorldItem(FItemDynamicInfoBase& DynamicInfo, TSubclassOf<UItemBase> NewItemType, UStaticMesh* NewItemMesh);
-
 };

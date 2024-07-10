@@ -36,18 +36,15 @@ struct FWidgetContainerSettings
     int32 MaxWidgetsInOneLine = 1;
 };
 
-
-USTRUCT(BlueprintType)
 struct FWidgestContainer
 {
-    GENERATED_BODY()
-
-    UPROPERTY(EditAnywhere, BlueprintReadWrite)
     TArray<UInventoryItemWidget*> Array;
 };
 
 class UInventoryComponent;
 class UTextBlock;
+
+DECLARE_LOG_CATEGORY_EXTERN(LogInventoryWidget, Log, All);
 
 UCLASS()
 class FRONTIERDIVER_API UInventoryWidget : public UUserWidget
@@ -62,33 +59,19 @@ public:
     TMap<EContainerType, FWidgetContainerSettings> WidgetContainersSettings;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite)
-    class UTexture2D* DefaultItemWidgetTexture;
-
-    UPROPERTY(meta = (BindWidget))
-    class UCanvasPanel* ParentCanvasPanel;
-
-    UPROPERTY(meta = (BindWidget))
-    class UImage* ItemImage;
-
-    UPROPERTY(meta = (BindWidget))
-    UTextBlock* ItemNameTextBlock;
-
-    UPROPERTY(meta = (BindWidget))
-    UTextBlock* ItemQuantityTextBlock;
-
-    UPROPERTY(meta = (BindWidget))
-    UTextBlock* ItemDescription;
-
-
-
-    UFUNCTION(BlueprintCallable)
-    class UInventoryComponent* GetInventoryComponent() { return InventoryComponent; }
-
-    UPROPERTY(EditAnywhere, BlueprintReadWrite)
     TSubclassOf<UInventoryItemWidget> InventoryItemWidgetClass;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite)
-    TMap<EContainerType, FWidgestContainer> Widgets;
+    class UTexture2D* DefaultItemWidgetTexture;
+
+    UFUNCTION(BlueprintCallable)
+    class UInventoryComponent* GetInventoryComponent() { return InventoryComponent; }
+    UFUNCTION(BlueprintCallable)
+    bool InventoryIsHidden() { return bIsInventoryHidden; }
+    UFUNCTION(BlueprintCallable)
+    void SetNotQuickInventoryVisibility(bool Hide);
+    UFUNCTION(BlueprintCallable)
+    void SetAllInventoryVisibility(bool Hide);
 
     void UpdateWidgetByItem(UItemBase* Item, bool Clear);
     void UpdateAllWidgets();
@@ -98,15 +81,23 @@ public:
     void ShowItemInfo(UItemBase* Item);
     void DropItemFromWidget(UItemBase* Item);
 
-    UFUNCTION(BlueprintCallable)
-    void SetNotQuickInventoryVisibility(bool Hide);
-    UFUNCTION(BlueprintCallable)
-    void SetAllInvenotoryVisibility(bool Hide);
+    UInventoryComponent* InventoryComponent;
+protected:
+
+    UPROPERTY(meta = (BindWidget))
+    class UCanvasPanel* ParentCanvasPanel;
+    UPROPERTY(meta = (BindWidget))
+    class UImage* ItemImage;
+    UPROPERTY(meta = (BindWidget))
+    UTextBlock* ItemNameTextBlock;
+    UPROPERTY(meta = (BindWidget))
+    UTextBlock* ItemQuantityTextBlock;
+    UPROPERTY(meta = (BindWidget))
+    UTextBlock* ItemDescription;
 
     bool bIsWidgetsCreated;
     bool bIsInventoryHidden = true;
     bool bIsAllInventoryHidden;
     bool bIsShowingItemInfo;
-
-    UInventoryComponent* InventoryComponent;
+    TMap<EContainerType, FWidgestContainer> Widgets;
 };

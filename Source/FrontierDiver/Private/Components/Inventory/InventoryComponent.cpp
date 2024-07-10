@@ -6,25 +6,31 @@
 #include "Components/Inventory/Items/Modules/PickupDropItem/PickupDropItemIF.h"
 #include "Components/Inventory/Widgets/InventoryWidget.h"
 #include "Components/Inventory/Items/ItemsTypes/JewelryItem.h"
+#include "Character/FrontierDiverCharacter.h"
 
-bool UInventoryComponent::AddItemToInventory(UItemBase* Item)
+DEFINE_LOG_CATEGORY(LogInventoryComponent);
+
+bool UInventoryComponent::AddItemToInventory(UItemBase* Item, bool DestroyItem)
 {
     if (Item->bUseCustomAddThisItemToInventory)
     {
-        if (Item) { if (Item->AddThisItemToInventory(this)) { return true; } }
+        if (Item && Item->AddThisItemToInventory(this)) { return true; }
+        UE_LOG(LogInventoryComponent, Warning, TEXT("Custom AddThisItemToInventory failed or Item is nullptr"));
         return false;
     }
     else
     {
-        return BaseAddItemToInventory(Item);
+        return BaseAddItemToInventory(Item, DestroyItem);
     }
 }
+
 
 bool UInventoryComponent::RemoveItemFromInventory(UItemBase* Item, bool DestroyItem)
 {
     if (Item->bUseCustomRemoveThisItemFromInventory)
     {
         if (Item) { if (Item->RemoveThisItemFromInventory(this, DestroyItem)) { return true; } }
+        UE_LOG(LogInventoryComponent, Warning, TEXT("Custom RemoveThisItemFromInventory failed or Item is nullptr"));
         return false;
     }
     else
@@ -35,70 +41,97 @@ bool UInventoryComponent::RemoveItemFromInventory(UItemBase* Item, bool DestroyI
 
 bool UInventoryComponent::PickupItemToInventory(AWorldItem* Item)
 {
-	UItemBase* NewItem = NewObject<UItemBase>(this, Item->ItemType);
-    //FItemDynamicInfoBase* NewItemDynamicInfo = NewItem->GetItemDynamicInfo();
-    //FItemDynamicInfoBase* ExistingItemDynamicInfo = &Item->ItemDynamicInfo;
-    //ExistingItemDynamicInfo->ItemTypeName = Item->ItemTypeName;
-
-    //if (NewItemDynamicInfo && ExistingItemDynamicInfo)
-    //{
-    //    *NewItemDynamicInfo = *ExistingItemDynamicInfo;
-    //}
-
-	if (IPickupDropItemIF* PickupDropItemIF = Cast<IPickupDropItemIF>(NewItem))
-	{
-		return PickupDropItemIF->PickupItem(this, Item);
-	}
-	else { NewItem->ConditionalBeginDestroy(); }
-	return false;
+    UItemBase* NewItem = NewObject<UItemBase>(this, Item->ItemType);
+    if (NewItem)
+    {
+        IPickupDropItemIF* PickupDropItemIF = Cast<IPickupDropItemIF>(NewItem);
+        if (PickupDropItemIF)
+        {
+            if (PickupDropItemIF->PickupItem(this, Item))
+            {
+                if (NewItem->GetItemDynamicInfo()->QuantityItems == 0)
+                {
+                    NewItem->ConditionalBeginDestroy();
+                }
+                return true;
+            }
+        }
+        else
+        {
+            UE_LOG(LogInventoryComponent, Warning, TEXT("Failed to cast NewItem to IPickupDropItemIF or NewItem is nullptr"));
+        }
+        NewItem->ConditionalBeginDestroy();
+    }
+    else
+    {
+        UE_LOG(LogInventoryComponent, Error, TEXT("Failed to create NewItem"));
+    }
+    return false;
 }
 
 bool UInventoryComponent::DropItemFromInventory(UItemBase* Item)
 {
-	if (IPickupDropItemIF* PickupDropItemIF = Cast<IPickupDropItemIF>(Item))
-	{
-		return PickupDropItemIF->DropItem(this);
-	}
-	return false;
+    if (IPickupDropItemIF* PickupDropItemIF = Cast<IPickupDropItemIF>(Item))
+    {
+        return PickupDropItemIF->DropItem(this);
+    }
+    UE_LOG(LogInventoryComponent, Warning, TEXT("Failed to cast Item to IPickupDropItemIF or Item is nullptr"));
+    return false;
 }
 
-UDataTable* UInventoryComponent::FindDataTableByItemType(TSubclassOf<UItemBase> Item)
+bool UInventoryComponent::TakeItemToHandsByID(int32& ID)
 {
-	if (DataTablesInfo.Contains(Item)) { return DataTablesInfo[Item]; }
-	return nullptr;
+    return false;
 }
+
+bool UInventoryComponent::RemoveItemFromHands()
+{
+    return false;
+}
+
 
 void UInventoryComponent::BeginPlay()
 {
-	Super::BeginPlay();
-	if (InventoryWidgetClass)
-	{
-		APlayerController* PlayerController = GetWorld()->GetFirstPlayerController();
-		if (PlayerController)
-		{
-			InventoryWidget = CreateWidget<UInventoryWidget>(PlayerController, InventoryWidgetClass);
+    Super::BeginPlay();
+    if (InventoryWidgetClass)
+    {
+        APlayerController* PlayerController = GetWorld()->GetFirstPlayerController();
+        if (PlayerController)
+        {
+            InventoryWidget = CreateWidget<UInventoryWidget>(PlayerController, InventoryWidgetClass);
 
-			if (InventoryWidget)
-			{
-				InventoryWidget->InventoryComponent = this;
-				InventoryWidget->LoadWidgestSlots();
-				InventoryWidget->CreateWidgets();
-				InventoryWidget->UpdateAllWidgets();
-				InventoryWidget->AddToViewport(0);
-			}
-		}
-	}
+            if (InventoryWidget)
+            {
+                InventoryWidget->InventoryComponent = this;
+                InventoryWidget->LoadWidgestSlots();
+                InventoryWidget->CreateWidgets();
+                InventoryWidget->UpdateAllWidgets();
+                InventoryWidget->AddToViewport(0);
+            }
+            else
+            {
+                UE_LOG(LogInventoryComponent, Warning, TEXT("Failed to create InventoryWidget"));
+            }
+        }
+        else
+        {
+            UE_LOG(LogInventoryComponent, Warning, TEXT("PlayerController not found"));
+        }
+    }
+    else
+    {
+        UE_LOG(LogInventoryComponent, Warning, TEXT("InventoryWidgetClass is nullptr"));
+    }
 }
 
-// бызывие релизации функций придметов 
-bool UInventoryComponent::BaseAddItemToInventory(UItemBase* Item)
+bool UInventoryComponent::BaseAddItemToInventory(UItemBase* Item, bool DestroyItem)
 {
-    if (!Item || Item->ThisItemID != 99)
+    if (!Item || !Item->IsValidLowLevel() || Item->ThisItemID != 99)
     {
+        UE_LOG(LogInventoryComponent, Warning, TEXT("Item is nullptr or ThisItemID is not 99"));
         return false;
     }
-
-    if (Item->FindDataTableByItemType(this))
+    if (Item->FindDataTableByItemType())
     {
         FItemTableRowInfoBase* ItemTableRowInfo = Item->GetItemStaticInfo();
         if (ItemTableRowInfo && Inventory.Contains(ItemTableRowInfo->ItemContainerType))
@@ -109,51 +142,71 @@ bool UInventoryComponent::BaseAddItemToInventory(UItemBase* Item)
                 bool bCheckQuantity = Item->GetItemStaticInfo()->MaxQuantityItemsInSlot > 1;
                 FItemDynamicInfoBase* ItemDynamicInfo = Item->GetItemDynamicInfo();
 
-                for (int32 Counter = 0; Counter < ContainerInventory.Num(); Counter++)
+                if (ItemDynamicInfo && ItemDynamicInfo->QuantityItems != 0)
                 {
-                    UItemBase* ItemOnInspection = ContainerInventory[Counter];
-
-                    if (bCheckQuantity && ItemOnInspection)
+                    for (int32 Counter = 0; Counter < ContainerInventory.Num(); Counter++)
                     {
-                        FItemDynamicInfoBase* InspectionDynamicInfo = ItemOnInspection->GetItemDynamicInfo();
+                        UItemBase* ItemOnInspection = ContainerInventory[Counter];
 
-                        if (InspectionDynamicInfo->ItemTypeName == ItemDynamicInfo->ItemTypeName)
+                        if (bCheckQuantity && ItemOnInspection)
                         {
-                            if (InspectionDynamicInfo->QuantityItems + ItemDynamicInfo->QuantityItems <= Item->GetItemStaticInfo()->MaxQuantityItemsInSlot)
+                            FItemDynamicInfoBase* InspectionDynamicInfo = ItemOnInspection->GetItemDynamicInfo();
+
+                            if (InspectionDynamicInfo && InspectionDynamicInfo->ItemTypeName == ItemDynamicInfo->ItemTypeName)
                             {
-                                InspectionDynamicInfo->QuantityItems += ItemDynamicInfo->QuantityItems;
-                                InventoryWidget->UpdateWidgetByItem(ItemOnInspection, false);
-                                Item->ConditionalBeginDestroy();
-                                return true;
+                                if (InspectionDynamicInfo->QuantityItems + ItemDynamicInfo->QuantityItems <= Item->GetItemStaticInfo()->MaxQuantityItemsInSlot)
+                                {
+                                    UE_LOG(LogInventoryComponent, Warning, TEXT("Adding items: %d + %d"), InspectionDynamicInfo->QuantityItems, ItemDynamicInfo->QuantityItems);
+                                    InspectionDynamicInfo->QuantityItems += ItemDynamicInfo->QuantityItems;
+                                    ItemDynamicInfo->QuantityItems = 0;
+                                    InventoryWidget->UpdateWidgetByItem(ItemOnInspection, false);
+                                    return true;
+                                }
                             }
                         }
-                    }
 
-                    if (!ItemOnInspection)
-                    {
-                        ContainerInventory[Counter] = Item;
-                        Item->ThisItemID = Counter;
-                        InventoryWidget->UpdateWidgetByItem(Item, false);
-                        return true;
+                        if (!ItemOnInspection)
+                        {
+                            ContainerInventory[Counter] = Item;
+                            Item->ThisItemID = Counter;
+                            InventoryWidget->UpdateWidgetByItem(Item, false);
+                            return true;
+                        }
                     }
                 }
+                else
+                {
+                    UE_LOG(LogInventoryComponent, Warning, TEXT("ItemDynamicInfo is nullptr"));
+                }
+            }
+            else
+            {
+                UE_LOG(LogInventoryComponent, Warning, TEXT("ContainerInventory is empty"));
             }
         }
+        else
+        {
+            UE_LOG(LogInventoryComponent, Warning, TEXT("ItemTableRowInfo is nullptr or ItemContainerType not found in Inventory"));
+        }
     }
+    else
+    {
+        UE_LOG(LogInventoryComponent, Warning, TEXT("Failed to find DataTable by ItemType"));
+    }
+    if (DestroyItem) { Item->ConditionalBeginDestroy(); }
     return false;
 }
 
 bool UInventoryComponent::BaseRemoveItemFromInventory(UItemBase* Item, bool DestroyItem)
 {
-	if (Item->ThisItemID != 99 && Item)
-	{
-		if (Item->FindDataTableByItemType(this))
-		{
+    if (Item->ThisItemID != 99 && Item)
+    {
+        if (Item->FindDataTableByItemType())
+        {
             FItemTableRowInfoBase* ItemTableRowInfo = Item->GetItemStaticInfo();
             FItemDynamicInfoBase* ItemDynamicInfo = Item->GetItemDynamicInfo();
             if (ItemTableRowInfo && ItemDynamicInfo)
             {
-
                 if (ItemTableRowInfo->MaxQuantityItemsInSlot > 1 && ItemDynamicInfo->QuantityItems - 1 >= 1)
                 {
                     ItemDynamicInfo->QuantityItems--;
@@ -163,14 +216,26 @@ bool UInventoryComponent::BaseRemoveItemFromInventory(UItemBase* Item, bool Dest
                 else if (Inventory.Contains(ItemTableRowInfo->ItemContainerType))
                 {
                     Inventory[ItemTableRowInfo->ItemContainerType].ContainerInventory[Item->ThisItemID] = nullptr;
+                    Item->GetItemDynamicInfo()->QuantityItems = 0;
                     InventoryWidget->UpdateWidgetByItem(Item, true);
                     if (DestroyItem) { Item->ConditionalBeginDestroy(); }
                     else { Item->ThisItemID = 99; }
                     return true;
                 }
             }
-		}
-	}
-	return false;
+            else
+            {
+                UE_LOG(LogInventoryComponent, Warning, TEXT("ItemTableRowInfo or ItemDynamicInfo is nullptr"));
+            }
+        }
+        else
+        {
+            UE_LOG(LogInventoryComponent, Warning, TEXT("Failed to find DataTable by ItemType"));
+        }
+    }
+    else
+    {
+        UE_LOG(LogInventoryComponent, Warning, TEXT("Item is nullptr or ThisItemID is 99"));
+    }
+    return false;
 }
-

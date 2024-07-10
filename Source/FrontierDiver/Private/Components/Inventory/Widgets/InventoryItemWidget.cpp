@@ -36,11 +36,11 @@ void UInventoryItemWidget::OnButtonPressed()
 
 void UInventoryItemWidget::OnButtonHovered()
 {
-    InventoryWidget->ShowItemInfo(Item);
+    if (Item) { InventoryWidget->ShowItemInfo(Item); }
 }
 
 void UInventoryItemWidget::OnButtonUnhovered()
 {
-    InventoryWidget->ShowItemInfo(nullptr);
+    if (Item) { InventoryWidget->ShowItemInfo(nullptr); }
 }
 

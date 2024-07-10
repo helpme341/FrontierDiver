@@ -5,7 +5,7 @@
 #include "Components/Inventory/InventoryComponent.h"
 #include "Components/Inventory/Widgets/InventoryItemWidget.h"
 
-bool UItemBase::FindDataTableByItemType(UInventoryComponent* Inventory)
+bool UItemBase::FindDataTableByItemType()
 {
     return false;
 }

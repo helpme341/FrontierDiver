@@ -43,7 +43,7 @@ public:
 
     bool DropItem(UInventoryComponent* Inventory) override;
 
-    bool FindDataTableByItemType(UInventoryComponent* Inventory) override;
+    bool FindDataTableByItemType() override;
 
     FItemTableRowInfoBase* GetItemStaticInfo() override;
 
