@@ -34,50 +34,33 @@ void UInventoryWidget::ShowItemInfo(UItemBase* Item)
 {
     if (Item && !bIsInventoryHidden)
     {
-        FItemDynamicInfoBase* ItemDynamicInfo;
-        if (Item->IsValidLowLevel()) { ItemDynamicInfo = Item->GetItemDynamicInfo(); }
-        else { bIsShowingItemInfo = false; return; }
-        if (ItemDynamicInfo)
+        if (Item->GetItemDynamicInfo().QuantityItems == 0) { bIsShowingItemInfo = false; return; }
+        FItemTableRowInfoBase* ItemStaticInfo = Item->GetItemStaticInfo();
+        if (ItemStaticInfo)
         {
-            if (ItemDynamicInfo->QuantityItems == 0) { bIsShowingItemInfo = false; return; }
-            FItemTableRowInfoBase* ItemStaticInfo = Item->GetItemStaticInfo();
-            if (ItemStaticInfo)
-            {
-                if (ItemImage) { ItemImage->SetBrushFromTexture(ItemStaticInfo->ItemWidgetTexture); }
+            if (ItemImage) { ItemImage->SetBrushFromTexture(ItemStaticInfo->ItemWidgetTexture); }
 
-                if (ItemDescription) { ItemDescription->SetText(ItemStaticInfo->ItemDescription); }
-            }
-            else
-            {
-                UE_LOG(LogInventoryWidget, Warning, TEXT("ItemStaticInfo is nullptr"));
-                bIsShowingItemInfo = false;
-                return;
-            }
-
-
-            if (ItemDynamicInfo)
-            {
-                if (ItemNameTextBlock) { ItemNameTextBlock->SetText(FText::FromName(ItemDynamicInfo->ItemTypeName)); }
-            }
-            else
-            {
-                UE_LOG(LogInventoryWidget, Warning, TEXT("ItemDynamicInfo is nullptr"));
-                bIsShowingItemInfo = false;
-                return;
-            }
-
-            FString QuantityString = FString::Printf(TEXT("%d/%d"), ItemDynamicInfo->QuantityItems, ItemStaticInfo->MaxQuantityItemsInSlot);
-            if (ItemQuantityTextBlock) { ItemQuantityTextBlock->SetText(FText::FromString(QuantityString)); }
-
-
-            if (ItemImage) { ItemImage->SetVisibility(ESlateVisibility::Visible); }
-            if (ItemNameTextBlock) { ItemNameTextBlock->SetVisibility(ESlateVisibility::Visible); }
-            if (ItemQuantityTextBlock) { ItemQuantityTextBlock->SetVisibility(ESlateVisibility::Visible); }
-            if (ItemDescription) { ItemDescription->SetVisibility(ESlateVisibility::Visible); }
-            bIsShowingItemInfo = true;
+            if (ItemDescription) { ItemDescription->SetText(ItemStaticInfo->ItemDescription); }
+        }
+        else
+        {
+            UE_LOG(LogInventoryWidget, Warning, TEXT("ItemStaticInfo is nullptr"));
+            bIsShowingItemInfo = false;
             return;
         }
-        bIsShowingItemInfo = false;
+        if (ItemNameTextBlock) { ItemNameTextBlock->SetText(FText::FromName(Item->GetItemDynamicInfo().ItemTypeName)); }
+
+        FString QuantityString = FString::Printf(TEXT("%d/%d"), Item->GetItemDynamicInfo().QuantityItems, ItemStaticInfo->MaxQuantityItemsInSlot);
+
+        if (ItemQuantityTextBlock) { ItemQuantityTextBlock->SetText(FText::FromString(QuantityString)); }
+
+
+        if (ItemImage) { ItemImage->SetVisibility(ESlateVisibility::Visible); }
+        if (ItemNameTextBlock) { ItemNameTextBlock->SetVisibility(ESlateVisibility::Visible); }
+        if (ItemQuantityTextBlock) { ItemQuantityTextBlock->SetVisibility(ESlateVisibility::Visible); }
+        if (ItemDescription) { ItemDescription->SetVisibility(ESlateVisibility::Visible); }
+        bIsShowingItemInfo = true;
+        return;
     }
     else if (!bIsInventoryHidden && bIsShowingItemInfo)
     {
@@ -116,7 +99,7 @@ void UInventoryWidget::DropItemFromWidget(UItemBase* Item)
             {
                 if (bIsShowingItemInfo)
                 { 
-                    if (Item->GetItemDynamicInfo()->QuantityItems == 0)
+                    if (Item->GetItemDynamicInfo().QuantityItems == 0)
                     {
                         ShowItemInfo(nullptr);
                     }
@@ -156,8 +139,7 @@ void UInventoryWidget::CreateWidgets()
 
                 NewWidget->WidgetCanvasPanel->RenderTransform.Scale = Settings.WidgetSize;
                 NewWidget->InventoryWidget = this;
-                NewWidget->ItemContainerType = Elem.Key;
-                NewWidget->ItemID = Counter;
+                NewWidget->Item = InventoryComponent->Inventory[Elem.Key].ContainerInventory[Counter];
 
                 UCanvasPanelSlot* CanvasSlot = ParentCanvasPanel->AddChildToCanvas(NewWidget);
                 CanvasSlot->SetPosition(CurrentPosition);
@@ -234,11 +216,10 @@ void UInventoryWidget::UpdateWidget(UItemBase* Item, UInventoryItemWidget* ItemW
             else
             {
                 ItemWidget->WidgetImage->SetBrushFromTexture(Item->GetItemStaticInfo()->ItemWidgetTexture);
-                ItemWidget->WidgetTextBlock->SetText(FText::FromString(FString::Printf(TEXT("%03d"), Item->GetItemDynamicInfo()->QuantityItems)));
-                ItemWidget->ItemContainerType = Item->GetItemStaticInfo()->ItemContainerType;
-                ItemWidget->ItemID = Item->ThisItemID;
+                ItemWidget->WidgetTextBlock->SetText(FText::FromString(FString::Printf(TEXT("%03d"), Item->GetItemDynamicInfo().QuantityItems)));
+                ItemWidget->Item = Item;
 
-                ItemWidget->WidgetTextBlock->SetText(FText::AsNumber(Item->GetItemDynamicInfo()->QuantityItems));
+                ItemWidget->WidgetTextBlock->SetText(FText::AsNumber(Item->GetItemDynamicInfo().QuantityItems));
                 ItemWidget->bIsThisEmptyWidget = false;
             }
         }
@@ -246,7 +227,7 @@ void UInventoryWidget::UpdateWidget(UItemBase* Item, UInventoryItemWidget* ItemW
         {
             ItemWidget->WidgetImage->SetBrushFromTexture(DefaultItemWidgetTexture);
             ItemWidget->WidgetTextBlock->SetText(FText());
-            ItemWidget->ItemID = -1;
+            ItemWidget->Item = nullptr;
             ItemWidget->bIsThisEmptyWidget = true;
         }
     }

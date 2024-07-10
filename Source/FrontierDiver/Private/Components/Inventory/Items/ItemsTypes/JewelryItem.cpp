@@ -30,7 +30,7 @@ FItemTableRowInfoBase* UJewelryItem::GetItemStaticInfo()
 	return ItemTableRowInfo;
 }
 
-FItemDynamicInfoBase* UJewelryItem::GetItemDynamicInfo()
+FItemDynamicInfoBase& UJewelryItem::GetItemDynamicInfo()
 {
-	return &ItemDynamicInfo;
+	return ItemDynamicInfo;
 }

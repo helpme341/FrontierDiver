@@ -49,7 +49,7 @@ bool UInventoryComponent::PickupItemToInventory(AWorldItem* Item)
         {
             if (PickupDropItemIF->PickupItem(this, Item))
             {
-                if (NewItem->GetItemDynamicInfo()->QuantityItems == 0)
+                if (NewItem->GetItemDynamicInfo().QuantityItems == 0)
                 {
                     NewItem->ConditionalBeginDestroy();
                 }
@@ -75,7 +75,7 @@ bool UInventoryComponent::DropItemFromInventory(UItemBase* Item)
     {
         if (PickupDropItemIF->DropItem(this))
         {
-            if (Item->GetItemDynamicInfo()->QuantityItems == 0) { Item->ConditionalBeginDestroy(); }
+            if (Item->GetItemDynamicInfo().QuantityItems == 0) { Item->ConditionalBeginDestroy(); }
             return true;
         }
     }
@@ -144,9 +144,7 @@ bool UInventoryComponent::BaseAddItemToInventory(UItemBase* Item, bool DestroyIt
             if (!ContainerInventory.IsEmpty())
             {
                 bool bCheckQuantity = Item->GetItemStaticInfo()->MaxQuantityItemsInSlot > 1;
-                FItemDynamicInfoBase* ItemDynamicInfo = Item->GetItemDynamicInfo();
-
-                if (ItemDynamicInfo && ItemDynamicInfo->QuantityItems != 0)
+                if (Item->GetItemDynamicInfo().ItemTypeName != "None" && Item->GetItemDynamicInfo().QuantityItems != 0)
                 {
                     for (int32 Counter = 0; Counter < ContainerInventory.Num(); Counter++)
                     {
@@ -154,15 +152,13 @@ bool UInventoryComponent::BaseAddItemToInventory(UItemBase* Item, bool DestroyIt
 
                         if (bCheckQuantity && ItemOnInspection)
                         {
-                            FItemDynamicInfoBase* InspectionDynamicInfo = ItemOnInspection->GetItemDynamicInfo();
 
-                            if (InspectionDynamicInfo && InspectionDynamicInfo->ItemTypeName == ItemDynamicInfo->ItemTypeName)
+                            if (ItemOnInspection->GetItemDynamicInfo().ItemTypeName == Item->GetItemDynamicInfo().ItemTypeName)
                             {
-                                if (InspectionDynamicInfo->QuantityItems + ItemDynamicInfo->QuantityItems <= Item->GetItemStaticInfo()->MaxQuantityItemsInSlot)
+                                if (ItemOnInspection->GetItemDynamicInfo().QuantityItems + Item->GetItemDynamicInfo().QuantityItems <= ItemTableRowInfo->MaxQuantityItemsInSlot)
                                 {
-                                    UE_LOG(LogInventoryComponent, Warning, TEXT("Adding items: %d + %d"), InspectionDynamicInfo->QuantityItems, ItemDynamicInfo->QuantityItems);
-                                    InspectionDynamicInfo->QuantityItems += ItemDynamicInfo->QuantityItems;
-                                    ItemDynamicInfo->QuantityItems = 0;
+                                    ItemOnInspection->GetItemDynamicInfo().QuantityItems += Item->GetItemDynamicInfo().QuantityItems;
+                                    Item->GetItemDynamicInfo().QuantityItems = 0;
                                     InventoryWidget->UpdateWidgetByItem(ItemOnInspection, false);
                                     return true;
                                 }
@@ -208,19 +204,18 @@ bool UInventoryComponent::BaseRemoveItemFromInventory(UItemBase* Item, bool Dest
         if (Item->FindDataTableByItemType())
         {
             FItemTableRowInfoBase* ItemTableRowInfo = Item->GetItemStaticInfo();
-            FItemDynamicInfoBase* ItemDynamicInfo = Item->GetItemDynamicInfo();
-            if (ItemTableRowInfo && ItemDynamicInfo)
+            if (ItemTableRowInfo)
             {
-                if (ItemTableRowInfo->MaxQuantityItemsInSlot > 1 && ItemDynamicInfo->QuantityItems - 1 >= 1)
+                if (ItemTableRowInfo->MaxQuantityItemsInSlot > 1 && Item->GetItemDynamicInfo().QuantityItems - 1 >= 1)
                 {
-                    ItemDynamicInfo->QuantityItems--;
+                    Item->GetItemDynamicInfo().QuantityItems--;
                     InventoryWidget->UpdateWidgetByItem(Item, false);
                     return true;
                 }
                 else if (Inventory.Contains(ItemTableRowInfo->ItemContainerType))
                 {
                     Inventory[ItemTableRowInfo->ItemContainerType].ContainerInventory[Item->ThisItemID] = nullptr;
-                    Item->GetItemDynamicInfo()->QuantityItems = 0;
+                    Item->GetItemDynamicInfo().QuantityItems = 0;
                     InventoryWidget->UpdateWidgetByItem(Item, true);
                     if (DestroyItem) { Item->ConditionalBeginDestroy(); }
                     else { Item->ThisItemID = 99; }

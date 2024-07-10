@@ -6,8 +6,6 @@
 #include "Blueprint/UserWidget.h"
 #include "InventoryItemWidget.generated.h"
 
-class UItemBase;
-
 /**
  * 
  */
@@ -44,9 +42,7 @@ public:
 	UFUNCTION()
 	void OnButtonUnhovered();
 
-	int32 ItemID = -1;
-
-	EContainerType ItemContainerType;
+	class UItemBase* Item;
 
 	class UInventoryWidget* InventoryWidget;
 

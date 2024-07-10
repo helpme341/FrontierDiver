@@ -10,18 +10,6 @@ bool UItemBase::FindDataTableByItemType()
     return false;
 }
 
-FItemTableRowInfoBase* UItemBase::GetItemStaticInfo()
-{
-    return nullptr;
-}
-
-FItemDynamicInfoBase* UItemBase::GetItemDynamicInfo()
-{
-    return nullptr;
-}
-
-
-
 void  UItemBase::UpdateItemWidget(UInventoryItemWidget* ItemWidget)
 {
 }

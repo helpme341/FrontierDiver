@@ -32,23 +32,23 @@ void UInventoryItemWidget::NativeConstruct()
 
 void UInventoryItemWidget::OnButtonPressed()
 {
-    if (ItemID != -1)
+    if (Item)
     {
-        InventoryWidget->DropItemFromWidget(InventoryWidget->GetInventoryComponent()->Inventory[ItemContainerType].ContainerInventory[ItemID]);
+        InventoryWidget->DropItemFromWidget(Item);
     }
 }
 
 void UInventoryItemWidget::OnButtonHovered()
 {
-    if (ItemID != -1)
+    if (Item)
     {
-        InventoryWidget->ShowItemInfo(InventoryWidget->GetInventoryComponent()->Inventory[ItemContainerType].ContainerInventory[ItemID]);
+        InventoryWidget->ShowItemInfo(Item);
     }
 }
 
 void UInventoryItemWidget::OnButtonUnhovered()
 {
-    if (ItemID != -1)
+    if (Item)
     {
         InventoryWidget->ShowItemInfo(nullptr);
     }

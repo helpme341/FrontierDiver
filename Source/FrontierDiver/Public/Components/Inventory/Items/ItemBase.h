@@ -68,9 +68,9 @@ public:
 
     virtual bool FindDataTableByItemType();
 
-    virtual FItemTableRowInfoBase* GetItemStaticInfo();
+    virtual FItemTableRowInfoBase* GetItemStaticInfo() { return nullptr; }
 
-    virtual FItemDynamicInfoBase* GetItemDynamicInfo();
+    virtual FItemDynamicInfoBase& GetItemDynamicInfo() { static FItemDynamicInfoBase DummyDynamicInfo; return DummyDynamicInfo; }
 
     bool bUseCustomAddThisItemToInventory = false;
 

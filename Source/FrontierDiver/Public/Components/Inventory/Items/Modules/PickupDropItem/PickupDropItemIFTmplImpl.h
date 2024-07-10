@@ -65,7 +65,7 @@ inline bool TPickupDropItemIFTmplImpl<OWT>::DropItem(UInventoryComponent* Invent
 	{
 		if (Inventory->RemoveItemFromInventory(Owner, false))
 		{
-			FItemDynamicInfoBase ItemDynamic = *Owner->GetItemDynamicInfo();
+			FItemDynamicInfoBase ItemDynamic = Owner->GetItemDynamicInfo();
 			ItemDynamic.QuantityItems = 1;
 			NewWorldItem->LoadDataToWorldItem(ItemDynamic, OWT::StaticClass(), Owner->GetItemStaticInfo()->ItemWorldStaticMesh);
 			return true;
