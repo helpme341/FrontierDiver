@@ -6,6 +6,14 @@
 #include "GameFramework/Character.h"
 #include "FrontierDiverCharacter.generated.h"
 
+UENUM(BlueprintType)
+enum class EAnimItemBlendType : uint8
+{
+	None,
+	Test,
+};
+
+
 class UInputComponent;
 class USkeletalMeshComponent;
 class UCameraComponent;
@@ -13,6 +21,8 @@ class UInputAction;
 class UInputMappingContext;
 struct FInputActionValue;
 class UInventoryComponent;
+
+
 
 DECLARE_LOG_CATEGORY_EXTERN(LogTemplateCharacter, Log, All);
 
@@ -55,7 +65,7 @@ private:
 	UInputAction* InventoryInteractAction;
 
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings", meta = (AllowPrivateAccess = "true"))
 	float InteractDistance = 75.0f;
 
 public:
@@ -68,6 +78,9 @@ public:
 	class UInputAction* LookAction;
 
 	bool bIsSwimming;
+
+	UPROPERTY(EditInstanceOnly, BlueprintReadOnly, Category = "Settings")
+	EAnimItemBlendType  AnimItemBlendTypeNow;
 
 	UFUNCTION(BlueprintCallable)
 	void ChangeMovementMode(EMovementMode NewMovementMode);

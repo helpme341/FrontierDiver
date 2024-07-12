@@ -51,9 +51,6 @@ inline bool TPickupDropItemIFTmplImpl<OWT>::PickupItem(UInventoryComponent* Inve
         Item->Destroy();
         return true;
     }
-    // Если не удалось добавить в инвентарь, не уничтожаем Item здесь
-    // Owner не уничтожаем здесь, а уничтожаем в другом месте, если нужно
-    // Owner->ConditionalBeginDestroy();
     return false;
 }
 
@@ -68,9 +65,11 @@ inline bool TPickupDropItemIFTmplImpl<OWT>::DropItem(UInventoryComponent* Invent
 			FItemDynamicInfoBase ItemDynamic = Owner->GetItemDynamicInfo();
 			ItemDynamic.QuantityItems = 1;
 			NewWorldItem->LoadDataToWorldItem(ItemDynamic, OWT::StaticClass(), Owner->GetItemStaticInfo()->ItemWorldStaticMesh);
+            NewWorldItem->SetActorLocation(Inventory->GetOwner()->GetActorLocation() + Inventory->PlayerDropLocationOffset);
 			return true;
 		}
 	}
+    NewWorldItem->Destroy();
 	return false;
 }
 

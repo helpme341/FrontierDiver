@@ -35,7 +35,7 @@ void UInventoryWidget::ShowItemInfo(UItemBase* Item)
     if (Item && !bIsInventoryHidden)
     {
         if (Item->GetItemDynamicInfo().QuantityItems == 0) { bIsShowingItemInfo = false; return; }
-        FItemTableRowInfoBase* ItemStaticInfo = Item->GetItemStaticInfo();
+        const FItemTableRowInfoBase* ItemStaticInfo = Item->GetItemStaticInfo();
         if (ItemStaticInfo)
         {
             if (ItemImage) { ItemImage->SetBrushFromTexture(ItemStaticInfo->ItemWidgetTexture); }
@@ -107,6 +107,10 @@ void UInventoryWidget::DropItemFromWidget(UItemBase* Item)
                     {
                         ShowItemInfo(Item);
                     }
+                }
+                if (Item->GetItemDynamicInfo().QuantityItems == 0)
+                {
+                    Item->ConditionalBeginDestroy();
                 }
             }
         }

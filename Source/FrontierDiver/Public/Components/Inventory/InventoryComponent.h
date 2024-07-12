@@ -61,16 +61,20 @@ class FRONTIERDIVER_API UInventoryComponent : public UCharacterComponentBase
 
 public:
 	UPROPERTY(EditDefaultsOnly, Category = "Settings")
-	FTransform PlayerDropLocationOffset;
+	FVector PlayerDropLocationOffset;
+	UPROPERTY(EditDefaultsOnly, Category = "Settings")
+	EContainerType QuickInventoryContainerType;
 	UPROPERTY(EditDefaultsOnly, Category = "Settings|UI") 
 	TSubclassOf<UInventoryWidget> InventoryWidgetClass;
-
-
 
 	UFUNCTION(BlueprintCallable)
 	UInventoryWidget* GetInventoryWidget() { return InventoryWidget; }
 	UFUNCTION(BlueprintCallable)
 	AFrontierDiverCharacter* GetOwnerCharacter() { return Cast<AFrontierDiverCharacter>(GetOwner()); }
+	UFUNCTION(BlueprintCallable)
+	bool TakeItemToHandsByID(int32 ID);
+	UFUNCTION(BlueprintCallable)
+	bool RemoveItemFromHands();
 
 
 	void BeginPlay() override;
@@ -78,8 +82,6 @@ public:
 	bool RemoveItemFromInventory(UItemBase* Item, bool DestroyItem);
 	bool PickupItemToInventory(AWorldItem* Item);
 	bool DropItemFromInventory(UItemBase* Item);
-	bool TakeItemToHandsByID(int32& ID);
-	bool RemoveItemFromHands();
 
 	TMap<EContainerType, FContainerBase> Inventory{
 	  { EContainerType::ClothingOne, FContainerBase(1)},
@@ -87,7 +89,9 @@ public:
 	  { EContainerType::Array, FContainerBase(5)}
 	};
 	UInventoryWidget* InventoryWidget;
-	UItemBase* ItemInHandsNow;
+	UItemBase* HeldItem;
+	bool bIsItemHeld;
+
 private:
 
 	bool BaseAddItemToInventory(UItemBase* NewItem, bool DestroyItem);

@@ -26,23 +26,24 @@ AFrontierDiverCharacter::AFrontierDiverCharacter()
 
 	GetCapsuleComponent()->InitCapsuleSize(55.f, 96.0f);
 
+
+	
+	// Create a mesh component that will be used when being viewed from a '1st person' view (when controlling this pawn)
+	Mesh1P = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("CharacterMesh1P"));
+	Mesh1P->SetOnlyOwnerSee(true);
+	Mesh1P->SetupAttachment(GetCapsuleComponent());
+	Mesh1P->bCastDynamicShadow = true;
+	Mesh1P->CastShadow = true;
+	//Mesh1P->SetRelativeRotation(FRotator(0.9f, -19.19f, 5.2f));
+	Mesh1P->SetRelativeLocation(FVector(-30.f, 0.f, -150.f));
+
 	// Create a CameraComponent	
 	FrontierDiverCameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("FirstPersonCamera"));
-	FrontierDiverCameraComponent->SetupAttachment(GetCapsuleComponent());
+	FrontierDiverCameraComponent->SetupAttachment(Mesh1P,TEXT("head"));
 	FrontierDiverCameraComponent->SetRelativeLocation(FVector(-10.f, 0.f, 60.f)); // Position the camera
 	FrontierDiverCameraComponent->bUsePawnControlRotation = true;
 
 	FrontierDiverInventoryComponent = CreateDefaultSubobject<UInventoryComponent>(TEXT("InventoryComponent"));
-
-	// Create a mesh component that will be used when being viewed from a '1st person' view (when controlling this pawn)
-	Mesh1P = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("CharacterMesh1P"));
-	Mesh1P->SetOnlyOwnerSee(true);
-	Mesh1P->SetupAttachment(FrontierDiverCameraComponent);
-	Mesh1P->bCastDynamicShadow = false;
-	Mesh1P->CastShadow = false;
-	//Mesh1P->SetRelativeRotation(FRotator(0.9f, -19.19f, 5.2f));
-	Mesh1P->SetRelativeLocation(FVector(-30.f, 0.f, -150.f));
-
 
 }
 
@@ -128,7 +129,7 @@ void AFrontierDiverCharacter::Interact()
 
 	if (GetWorld()->SweepSingleByChannel(HitResult, StartLocation, EndLocation, FQuat::Identity, ECollisionChannel::ECC_Visibility, FCollisionShape::MakeSphere(15.0f), TraceParams))
 	{
-		Cast<IInteractionIF>(HitResult.GetActor())->Interaction(this);
+		if (IInteractionIF* InteractionIF = Cast<IInteractionIF>(HitResult.GetActor())) { InteractionIF->Interaction(this); }
 	}
 }
 

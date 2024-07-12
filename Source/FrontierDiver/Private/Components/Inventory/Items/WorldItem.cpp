@@ -16,21 +16,53 @@ AWorldItem::AWorldItem()
 
 void AWorldItem::OnConstruction(const FTransform& Transform)
 {
-	Super::OnConstruction(Transform);
+    Super::OnConstruction(Transform);
 
-	if (ItemTypeName != "None")
-	{
-		TArray<AActor*> FoundActors;
-		UGameplayStatics::GetAllActorsOfClass(GetWorld(), AInventoryDataTableItemManager::StaticClass(), FoundActors);
-		if (FoundActors.Num() > 0)
-		{
-			AInventoryDataTableItemManager* FoundActor = Cast<AInventoryDataTableItemManager>(FoundActors[0]);
-			FoundActor->FindDataTableByItemType(ItemType)->FindRow<FItemTableRowInfoBase>(ItemTypeName, "");
-			StaticMesh->SetStaticMesh(FoundActor->FindDataTableByItemType(ItemType)->FindRow<FItemTableRowInfoBase>(ItemTypeName, "")->ItemWorldStaticMesh);
-		}
-	}
+    if (ItemTypeName != "None")
+    {
+        TArray<AActor*> FoundActors;
+        UGameplayStatics::GetAllActorsOfClass(GetWorld(), AInventoryDataTableItemManager::StaticClass(), FoundActors);
+
+        if (FoundActors.Num() > 0)
+        {
+            AInventoryDataTableItemManager* FoundActor = Cast<AInventoryDataTableItemManager>(FoundActors[0]);
+
+            if (FoundActor)
+            {
+                UDataTable* DataTable = FoundActor->FindDataTableByItemType(ItemType);
+
+                if (DataTable)
+                {
+                    FItemTableRowInfoBase* ItemRow = DataTable->FindRow<FItemTableRowInfoBase>(ItemTypeName, "");
+
+                    if (ItemRow)
+                    {
+                        if (StaticMesh && ItemRow->ItemWorldStaticMesh)
+                        {
+                            StaticMesh->SetStaticMesh(ItemRow->ItemWorldStaticMesh);
+                        }
+                        else
+                        {
+                            UE_LOG(LogTemp, Warning, TEXT("StaticMesh or ItemWorldStaticMesh is null."));
+                        }
+                    }
+                    else
+                    {
+                        UE_LOG(LogTemp, Warning, TEXT("ItemRow not found for ItemTypeName: %s"), *ItemTypeName.ToString());
+                    }
+                }
+            }
+            else
+            {
+                UE_LOG(LogTemp, Warning, TEXT("FoundActor is not of type AInventoryDataTableItemManager."));
+            }
+        }
+        else
+        {
+            UE_LOG(LogTemp, Warning, TEXT("No AInventoryDataTableItemManager actors found in the world."));
+        }
+    }
 }
-
 void AWorldItem::Interaction(AFrontierDiverCharacter* Character)
 {
 	Character->GetComponentByClass<UInventoryComponent>()->PickupItemToInventory(this);

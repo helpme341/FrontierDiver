@@ -27,7 +27,8 @@ class UInventoryComponent;
  * 
  */
 UCLASS()
-class FRONTIERDIVER_API UJewelryItem : public UItemBase, 
+class FRONTIERDIVER_API UJewelryItem :
+    public UItemBase, 
     public IPickupDropItemIF,
     public TItemTmpl<UJewelryItem, FJewelryItemDynamicInfo, FJewelryItemTableRowInfo>,
     public TPickupDropItemIFTmplImpl<UJewelryItem>
@@ -45,7 +46,8 @@ public:
 
     bool FindDataTableByItemType() override;
 
-    FItemTableRowInfoBase* GetItemStaticInfo() override;
+    const FItemTableRowInfoBase* GetItemStaticInfo() override;
 
     FItemDynamicInfoBase& GetItemDynamicInfo() override;
 };
+ 

@@ -68,7 +68,7 @@ public:
 
     virtual bool FindDataTableByItemType();
 
-    virtual FItemTableRowInfoBase* GetItemStaticInfo() { return nullptr; }
+    const virtual FItemTableRowInfoBase* GetItemStaticInfo() { return nullptr; }
 
     virtual FItemDynamicInfoBase& GetItemDynamicInfo() { static FItemDynamicInfoBase DummyDynamicInfo; return DummyDynamicInfo; }
 
@@ -85,7 +85,7 @@ public:
 	virtual bool RemoveThisItemFromInventory(UInventoryComponent* Inventory, bool DestroyItem);
 
 protected:
-
+    /*FT == ItemTableRowInfo*/
     template<typename T, typename FT>
     bool BaseFindDataTableByItemType();
 };

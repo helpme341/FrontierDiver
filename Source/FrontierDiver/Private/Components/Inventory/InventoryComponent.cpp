@@ -7,6 +7,8 @@
 #include "Components/Inventory/Widgets/InventoryWidget.h"
 #include "Components/Inventory/Items/ItemsTypes/JewelryItem.h"
 #include "Character/FrontierDiverCharacter.h"
+#include "Components/Inventory/Items/Modules/TakeRemoveItem/TakeRemoveItemIF.h"
+#include "Engine/StaticMeshActor.h"
 
 DEFINE_LOG_CATEGORY(LogInventoryComponent);
 
@@ -29,7 +31,13 @@ bool UInventoryComponent::RemoveItemFromInventory(UItemBase* Item, bool DestroyI
 {
     if (Item->bUseCustomRemoveThisItemFromInventory)
     {
-        if (Item) { if (Item->RemoveThisItemFromInventory(this, DestroyItem)) { return true; } }
+        if (Item)
+        { 
+            if (Item->RemoveThisItemFromInventory(this, DestroyItem)) 
+            {
+                return true;
+            }
+        }
         UE_LOG(LogInventoryComponent, Warning, TEXT("Custom RemoveThisItemFromInventory failed or Item is nullptr"));
         return false;
     }
@@ -83,17 +91,6 @@ bool UInventoryComponent::DropItemFromInventory(UItemBase* Item)
     return false;
 }
 
-bool UInventoryComponent::TakeItemToHandsByID(int32& ID)
-{
-    return false;
-}
-
-bool UInventoryComponent::RemoveItemFromHands()
-{
-    return false;
-}
-
-
 void UInventoryComponent::BeginPlay()
 {
     Super::BeginPlay();
@@ -137,7 +134,7 @@ bool UInventoryComponent::BaseAddItemToInventory(UItemBase* Item, bool DestroyIt
     }
     if (Item->FindDataTableByItemType())
     {
-        FItemTableRowInfoBase* ItemTableRowInfo = Item->GetItemStaticInfo();
+        const FItemTableRowInfoBase* ItemTableRowInfo = Item->GetItemStaticInfo();
         if (ItemTableRowInfo && Inventory.Contains(ItemTableRowInfo->ItemContainerType))
         {
             TArray<UItemBase*>& ContainerInventory = Inventory[ItemTableRowInfo->ItemContainerType].ContainerInventory;
@@ -203,7 +200,7 @@ bool UInventoryComponent::BaseRemoveItemFromInventory(UItemBase* Item, bool Dest
     {
         if (Item->FindDataTableByItemType())
         {
-            FItemTableRowInfoBase* ItemTableRowInfo = Item->GetItemStaticInfo();
+            const FItemTableRowInfoBase* ItemTableRowInfo = Item->GetItemStaticInfo();
             if (ItemTableRowInfo)
             {
                 if (ItemTableRowInfo->MaxQuantityItemsInSlot > 1 && Item->GetItemDynamicInfo().QuantityItems - 1 >= 1)
@@ -235,6 +232,73 @@ bool UInventoryComponent::BaseRemoveItemFromInventory(UItemBase* Item, bool Dest
     else
     {
         UE_LOG(LogInventoryComponent, Warning, TEXT("Item is nullptr or ThisItemID is 99"));
+    }
+    return false;
+}
+
+bool UInventoryComponent::TakeItemToHandsByID(int32 ID)
+{
+    if (!bIsItemHeld && Inventory[QuickInventoryContainerType].ContainerInventory[ID])
+    {
+        ITakeRemoveItemIF* TakeRemoveItem = Cast<ITakeRemoveItemIF>(Inventory[QuickInventoryContainerType].ContainerInventory[ID]);
+        if (TakeRemoveItem)
+        {
+            if (TakeRemoveItem->UseStaticMesh() && TakeRemoveItem->GetSocketNameForItem() != "None")
+            {
+                AStaticMeshActor* HeldMeshItem = GetWorld()->SpawnActor<AStaticMeshActor>();
+                if (HeldMeshItem)
+                {
+                    TakeRemoveItem->SetHeldMeshItem(HeldMeshItem);
+
+                    // Установите подвижность для HeldMeshItem
+                    HeldMeshItem->GetStaticMeshComponent()->SetMobility(EComponentMobility::Movable);
+                    HeldMeshItem->GetStaticMeshComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
+                    FAttachmentTransformRules AttachmentRules(EAttachmentRule::SnapToTarget, true);
+                    HeldMeshItem->AttachToComponent(GetOwnerCharacter()->Mesh1P, AttachmentRules, TakeRemoveItem->GetSocketNameForItem());
+                    HeldMeshItem->AddActorLocalTransform(TakeRemoveItem->GetHeldMeshItemOffset());
+
+                    HeldItem = Inventory[QuickInventoryContainerType].ContainerInventory[ID];
+
+                    if (HeldMeshItem->GetStaticMeshComponent() && HeldItem->GetItemStaticInfo()->ItemWorldStaticMesh)
+                    {
+                        HeldMeshItem->GetStaticMeshComponent()->SetStaticMesh(HeldItem->GetItemStaticInfo()->ItemWorldStaticMesh);
+                    }
+
+                    GetOwnerCharacter()->AnimItemBlendTypeNow = TakeRemoveItem->GetAnimItemBlendType();
+                    bIsItemHeld = true;
+                    return true;
+                }
+            }
+            else
+            {
+                // логика с скелет мешем 
+            }
+        }
+    }
+    return false;
+}
+
+bool UInventoryComponent::RemoveItemFromHands()
+{
+    if (bIsItemHeld)
+    {
+        ITakeRemoveItemIF* TakeRemoveItem = Cast<ITakeRemoveItemIF>(HeldItem);
+        if (TakeRemoveItem)
+        {
+            if (TakeRemoveItem->UseStaticMesh())
+            {
+                TakeRemoveItem->GetHeldMeshItem()->Destroy();
+                GetOwnerCharacter()->AnimItemBlendTypeNow = EAnimItemBlendType::None;
+                HeldItem = nullptr;
+                bIsItemHeld = false;
+            }
+            else
+            {
+                // логика с скелет мешем 
+            }
+        }
+
     }
     return false;
 }

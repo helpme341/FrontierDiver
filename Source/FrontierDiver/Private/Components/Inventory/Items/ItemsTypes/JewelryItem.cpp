@@ -25,7 +25,7 @@ bool UJewelryItem::FindDataTableByItemType()
 	return BaseFindDataTableByItemType<UJewelryItem, FJewelryItemTableRowInfo>();
 }
 
-FItemTableRowInfoBase* UJewelryItem::GetItemStaticInfo()
+const FItemTableRowInfoBase* UJewelryItem::GetItemStaticInfo()
 {
 	return ItemTableRowInfo;
 }
