@@ -117,7 +117,7 @@ void AFrontierDiverCharacter::Look(const FInputActionValue& Value)
 	}
 }
 
-void AFrontierDiverCharacter::Interact()
+void AFrontierDiverCharacter::MainInteract()
 {
 	FVector StartLocation = GetActorLocation();
 	StartLocation.Z += 60;
@@ -129,11 +129,26 @@ void AFrontierDiverCharacter::Interact()
 
 	if (GetWorld()->SweepSingleByChannel(HitResult, StartLocation, EndLocation, FQuat::Identity, ECollisionChannel::ECC_Visibility, FCollisionShape::MakeSphere(15.0f), TraceParams))
 	{
-		if (IInteractionIF* InteractionIF = Cast<IInteractionIF>(HitResult.GetActor())) { InteractionIF->Interaction(this); }
+		if (IInteractionIF* InteractionIF = Cast<IInteractionIF>(HitResult.GetActor())) { InteractionIF->MainInteract(this); }
 	}
 }
 
-void AFrontierDiverCharacter::InventoryInteract()
+void AFrontierDiverCharacter::FirstInteract()
+{
+
+}
+
+void AFrontierDiverCharacter::SecondInteract()
+{
+}
+
+void AFrontierDiverCharacter::ThirdInteract()
+{
+	if (FrontierDiverInventoryComponent->ThirdInteractWithHeldItem()) { return; }
+}
+
+
+void AFrontierDiverCharacter::OpenCloseInventory()
 {
 	APlayerController* PlayerController = GetWorld()->GetFirstPlayerController();
 	if (PlayerController)
@@ -172,15 +187,22 @@ void AFrontierDiverCharacter::SetupPlayerInputComponent(UInputComponent* PlayerI
 		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &AFrontierDiverCharacter::Move);
 		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Completed, this, &AFrontierDiverCharacter::Move);
 
-		// Looking
+		// Lookingeeee
 		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &AFrontierDiverCharacter::Look);
 
 		//Interact
-		EnhancedInputComponent->BindAction(InteractAction, ETriggerEvent::Started, this, &AFrontierDiverCharacter::Interact);
+		EnhancedInputComponent->BindAction(MainInteractAction, ETriggerEvent::Started, this, &AFrontierDiverCharacter::MainInteract);
+		
+		EnhancedInputComponent->BindAction(FirstInteractAction, ETriggerEvent::Started, this, &AFrontierDiverCharacter::FirstInteract);
+
+		EnhancedInputComponent->BindAction(SecondInteractAction, ETriggerEvent::Started, this, &AFrontierDiverCharacter::SecondInteract);
+
+		EnhancedInputComponent->BindAction(ThirdInteractAction, ETriggerEvent::Started, this, &AFrontierDiverCharacter::ThirdInteract);
+
 
 
 		//Inventory Interact
-		EnhancedInputComponent->BindAction(InventoryInteractAction, ETriggerEvent::Started, this, &AFrontierDiverCharacter::InventoryInteract);
+		EnhancedInputComponent->BindAction(OpenCloseInventoryAction, ETriggerEvent::Started, this, &AFrontierDiverCharacter::OpenCloseInventory);
 	}
 	else
 	{

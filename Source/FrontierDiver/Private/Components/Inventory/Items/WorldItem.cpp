@@ -63,9 +63,10 @@ void AWorldItem::OnConstruction(const FTransform& Transform)
         }
     }
 }
-void AWorldItem::Interaction(AFrontierDiverCharacter* Character)
+
+bool AWorldItem::MainInteract(AFrontierDiverCharacter* Character)
 {
-	Character->GetComponentByClass<UInventoryComponent>()->PickupItemToInventory(this);
+	return Character->GetComponentByClass<UInventoryComponent>()->PickupItemToInventory(this);
 }
 
 

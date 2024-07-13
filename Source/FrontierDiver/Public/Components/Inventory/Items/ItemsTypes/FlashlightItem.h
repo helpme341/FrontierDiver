@@ -5,7 +5,7 @@
 #include "CoreMinimal.h"
 #include "Components/Inventory/Items/ItemBase.h"
 #include "Components/Inventory/Items/Modules/PickupDropItem/PickupDropItemIF.h"
-#include "Components/Inventory/Items/Modules/InteractItem/MainInteractItemIF.h"
+#include "Components/Inventory/Items/Modules/InteractItemIF.h"
 #include "Components/Inventory/Items/Modules/TakeRemoveItem/TakeRemoveItemIF.h"
 #include "Components/Inventory/Items/Modules/PickupDropItem/PickupDropItemIFTmplImpl.h"
 #include "Components/Inventory/Items/ItemTmpl.h"
@@ -52,8 +52,9 @@ class FRONTIERDIVER_API UFlashlightItem :
 	public UItemBase,
 	public TItemTmpl<UFlashlightItem, FFlashlightItemDynamicInfo, FFlashlightItemTableRowInfo>,
 	public IPickupDropItemIF,
-	public IMainInteractItemIF,
+	public IInteractionIF,
 	public ITakeRemoveItemIF,
+	public IInteractItemIF,
 	public TPickupDropItemIFTmplImpl<UFlashlightItem>
 {
 	GENERATED_BODY()
@@ -61,7 +62,7 @@ class FRONTIERDIVER_API UFlashlightItem :
 public:
 	UFlashlightItem();
 
-	bool bIsFlashlightOff;
+	bool bIsFlashlightOff = true;
 
 	AStaticMeshActor* HeldMeshItem;
 
@@ -98,5 +99,5 @@ public:
 
 	const EAnimItemBlendType GetAnimItemBlendType() override;
 
-	void  MainInteract(class UInventoryComponent* Inventory) override;
+	void ThirdInteract(class UInventoryComponent* Inventory) override;
 };

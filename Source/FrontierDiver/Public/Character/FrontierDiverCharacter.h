@@ -58,11 +58,23 @@ private:
 
 	/** Interact Action */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
-	UInputAction* InteractAction;
+	UInputAction* MainInteractAction;
+
+	/** First Interact Action */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* FirstInteractAction;
+
+	/** Second Interact Action */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* SecondInteractAction;
+
+	/** Second Interact Action */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* ThirdInteractAction;
 
 	/** Inventory Interact Action */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
-	UInputAction* InventoryInteractAction;
+	UInputAction* OpenCloseInventoryAction;
 
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings", meta = (AllowPrivateAccess = "true"))
@@ -92,9 +104,15 @@ protected:
 	/** Called for looking input */
 	void Look(const FInputActionValue& Value);
 
-	void Interact();
+	void MainInteract();
+	     
+	void FirstInteract();
 
-	void InventoryInteract();
+	void SecondInteract();
+
+	void ThirdInteract();
+
+	void OpenCloseInventory();
 
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;

@@ -32,17 +32,31 @@ const EAnimItemBlendType UFlashlightItem::GetAnimItemBlendType()
 	return EAnimItemBlendType::None;
 }
 
-void UFlashlightItem::MainInteract(UInventoryComponent* Inventory)
+void UFlashlightItem::ThirdInteract(UInventoryComponent* Inventory)
 {
-	if (bIsFlashlightOff)
-	{
-		SpotLight->Destroy();
-	}
-	else
-	{
-		SpotLight = Inventory->GetWorld()->SpawnActor<ASpotLight>();
-		FAttachmentTransformRules AttachmentRules(EAttachmentRule::SnapToTarget, true);
-		SpotLight->AttachToComponent(HeldMeshItem->GetStaticMeshComponent(), AttachmentRules, ItemTableRowInfo->ItemLightSocketName);
-		SpotLight->AddActorLocalTransform(ItemTableRowInfo->SpotLightAttachOffset);
-	}
+    if (!bIsFlashlightOff)
+    {
+        if (SpotLight)
+        {
+            SpotLight->Destroy();
+            SpotLight = nullptr;
+        }
+        bIsFlashlightOff = true;
+    }
+    else
+    {
+        if (Inventory && Inventory->GetWorld())
+        {
+            SpotLight = Inventory->GetWorld()->SpawnActor<ASpotLight>();
+            if (SpotLight)
+            {
+                SpotLight->SetMobility(EComponentMobility::Movable);
+                FAttachmentTransformRules AttachmentRules(EAttachmentRule::SnapToTarget, true);
+                SpotLight->AttachToComponent(HeldMeshItem->GetStaticMeshComponent(), AttachmentRules, ItemTableRowInfo->ItemLightSocketName);
+                SpotLight->AddActorLocalTransform(ItemTableRowInfo->SpotLightAttachOffset);
+
+                bIsFlashlightOff = false;
+            }
+        }
+    }
 }

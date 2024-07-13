@@ -15,6 +15,9 @@ class UTakeRemoveItemIF : public UInterface
 	GENERATED_BODY()
 };
 
+
+class UInventoryComponent;
+
 /**
  * 
  */
@@ -36,4 +39,8 @@ public:
 	virtual AStaticMeshActor* GetHeldMeshItem() =0;
 
 	const virtual FTransform GetHeldMeshItemOffset() =0;
+
+	virtual void OnTakeItem(UInventoryComponent* Inventory) =0;
+
+	virtual void OnRemoveItem(UInventoryComponent* Inventory) =0;
 };

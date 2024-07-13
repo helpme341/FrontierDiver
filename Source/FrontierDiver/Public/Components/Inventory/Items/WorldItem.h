@@ -22,7 +22,7 @@ public:
 
 	virtual void OnConstruction(const FTransform& Transform) override;
 
-	void Interaction(AFrontierDiverCharacter* Character) override;
+	bool MainInteract(AFrontierDiverCharacter* Character) override;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UStaticMeshComponent* StaticMesh;

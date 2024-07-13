@@ -25,5 +25,11 @@ class FRONTIERDIVER_API IInteractionIF : public IInterface
 	// Add interface functions to this class. This is the class that will be inherited to implement this interface.
 public:
 
-	virtual void Interaction(AFrontierDiverCharacter* Character) =0;
+	virtual bool MainInteract(AFrontierDiverCharacter* Character) { return false; };
+
+	virtual bool FirstInteract(AFrontierDiverCharacter* Character) { return false; };
+
+	virtual bool SecondInteract(AFrontierDiverCharacter* Character) { return false; };
+
+	virtual bool ThirdInteract(AFrontierDiverCharacter* Character) { return false; };
 };

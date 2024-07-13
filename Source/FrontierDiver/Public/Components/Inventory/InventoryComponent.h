@@ -76,12 +76,12 @@ public:
 	UFUNCTION(BlueprintCallable)
 	bool RemoveItemFromHands();
 
-
 	void BeginPlay() override;
 	bool AddItemToInventory(UItemBase* Item, bool DestroyItem);
 	bool RemoveItemFromInventory(UItemBase* Item, bool DestroyItem);
 	bool PickupItemToInventory(AWorldItem* Item);
 	bool DropItemFromInventory(UItemBase* Item);
+	bool ThirdInteractWithHeldItem();
 
 	TMap<EContainerType, FContainerBase> Inventory{
 	  { EContainerType::ClothingOne, FContainerBase(1)},

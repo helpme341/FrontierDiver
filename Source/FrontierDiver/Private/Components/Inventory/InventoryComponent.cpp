@@ -9,6 +9,7 @@
 #include "Character/FrontierDiverCharacter.h"
 #include "Components/Inventory/Items/Modules/TakeRemoveItem/TakeRemoveItemIF.h"
 #include "Engine/StaticMeshActor.h"
+#include "Components/Inventory/Items/Modules/InteractItemIF.h"
 
 DEFINE_LOG_CATEGORY(LogInventoryComponent);
 
@@ -25,7 +26,6 @@ bool UInventoryComponent::AddItemToInventory(UItemBase* Item, bool DestroyItem)
         return BaseAddItemToInventory(Item, DestroyItem);
     }
 }
-
 
 bool UInventoryComponent::RemoveItemFromInventory(UItemBase* Item, bool DestroyItem)
 {
@@ -88,6 +88,17 @@ bool UInventoryComponent::DropItemFromInventory(UItemBase* Item)
         }
     }
     UE_LOG(LogInventoryComponent, Warning, TEXT("Failed to cast Item to IPickupDropItemIF or Item is nullptr"));
+    return false;
+}
+
+bool UInventoryComponent::ThirdInteractWithHeldItem()
+{
+    if (bIsItemHeld)
+    {
+        IInteractItemIF* InteractItemIF = Cast<IInteractItemIF>(HeldItem);
+        if (InteractItemIF->_getUObject()->IsValidLowLevel()) { InteractItemIF->ThirdInteract(this); }
+        return true;
+    }
     return false;
 }
 
@@ -265,6 +276,7 @@ bool UInventoryComponent::TakeItemToHandsByID(int32 ID)
                         HeldMeshItem->GetStaticMeshComponent()->SetStaticMesh(HeldItem->GetItemStaticInfo()->ItemWorldStaticMesh);
                     }
 
+                    TakeRemoveItem->OnTakeItem(this);
                     GetOwnerCharacter()->AnimItemBlendTypeNow = TakeRemoveItem->GetAnimItemBlendType();
                     bIsItemHeld = true;
                     return true;
@@ -292,6 +304,8 @@ bool UInventoryComponent::RemoveItemFromHands()
                 GetOwnerCharacter()->AnimItemBlendTypeNow = EAnimItemBlendType::None;
                 HeldItem = nullptr;
                 bIsItemHeld = false;
+                TakeRemoveItem->OnRemoveItem(this);
+                return true;
             }
             else
             {
