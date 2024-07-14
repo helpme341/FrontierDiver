@@ -15,6 +15,7 @@
 #include "Components/Inventory/InventoryComponent.h"
 #include "Character/Interfaces/InteractionIF.h"
 #include "Components/Inventory/Widgets/InventoryWidget.h"
+#include "DrawDebugHelpers.h" 
 
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
 
@@ -127,24 +128,41 @@ void AFrontierDiverCharacter::MainInteract()
 
 	float SphereRadius = 25.0f;
 
-	if (GetWorld()->SweepSingleByChannel(HitResult, StartLocation, EndLocation, FQuat::Identity, ECollisionChannel::ECC_Visibility, FCollisionShape::MakeSphere(15.0f), TraceParams))
+	// Визуализируем линию трассировки
+	DrawDebugLine(GetWorld(), StartLocation, EndLocation, FColor::Green, false, 2.0f, 0, 1.0f);
+	// Визуализируем сферическую трассировку в начале и в конце
+	DrawDebugSphere(GetWorld(), StartLocation, SphereRadius, 12, FColor::Blue, false, 2.0f);
+	DrawDebugSphere(GetWorld(), EndLocation, SphereRadius, 12, FColor::Red, false, 2.0f);
+
+	if (GetWorld()->SweepSingleByChannel(HitResult, StartLocation, EndLocation, FQuat::Identity, ECollisionChannel::ECC_Visibility, FCollisionShape::MakeSphere(SphereRadius), TraceParams))
 	{
-		if (IInteractionIF* InteractionIF = Cast<IInteractionIF>(HitResult.GetActor())) { InteractionIF->MainInteract(this); }
+		if (IInteractionIF* InteractionIF = Cast<IInteractionIF>(HitResult.GetActor()))
+		{
+			InteractionIF->MainInteract(this);
+		}
+
+		// Визуализируем точку удара
+		DrawDebugSphere(GetWorld(), HitResult.Location, SphereRadius, 12, FColor::Yellow, false, 2.0f);
 	}
+	// ещё логика
 }
 
 void AFrontierDiverCharacter::FirstInteract()
 {
-
+	if (FrontierDiverInventoryComponent->FirstInteractWithHeldItem()) { return; }
+	// ещё логика
 }
 
 void AFrontierDiverCharacter::SecondInteract()
 {
+	if (FrontierDiverInventoryComponent->SecondInteractWithHeldItem()) { return; }
+	// ещё логика
 }
 
 void AFrontierDiverCharacter::ThirdInteract()
 {
 	if (FrontierDiverInventoryComponent->ThirdInteractWithHeldItem()) { return; }
+	// ещё логика
 }
 
 

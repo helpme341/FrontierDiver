@@ -6,6 +6,8 @@
 #include "Components/Inventory/Items/WorldItem.h"
 #include "Components/Inventory/Items/ItemTmpl.h"
 #include "Components/Inventory/InventoryComponent.h"
+#include "Camera/CameraComponent.h"
+#include "Character/FrontierDiverCharacter.h"
 #include "Components/Inventory/Items/Modules/ItemTmplBase.h"
 
 
@@ -57,20 +59,31 @@ inline bool TPickupDropItemIFTmplImpl<OWT>::PickupItem(UInventoryComponent* Inve
 template<typename OWT>
 inline bool TPickupDropItemIFTmplImpl<OWT>::DropItem(UInventoryComponent* Inventory)
 {
-	AWorldItem* NewWorldItem = Owner->GetWorld()->SpawnActor<AWorldItem>(); ////// найти утечки памети 
-	if (Owner->FindDataTableByItemType())
-	{
-		if (Inventory->RemoveItemFromInventory(Owner, false))
-		{
-			FItemDynamicInfoBase ItemDynamic = Owner->GetItemDynamicInfo();
-			ItemDynamic.QuantityItems = 1;
-			NewWorldItem->LoadDataToWorldItem(ItemDynamic, OWT::StaticClass(), Owner->GetItemStaticInfo()->ItemWorldStaticMesh);
-            NewWorldItem->SetActorLocation(Inventory->GetOwner()->GetActorLocation() + Inventory->PlayerDropLocationOffset);
-			return true;
-		}
-	}
+    // Убедитесь, что NewWorldItem создается успешно
+    AWorldItem* NewWorldItem = Owner->GetWorld()->SpawnActor<AWorldItem>();
+    if (!NewWorldItem)
+    {
+        return false; // Если создание не удалось, просто верните false
+    }
+
+    // Проверьте, нашли ли тип элемента в таблице данных
+    if (Owner->FindDataTableByItemType())
+    {
+        // Попробуйте удалить элемент из инвентаря
+        if (Inventory->RemoveItemFromInventory(Owner, false))
+        {
+            // Если удаление прошло успешно, настройте новый мировой элемент
+            FItemDynamicInfoBase ItemDynamic = Owner->GetItemDynamicInfo();
+            ItemDynamic.QuantityItems = 1;
+            NewWorldItem->LoadDataToWorldItem(ItemDynamic, OWT::StaticClass(), Owner->GetItemStaticInfo()->ItemWorldStaticMesh);
+            NewWorldItem->SetActorLocation(Inventory->GetOwnerCharacter()->GetActorLocation() + Inventory->GetOwnerCharacter()->GetActorForwardVector() * Inventory->PlayerDropLocationOffset);
+            return true;
+        }
+    }
+
+    // Уничтожьте NewWorldItem, если предыдущие шаги не удались
     NewWorldItem->Destroy();
-	return false;
+    return false;
 }
 
 template<typename OWT>

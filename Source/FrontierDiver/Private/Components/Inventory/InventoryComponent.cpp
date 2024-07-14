@@ -91,6 +91,29 @@ bool UInventoryComponent::DropItemFromInventory(UItemBase* Item)
     return false;
 }
 
+bool UInventoryComponent::FirstInteractWithHeldItem()
+{
+    if (bIsItemHeld)
+    {
+        IInteractItemIF* InteractItemIF = Cast<IInteractItemIF>(HeldItem);
+        if (InteractItemIF->_getUObject()->IsValidLowLevel()) { InteractItemIF->FirstInteract(this); }
+        return true;
+    }
+    return false;
+}
+
+bool UInventoryComponent::SecondInteractWithHeldItem()
+{
+    if (bIsItemHeld)
+    {
+        IInteractItemIF* InteractItemIF = Cast<IInteractItemIF>(HeldItem);
+        if (InteractItemIF->_getUObject()->IsValidLowLevel()) { InteractItemIF->SecondInteract(this); }
+        return true;
+    }
+    return false;
+}
+
+
 bool UInventoryComponent::ThirdInteractWithHeldItem()
 {
     if (bIsItemHeld)
@@ -161,7 +184,7 @@ bool UInventoryComponent::BaseAddItemToInventory(UItemBase* Item, bool DestroyIt
                         if (bCheckQuantity && ItemOnInspection)
                         {
 
-                            if (ItemOnInspection->GetItemDynamicInfo().ItemTypeName == Item->GetItemDynamicInfo().ItemTypeName)
+                            if (ItemOnInspection->GetItemDynamicInfo().ItemTypeName == Item->GetItemDynamicInfo().ItemTypeName && ItemOnInspection->GetClass() == Item->GetClass())
                             {
                                 if (ItemOnInspection->GetItemDynamicInfo().QuantityItems + Item->GetItemDynamicInfo().QuantityItems <= ItemTableRowInfo->MaxQuantityItemsInSlot)
                                 {

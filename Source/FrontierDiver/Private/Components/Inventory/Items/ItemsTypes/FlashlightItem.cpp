@@ -32,6 +32,19 @@ const EAnimItemBlendType UFlashlightItem::GetAnimItemBlendType()
 	return EAnimItemBlendType::None;
 }
 
+void UFlashlightItem::OnRemoveItem(UInventoryComponent* Inventory)
+{
+    if (!bIsFlashlightOff)
+    {
+        if (SpotLight)
+        {
+            SpotLight->Destroy();
+            SpotLight = nullptr;
+        }
+        bIsFlashlightOff = true;
+    }
+}
+
 void UFlashlightItem::ThirdInteract(UInventoryComponent* Inventory)
 {
     if (!bIsFlashlightOff)

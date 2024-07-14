@@ -31,9 +31,12 @@ enum class ECylinderInventorySlotType : uint8
 	ThighMount,
 };
 
+USTRUCT(BlueprintType)
 struct FContainerBase
 {
+	GENERATED_BODY()
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Testing")
 	TArray<UItemBase*> ContainerInventory;
 
 	FContainerBase() {}
@@ -61,7 +64,7 @@ class FRONTIERDIVER_API UInventoryComponent : public UCharacterComponentBase
 
 public:
 	UPROPERTY(EditDefaultsOnly, Category = "Settings")
-	FVector PlayerDropLocationOffset;
+	float PlayerDropLocationOffset;
 	UPROPERTY(EditDefaultsOnly, Category = "Settings")
 	EContainerType QuickInventoryContainerType;
 	UPROPERTY(EditDefaultsOnly, Category = "Settings|UI") 
@@ -81,8 +84,12 @@ public:
 	bool RemoveItemFromInventory(UItemBase* Item, bool DestroyItem);
 	bool PickupItemToInventory(AWorldItem* Item);
 	bool DropItemFromInventory(UItemBase* Item);
+
+	bool FirstInteractWithHeldItem();
+	bool SecondInteractWithHeldItem();
 	bool ThirdInteractWithHeldItem();
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Testing")
 	TMap<EContainerType, FContainerBase> Inventory{
 	  { EContainerType::ClothingOne, FContainerBase(1)},
 	  { EContainerType::ClothingTwo, FContainerBase(1)},

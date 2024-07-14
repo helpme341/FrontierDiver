@@ -100,4 +100,8 @@ public:
 	const EAnimItemBlendType GetAnimItemBlendType() override;
 
 	void ThirdInteract(class UInventoryComponent* Inventory) override;
+
+	void OnTakeItem(UInventoryComponent* Inventory) {};
+
+    void OnRemoveItem(UInventoryComponent* Inventory);
 };

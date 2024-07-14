@@ -12,6 +12,7 @@
 AWorldItem::AWorldItem()
 {
 	StaticMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("StaticMeshComponent"));
+    StaticMesh->SetSimulatePhysics(true);
 }
 
 void AWorldItem::OnConstruction(const FTransform& Transform)

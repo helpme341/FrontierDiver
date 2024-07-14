@@ -32,7 +32,7 @@ void UInventoryWidget::LoadWidgestSlots()
 
 void UInventoryWidget::ShowItemInfo(UItemBase* Item)
 {
-    if (Item && !bIsInventoryHidden)
+    if (Item->IsValidLowLevel() && !bIsInventoryHidden)
     {
         if (Item->GetItemDynamicInfo().QuantityItems == 0) { bIsShowingItemInfo = false; return; }
         const FItemTableRowInfoBase* ItemStaticInfo = Item->GetItemStaticInfo();
