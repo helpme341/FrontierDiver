@@ -34,6 +34,10 @@ public:
 
 	virtual const struct FHeldItemInfo& GetHeldItemInfo() =0;
 
+	virtual bool CanDrop() = 0;
+
+	virtual void OnDropItem(class AWorldItem* WorldItem) {};
+
 	virtual void OnTakeItem(UInventoryComponent* Inventory) =0;
 
 	virtual void OnRemoveItem(UInventoryComponent* Inventory) =0;

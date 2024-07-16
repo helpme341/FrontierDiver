@@ -153,36 +153,47 @@ bool UInventoryComponent::PickupItemToInventory(AWorldItem* Item)
             return false;
         }
     }
-    else
-    {
-        NewItem->ConditionalBeginDestroy();
-    }
+    else { NewItem->ConditionalBeginDestroy(); }
     return false;
 }
 
 bool UInventoryComponent::DropItemFromInventory(UItemBase* Item)
 {
-    if (Item->bIsPlayerCanDropThisItem)
+    if (!Item->bIsPlayerCanDropThisItem) { return false; }
+
+    AWorldItem* NewWorldItem = Item->GetWorld()->SpawnActor<AWorldItem>();
+    if (!NewWorldItem) { return false; }
+
+    if (!Item->FindDataTableByItemType())
     {
-        AWorldItem* NewWorldItem = Item->GetWorld()->SpawnActor<AWorldItem>();
-        if (NewWorldItem)
-        {
-            if (Item->FindDataTableByItemType())
-            {
-                if (RemoveItemFromInventory(Item, false))
-                {
-                    FItemDynamicInfoBase ItemDynamic = Item->GetItemDynamicInfo();
-                    ItemDynamic.QuantityItems = 1;
-                    NewWorldItem->LoadDataToWorldItem(ItemDynamic, Item->GetItemStaticInfo(), Item->GetClass());
-                    NewWorldItem->SetActorLocation(GetOwnerCharacter()->GetActorLocation() + GetOwnerCharacter()->GetActorForwardVector() * PlayerDropLocationOffset);
-                    if (Item->GetItemDynamicInfo().QuantityItems == 0) { Item->ConditionalBeginDestroy(); }
-                    return true;
-                }
-            }
-        }
         NewWorldItem->Destroy();
         return false;
     }
+
+    bool bItemRemoved = false;
+
+    if (bIsItemHeld && Item == HeldItem)
+    {
+        ITakeRemoveItemIF* TakeRemoveItemIF = Cast<ITakeRemoveItemIF>(HeldItem);
+        if (TakeRemoveItemIF && TakeRemoveItemIF->CanDrop())
+        {
+            bItemRemoved = RemoveItemFromInventory(Item, false);
+            if (bItemRemoved) { TakeRemoveItemIF->OnDropItem(NewWorldItem); } /////////// перепимсать с RemoveItemFromHands()
+        }
+    }
+    else { bItemRemoved = RemoveItemFromInventory(Item, false); }
+
+    if (bItemRemoved)
+    {
+        FItemDynamicInfoBase ItemDynamic = Item->GetItemDynamicInfo();
+        ItemDynamic.QuantityItems = 1;
+        NewWorldItem->LoadDataToWorldItem(ItemDynamic, Item->GetItemStaticInfo(), Item->GetClass());
+        NewWorldItem->SetActorLocation(GetOwnerCharacter()->GetActorLocation() + GetOwnerCharacter()->GetActorForwardVector() * PlayerDropLocationOffset);
+
+        if (Item->GetItemDynamicInfo().QuantityItems == 0) { Item->ConditionalBeginDestroy(); }
+        return true;
+    }
+    NewWorldItem->Destroy();
     return false;
 }
 

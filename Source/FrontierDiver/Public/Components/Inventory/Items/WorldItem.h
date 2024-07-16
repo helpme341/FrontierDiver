@@ -36,4 +36,8 @@ public:
 	FItemDynamicInfoBase ItemDynamicInfo;
 
 	void LoadDataToWorldItem(FItemDynamicInfoBase& DynamicInfo, const FItemTableRowInfoBase* ItemTableRowInfo, TSubclassOf<UItemBase> NewItemType);
+
+private:
+
+	class AInventoryDataTableItemManager* FoundActor;
 };

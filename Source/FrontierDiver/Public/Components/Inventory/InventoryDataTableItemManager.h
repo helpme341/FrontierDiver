@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "PhysicalMaterials/PhysicalMaterial.h"
 #include "InventoryDataTableItemManager.generated.h"
 
 UCLASS()
@@ -20,4 +21,7 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	UDataTable* FindDataTableByItemType(TSubclassOf<UItemBase> Item);
+
+	UPROPERTY(EditAnywhere,BlueprintReadWrite)
+	UPhysicalMaterial* WaterPhysicalMaterial;
 };

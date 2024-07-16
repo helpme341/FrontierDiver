@@ -13,6 +13,8 @@ AWorldItem::AWorldItem()
 {
 	StaticMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("StaticMeshComponent"));
     StaticMesh->SetSimulatePhysics(true);
+    StaticMesh->SetLinearDamping(2.0f);
+    StaticMesh->SetAngularDamping(1.0f);
 }
 
 void AWorldItem::OnConstruction(const FTransform& Transform)
@@ -21,48 +23,40 @@ void AWorldItem::OnConstruction(const FTransform& Transform)
 
     if (ItemTypeName != "None")
     {
-        TArray<AActor*> FoundActors;
-        UGameplayStatics::GetAllActorsOfClass(GetWorld(), AInventoryDataTableItemManager::StaticClass(), FoundActors);
-
-        if (FoundActors.Num() > 0)
+        if (!FoundActor)
         {
-            AInventoryDataTableItemManager* FoundActor = Cast<AInventoryDataTableItemManager>(FoundActors[0]);
+            TArray<AActor*> FoundActors;
+            UGameplayStatics::GetAllActorsOfClass(GetWorld(), AInventoryDataTableItemManager::StaticClass(), FoundActors);
+            
+            if (FoundActors.Num() > 0) { FoundActor = Cast<AInventoryDataTableItemManager>(FoundActors[0]); }
+            else { return; }
+        }
 
-            if (FoundActor)
+
+        UDataTable* DataTable = FoundActor->FindDataTableByItemType(ItemType);
+
+        if (DataTable)
+        {
+            FItemTableRowInfoBase* ItemRow = DataTable->FindRow<FItemTableRowInfoBase>(ItemTypeName, "");
+
+            if (ItemRow)
             {
-                UDataTable* DataTable = FoundActor->FindDataTableByItemType(ItemType);
-
-                if (DataTable)
+                if (StaticMesh && ItemRow->WorldItemStaticMesh)
                 {
-                    FItemTableRowInfoBase* ItemRow = DataTable->FindRow<FItemTableRowInfoBase>(ItemTypeName, "");
-
-                    if (ItemRow)
-                    {
-                        if (StaticMesh && ItemRow->WorldItemStaticMesh)
-                        {
-                            StaticMesh->SetStaticMesh(ItemRow->WorldItemStaticMesh);
-                            StaticMesh->SetMassOverrideInKg(NAME_None, ItemRow->WorldItemMass);
-                            StaticMesh->SetWorldScale3D(ItemRow->WorldItemScale);
-                        }
-                        else
-                        {
-                            UE_LOG(LogTemp, Warning, TEXT("StaticMesh or ItemWorldStaticMesh is null."));
-                        }
-                    }
-                    else
-                    {
-                        UE_LOG(LogTemp, Warning, TEXT("ItemRow not found for ItemTypeName: %s"), *ItemTypeName.ToString());
-                    }
+                    StaticMesh->SetStaticMesh(ItemRow->WorldItemStaticMesh);
+                    StaticMesh->SetMassOverrideInKg(NAME_None, ItemRow->WorldItemMass);
+                    StaticMesh->SetWorldScale3D(ItemRow->WorldItemScale);
+                    if (FoundActor->WaterPhysicalMaterial) { StaticMesh->SetPhysMaterialOverride(FoundActor->WaterPhysicalMaterial); }
+                }
+                else
+                {
+                    UE_LOG(LogTemp, Warning, TEXT("StaticMesh or ItemWorldStaticMesh is null."));
                 }
             }
             else
             {
-                UE_LOG(LogTemp, Warning, TEXT("FoundActor is not of type AInventoryDataTableItemManager."));
+                UE_LOG(LogTemp, Warning, TEXT("ItemRow not found for ItemTypeName: %s"), *ItemTypeName.ToString());
             }
-        }
-        else
-        {
-            UE_LOG(LogTemp, Warning, TEXT("No AInventoryDataTableItemManager actors found in the world."));
         }
     }
 }
@@ -79,5 +73,6 @@ void AWorldItem::LoadDataToWorldItem(FItemDynamicInfoBase& DynamicInfo, const FI
 	ItemDynamicInfo = DynamicInfo;
 	StaticMesh->SetStaticMesh(ItemTableRowInfo->WorldItemStaticMesh);
     StaticMesh->SetWorldScale3D(ItemTableRowInfo->WorldItemScale);
+    if (FoundActor && FoundActor->WaterPhysicalMaterial) { StaticMesh->SetPhysMaterialOverride(FoundActor->WaterPhysicalMaterial); }
     StaticMesh->SetMassOverrideInKg(NAME_None, ItemTableRowInfo->WorldItemMass);
 }

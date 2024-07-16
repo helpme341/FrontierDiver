@@ -6,6 +6,7 @@
 #include "Components/Inventory/InventoryComponent.h"
 #include "Engine/SpotLight.h"
 #include "Engine/StaticMeshActor.h"
+#include "Components/Inventory/Items/WorldItem.h"
 
 
 UFlashlightItem::UFlashlightItem()
@@ -21,6 +22,11 @@ const FHeldItemInfo& UFlashlightItem::GetHeldItemInfo()
     }
     static const FHeldItemInfo DefaultHeldItemInfo = FHeldItemInfo();
     return DefaultHeldItemInfo;
+}
+
+void UFlashlightItem::OnDropItem(AWorldItem* WorldItem)
+{
+
 }
 
 

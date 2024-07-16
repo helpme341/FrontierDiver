@@ -74,14 +74,19 @@ public:
 	void SetHeldMeshItem(AStaticMeshActor* HeldMesh)
 		override { HeldMeshItem = HeldMesh; }
 
-	virtual AStaticMeshActor* GetHeldMeshItem()
+	AStaticMeshActor* GetHeldMeshItem()
 		override { return  HeldMeshItem; }
 
-	virtual const FHeldItemInfo& GetHeldItemInfo() override;
+	bool CanDrop()
+		override { return true;};
 
-	void ThirdInteract(class UInventoryComponent* Inventory) override;
+	const FHeldItemInfo& GetHeldItemInfo() override;
 
-	void OnTakeItem(UInventoryComponent* Inventory) {};
+	void ThirdInteract(UInventoryComponent* Inventory) override;
 
-    void OnRemoveItem(UInventoryComponent* Inventory);
+	void OnDropItem(class AWorldItem* WorldItem) override;
+
+	void OnTakeItem(UInventoryComponent* Inventory) override {};
+
+    void OnRemoveItem(UInventoryComponent* Inventory) override;
 };
