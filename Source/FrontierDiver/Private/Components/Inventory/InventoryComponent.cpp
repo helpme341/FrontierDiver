@@ -135,6 +135,9 @@ bool UInventoryComponent::PickupItemToInventory(AWorldItem* Item)
         else if (Item->ItemDynamicInfo.ItemTypeName != "None")
         {
             NewItem->GetItemDynamicInfo() = Item->ItemDynamicInfo;
+            if (NewItem->GetItemDynamicInfo().ItemTypeName == "!") {
+
+            }
         }
         else
         {
@@ -144,6 +147,7 @@ bool UInventoryComponent::PickupItemToInventory(AWorldItem* Item)
 
         if (AddItemToInventory(NewItem, true))
         {
+            NewItem->OnPickupItemToInventory(Item);
             Item->Destroy();
             return true;
         }
@@ -178,7 +182,21 @@ bool UInventoryComponent::DropItemFromInventory(UItemBase* Item)
         if (TakeRemoveItemIF && TakeRemoveItemIF->CanDrop())
         {
             bItemRemoved = RemoveItemFromInventory(Item, false);
-            if (bItemRemoved) { TakeRemoveItemIF->OnDropItem(NewWorldItem); } /////////// перепимсать с RemoveItemFromHands()
+            if (bItemRemoved) 
+            { 
+                if (TakeRemoveItemIF->UseStaticMesh())
+                {
+                    TakeRemoveItemIF->GetHeldMeshItem()->Destroy();
+                    GetOwnerCharacter()->AnimItemBlendTypeNow = EAnimItemBlendType::None;
+                    HeldItem = nullptr;
+                    bIsItemHeld = false;
+                }
+                else
+                {
+                    // логика с скелет мешем 
+                }
+                TakeRemoveItemIF->OnDropItem(NewWorldItem);
+            }
         }
     }
     else { bItemRemoved = RemoveItemFromInventory(Item, false); }
@@ -189,6 +207,7 @@ bool UInventoryComponent::DropItemFromInventory(UItemBase* Item)
         ItemDynamic.QuantityItems = 1;
         NewWorldItem->LoadDataToWorldItem(ItemDynamic, Item->GetItemStaticInfo(), Item->GetClass());
         NewWorldItem->SetActorLocation(GetOwnerCharacter()->GetActorLocation() + GetOwnerCharacter()->GetActorForwardVector() * PlayerDropLocationOffset);
+        NewWorldItem->AddActorWorldTransform(Item->GetWorldItemOffset());
 
         if (Item->GetItemDynamicInfo().QuantityItems == 0) { Item->ConditionalBeginDestroy(); }
         return true;
@@ -337,7 +356,6 @@ bool UInventoryComponent::RemoveItemFromHands()
                 // логика с скелет мешем 
             }
         }
-
     }
     return false;
 }

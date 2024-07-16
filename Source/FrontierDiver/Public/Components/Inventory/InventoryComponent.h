@@ -76,6 +76,7 @@ public:
 	AFrontierDiverCharacter* GetOwnerCharacter() { return Cast<AFrontierDiverCharacter>(GetOwner()); }
 	UFUNCTION(BlueprintCallable)
 	bool TakeItemToHandsByID(int32 ID);
+
 	UFUNCTION(BlueprintCallable)
 	bool RemoveItemFromHands();
 

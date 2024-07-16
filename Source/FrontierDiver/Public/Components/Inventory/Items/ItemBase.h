@@ -30,6 +30,7 @@ struct FItemDynamicInfoBase
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "DefaultSettings")
     int32 QuantityItems = 1;
 
+    virtual ~FItemDynamicInfoBase() = default;
 };
 
 USTRUCT(BlueprintType)
@@ -87,11 +88,15 @@ public:
 
     bool bIsPlayerCanDropThisItem;
 
-    int32 ThisItemID = 99;
+    int32 ThisItemID = 99; 
 
     virtual bool FindDataTableByItemType();
 
-    const virtual FItemTableRowInfoBase* GetItemStaticInfo() { return nullptr; }
+    virtual const FTransform& GetWorldItemOffset();
+
+    virtual void OnPickupItemToInventory(class AWorldItem* Item) {};
+
+    virtual const FItemTableRowInfoBase* GetItemStaticInfo() { return nullptr; }
 
     virtual FItemDynamicInfoBase& GetItemDynamicInfo() { static FItemDynamicInfoBase DummyDynamicInfo; return DummyDynamicInfo; }
 

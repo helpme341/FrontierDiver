@@ -9,6 +9,7 @@
 #include "Components/Inventory/Items/WorldItem.h"
 
 
+
 UFlashlightItem::UFlashlightItem()
 {
     bIsPlayerCanDropThisItem = true;
@@ -24,50 +25,93 @@ const FHeldItemInfo& UFlashlightItem::GetHeldItemInfo()
     return DefaultHeldItemInfo;
 }
 
-void UFlashlightItem::OnDropItem(AWorldItem* WorldItem)
+void UFlashlightItem::ThirdInteract(UInventoryComponent* Inventory)
 {
-
-}
-
-
-void UFlashlightItem::OnRemoveItem(UInventoryComponent* Inventory)
-{
-    if (!bIsFlashlightOff)
+    if (ItemDynamicInfo.SpotLight)
     {
-        if (SpotLight)
+        if (ItemDynamicInfo.bIsFlashlightOn)
         {
-            SpotLight->Destroy();
-            SpotLight = nullptr;
+            ItemDynamicInfo.SpotLight->SetActorHiddenInGame(true);
+            ItemDynamicInfo.bIsFlashlightOn = false;
         }
-        bIsFlashlightOff = true;
+        else if (!ItemDynamicInfo.bIsFlashlightOn)
+        {
+            ItemDynamicInfo.SpotLight->SetActorHiddenInGame(false);
+            ItemDynamicInfo.bIsFlashlightOn = true;
+        }
     }
 }
 
-void UFlashlightItem::ThirdInteract(UInventoryComponent* Inventory)
+void UFlashlightItem::OnPickupItemToInventory(AWorldItem* Item)
 {
-    if (!bIsFlashlightOff)
+    Item->
+
+    if (ItemDynamicInfo.SpotLight)
     {
-        if (SpotLight)
+        ItemDynamicInfo.SpotLight->Destroy();
+        ItemDynamicInfo.SpotLight = nullptr;
+    }
+}
+
+void UFlashlightItem::OnTakeItem(UInventoryComponent* Inventory)
+{
+    if (!ItemDynamicInfo.SpotLight)
+    {
+        ItemDynamicInfo.SpotLight = GetWorld()->SpawnActor<ASpotLight>();
+        if (ItemDynamicInfo.SpotLight)
         {
-            SpotLight->Destroy();
-            SpotLight = nullptr;
+            ItemDynamicInfo.SpotLight->SetMobility(EComponentMobility::Movable);
+            FAttachmentTransformRules AttachmentRules(EAttachmentRule::SnapToTarget, true);
+            ItemDynamicInfo.SpotLight->AttachToComponent(HeldMeshItem->GetStaticMeshComponent(), AttachmentRules, ItemTableRowInfo->ItemLightSocketName);
+            ItemDynamicInfo.SpotLight->AddActorLocalTransform(ItemTableRowInfo->SpotLightAttachOffset);
         }
-        bIsFlashlightOff = true;
     }
     else
     {
-        if (Inventory && Inventory->GetWorld())
+        ItemDynamicInfo.SpotLight->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
+        FAttachmentTransformRules AttachmentRules(EAttachmentRule::SnapToTarget, true);
+        ItemDynamicInfo.SpotLight->AttachToComponent(HeldMeshItem->GetStaticMeshComponent(), AttachmentRules, ItemTableRowInfo->ItemLightSocketName);
+        ItemDynamicInfo.SpotLight->AddActorLocalTransform(ItemTableRowInfo->SpotLightAttachOffset);
+    }
+    
+    if (ItemDynamicInfo.SpotLight)
+    {
+        if (!ItemDynamicInfo.bIsFlashlightOn)
         {
-            SpotLight = Inventory->GetWorld()->SpawnActor<ASpotLight>();
-            if (SpotLight)
-            {
-                SpotLight->SetMobility(EComponentMobility::Movable);
-                FAttachmentTransformRules AttachmentRules(EAttachmentRule::SnapToTarget, true);
-                SpotLight->AttachToComponent(HeldMeshItem->GetStaticMeshComponent(), AttachmentRules, ItemTableRowInfo->ItemLightSocketName);
-                SpotLight->AddActorLocalTransform(ItemTableRowInfo->SpotLightAttachOffset);
-
-                bIsFlashlightOff = false;
-            }
+            ItemDynamicInfo.SpotLight->SetActorHiddenInGame(true);
+            ItemDynamicInfo.bIsFlashlightOn = false;
         }
+        else if (ItemDynamicInfo.bIsFlashlightOn)
+        {
+            ItemDynamicInfo.SpotLight->SetActorHiddenInGame(false);
+            ItemDynamicInfo.bIsFlashlightOn = true;
+        }
+    }
+}
+
+void UFlashlightItem::OnDropItem(AWorldItem* WorldItem)
+{
+    if (ItemDynamicInfo.bIsFlashlightOn)
+    {
+        if (ItemDynamicInfo.SpotLight)
+        {
+            ItemDynamicInfo.SpotLight->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
+            FAttachmentTransformRules AttachmentRules(EAttachmentRule::SnapToTarget, true);
+            ItemDynamicInfo.SpotLight->AttachToComponent(WorldItem->StaticMesh, AttachmentRules, ItemTableRowInfo->ItemLightSocketName);
+            ItemDynamicInfo.SpotLight->AddActorLocalTransform(ItemTableRowInfo->SpotLightAttachOffset);
+        }
+    }
+    else if (ItemDynamicInfo.SpotLight)
+    {
+        ItemDynamicInfo.SpotLight->Destroy();
+    }
+}
+
+void UFlashlightItem::OnRemoveItem(UInventoryComponent* Inventory)
+{
+    if (ItemDynamicInfo.SpotLight)
+    {
+        ItemDynamicInfo.SpotLight->Destroy();
+        ItemDynamicInfo.SpotLight = nullptr;
     }
 }

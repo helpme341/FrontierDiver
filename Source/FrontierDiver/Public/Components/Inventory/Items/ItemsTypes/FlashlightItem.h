@@ -14,6 +14,10 @@ USTRUCT(BlueprintType)
 struct FFlashlightItemDynamicInfo : public FItemDynamicInfoBase
 {
 	GENERATED_BODY()
+
+	bool bIsFlashlightOn;
+
+	class ASpotLight* SpotLight;
 };
 
 USTRUCT(BlueprintType)
@@ -36,6 +40,7 @@ struct FFlashlightItemTableRowInfo : public FItemTableRowInfoBase
 	FTransform SpotLightAttachOffset;
 };
 
+class AWorldItem;
 
 /**
  * 
@@ -53,11 +58,7 @@ public:
 
 	UFlashlightItem();
 
-	bool bIsFlashlightOff = true;
-
 	AStaticMeshActor* HeldMeshItem;
-
-	class ASpotLight* SpotLight;
 
 	bool FindDataTableByItemType()
 		override { return BaseFindDataTableByItemType<UFlashlightItem, FFlashlightItemTableRowInfo>(); }
@@ -84,9 +85,11 @@ public:
 
 	void ThirdInteract(UInventoryComponent* Inventory) override;
 
-	void OnDropItem(class AWorldItem* WorldItem) override;
+	void OnDropItem(AWorldItem* WorldItem) override;
 
-	void OnTakeItem(UInventoryComponent* Inventory) override {};
+	void OnTakeItem(UInventoryComponent* Inventory) override;
+
+	void OnPickupItemToInventory(AWorldItem* Item) override;
 
     void OnRemoveItem(UInventoryComponent* Inventory) override;
 };

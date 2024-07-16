@@ -4,8 +4,15 @@
 #include "Components/Inventory/Items/ItemBase.h"
 #include "Components/Inventory/InventoryComponent.h"
 #include "Components/Inventory/Widgets/InventoryItemWidget.h"
+#include "Components/Inventory/Items/WorldItem.h"
 
 bool UItemBase::FindDataTableByItemType()
 {
     return false;
+}
+
+const FTransform& UItemBase::GetWorldItemOffset()
+{
+    static const FTransform DefaultTransform = FTransform();
+    return DefaultTransform;
 }
