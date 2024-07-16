@@ -38,9 +38,11 @@ void AWorldItem::OnConstruction(const FTransform& Transform)
 
                     if (ItemRow)
                     {
-                        if (StaticMesh && ItemRow->ItemWorldStaticMesh)
+                        if (StaticMesh && ItemRow->WorldItemStaticMesh)
                         {
-                            StaticMesh->SetStaticMesh(ItemRow->ItemWorldStaticMesh);
+                            StaticMesh->SetStaticMesh(ItemRow->WorldItemStaticMesh);
+                            StaticMesh->SetMassOverrideInKg(NAME_None, ItemRow->WorldItemMass);
+                            StaticMesh->SetWorldScale3D(ItemRow->WorldItemScale);
                         }
                         else
                         {
@@ -71,9 +73,11 @@ bool AWorldItem::MainInteract(AFrontierDiverCharacter* Character)
 }
 
 
-void AWorldItem::LoadDataToWorldItem(FItemDynamicInfoBase& DynamicInfo, TSubclassOf<UItemBase> NewItemType, UStaticMesh* NewItemMesh)
+void AWorldItem::LoadDataToWorldItem(FItemDynamicInfoBase& DynamicInfo, const FItemTableRowInfoBase* ItemTableRowInfo, TSubclassOf<UItemBase> NewItemType)
 {
 	ItemType = NewItemType;
 	ItemDynamicInfo = DynamicInfo;
-	StaticMesh->SetStaticMesh(NewItemMesh);
+	StaticMesh->SetStaticMesh(ItemTableRowInfo->WorldItemStaticMesh);
+    StaticMesh->SetWorldScale3D(ItemTableRowInfo->WorldItemScale);
+    StaticMesh->SetMassOverrideInKg(NAME_None, ItemTableRowInfo->WorldItemMass);
 }

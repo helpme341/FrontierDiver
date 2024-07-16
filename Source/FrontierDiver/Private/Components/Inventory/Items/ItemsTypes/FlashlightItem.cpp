@@ -10,27 +10,19 @@
 
 UFlashlightItem::UFlashlightItem()
 {
-	TItemTmpl::Owner = this;
-	TPickupDropItemIFTmplImpl::Owner = this;
+    bIsPlayerCanDropThisItem = true;
 }
 
-const FName UFlashlightItem::GetSocketNameForItem()
+const FHeldItemInfo& UFlashlightItem::GetHeldItemInfo()
 {
-	if (FindDataTableByItemType())
-	{
-		return ItemTableRowInfo->ItemSocketName;
-	}
-	return "None";
+    if (FindDataTableByItemType())
+    {
+        return ItemTableRowInfo->HeldItemInfo;
+    }
+    static const FHeldItemInfo DefaultHeldItemInfo = FHeldItemInfo();
+    return DefaultHeldItemInfo;
 }
 
-const EAnimItemBlendType UFlashlightItem::GetAnimItemBlendType()
-{
-	if (FindDataTableByItemType())
-	{
-		return ItemTableRowInfo->ItemAnimBlendType;
-	}
-	return EAnimItemBlendType::None;
-}
 
 void UFlashlightItem::OnRemoveItem(UInventoryComponent* Inventory)
 {

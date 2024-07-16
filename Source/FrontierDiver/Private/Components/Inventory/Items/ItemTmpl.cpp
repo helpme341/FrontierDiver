@@ -2,3 +2,4 @@
 
 
 #include "Components/Inventory/Items/ItemTmpl.h"
+#include "Components/Inventory/Items/ItemBase.h"

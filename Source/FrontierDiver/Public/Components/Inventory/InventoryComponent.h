@@ -98,10 +98,5 @@ public:
 	UInventoryWidget* InventoryWidget;
 	UItemBase* HeldItem;
 	bool bIsItemHeld;
-
-private:
-
-	bool BaseAddItemToInventory(UItemBase* NewItem, bool DestroyItem);
-	bool BaseRemoveItemFromInventory(UItemBase* NewItem, bool DestroyItem);
 };
 

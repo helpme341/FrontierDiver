@@ -6,23 +6,7 @@
 
 UJewelryItem::UJewelryItem()
 {
-	TItemTmpl::Owner = this;
-	TPickupDropItemIFTmplImpl::Owner = this;
-}
-
-bool UJewelryItem::PickupItem(UInventoryComponent* Inventory, AWorldItem* Item)
-{
-	return TPickupDropItemIFTmplImpl::PickupItem(Inventory, Item);
-}
-
-bool UJewelryItem::DropItem(UInventoryComponent* Inventory)
-{
-	return TPickupDropItemIFTmplImpl::DropItem(Inventory);
-}
-
-bool UJewelryItem::FindDataTableByItemType()
-{
-	return BaseFindDataTableByItemType<UJewelryItem, FJewelryItemTableRowInfo>();
+	bIsPlayerCanDropThisItem = true;
 }
 
 const FItemTableRowInfoBase* UJewelryItem::GetItemStaticInfo()

@@ -4,24 +4,27 @@
 
 #include "CoreMinimal.h"
 
+class UItemBase;
+struct FItemDynamicInfoBase;
+struct FItemTableRowInfoBase;
+
+
+
 /**
  * 
  */
-template<typename OWT, typename DT, typename TRT>
+template<typename DT  = FItemDynamicInfoBase, typename TRT = FItemTableRowInfoBase>
 class FRONTIERDIVER_API TItemTmpl
 {
 public:
 
 	DT ItemDynamicInfo;
 	TRT* ItemTableRowInfo;
-	OWT* Owner;
-
-
-	TItemTmpl<OWT, DT, TRT>* GetItemTmpl();
+	TItemTmpl<DT, TRT>* GetItemTmpl();
 };
 
-template<typename OWT, typename DT, typename TRT>
-inline TItemTmpl<OWT, DT, TRT>* TItemTmpl<OWT, DT, TRT>::GetItemTmpl()
+template<typename DT, typename TRT>
+inline TItemTmpl<DT, TRT>* TItemTmpl<DT, TRT>::GetItemTmpl()
 {
 	return this;
 }

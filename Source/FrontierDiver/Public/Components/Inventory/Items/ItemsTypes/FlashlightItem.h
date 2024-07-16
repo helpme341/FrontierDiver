@@ -4,10 +4,8 @@
 
 #include "CoreMinimal.h"
 #include "Components/Inventory/Items/ItemBase.h"
-#include "Components/Inventory/Items/Modules/PickupDropItem/PickupDropItemIF.h"
-#include "Components/Inventory/Items/Modules/InteractItemIF.h"
-#include "Components/Inventory/Items/Modules/TakeRemoveItem/TakeRemoveItemIF.h"
-#include "Components/Inventory/Items/Modules/PickupDropItem/PickupDropItemIFTmplImpl.h"
+#include "Components/Inventory/Items/Interfaces/InteractItemIF.h"
+#include "Components/Inventory/Items/Interfaces/TakeRemoveItemIF.h"
 #include "Components/Inventory/Items/ItemTmpl.h"
 #include "Character/FrontierDiverCharacter.h"
 #include "FlashlightItem.generated.h"
@@ -28,19 +26,14 @@ struct FFlashlightItemTableRowInfo : public FItemTableRowInfoBase
 		MaxQuantityItemsInSlot = 1;
 	}
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "CustomFlashlightSettings|SocketNames")
-	FName ItemSocketName = "None";
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "CustomFlashlightSettings")
+	FHeldItemInfo HeldItemInfo;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "CustomFlashlightSettings|SocketNames")
 	FName ItemLightSocketName = "None";
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "CustomFlashlightSettings|AttachOffset")
-	FTransform  MeshItemAttachOffset;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "CustomFlashlightSettings|AttachOffset")
 	FTransform SpotLightAttachOffset;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "CustomFlashlightSettings")
-	EAnimItemBlendType ItemAnimBlendType;
 };
 
 
@@ -50,16 +43,14 @@ struct FFlashlightItemTableRowInfo : public FItemTableRowInfoBase
 UCLASS()
 class FRONTIERDIVER_API UFlashlightItem :
 	public UItemBase,
-	public TItemTmpl<UFlashlightItem, FFlashlightItemDynamicInfo, FFlashlightItemTableRowInfo>,
-	public IPickupDropItemIF,
-	public IInteractionIF,
+	public TItemTmpl<FFlashlightItemDynamicInfo, FFlashlightItemTableRowInfo>,
 	public ITakeRemoveItemIF,
-	public IInteractItemIF,
-	public TPickupDropItemIFTmplImpl<UFlashlightItem>
+	public IInteractItemIF
 {
 	GENERATED_BODY()
 
 public:
+
 	UFlashlightItem();
 
 	bool bIsFlashlightOff = true;
@@ -67,12 +58,6 @@ public:
 	AStaticMeshActor* HeldMeshItem;
 
 	class ASpotLight* SpotLight;
-
-	bool PickupItem(UInventoryComponent* Inventory, AWorldItem* Item)
-		override { return TPickupDropItemIFTmplImpl::PickupItem(Inventory, Item); }
-
-	bool DropItem(UInventoryComponent* Inventory)
-		override { return TPickupDropItemIFTmplImpl::DropItem(Inventory); }
 
 	bool FindDataTableByItemType()
 		override { return BaseFindDataTableByItemType<UFlashlightItem, FFlashlightItemTableRowInfo>(); }
@@ -89,15 +74,10 @@ public:
 	void SetHeldMeshItem(AStaticMeshActor* HeldMesh)
 		override { HeldMeshItem = HeldMesh; }
 
-	AStaticMeshActor* GetHeldMeshItem()
-		override { return HeldMeshItem; }
+	virtual AStaticMeshActor* GetHeldMeshItem()
+		override { return  HeldMeshItem; }
 
-	const FTransform  GetHeldMeshItemOffset()
-		override { return ItemTableRowInfo->MeshItemAttachOffset; }
-
-	const FName GetSocketNameForItem() override;
-
-	const EAnimItemBlendType GetAnimItemBlendType() override;
+	virtual const FHeldItemInfo& GetHeldItemInfo() override;
 
 	void ThirdInteract(class UInventoryComponent* Inventory) override;
 

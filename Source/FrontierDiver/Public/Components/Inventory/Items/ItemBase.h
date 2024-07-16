@@ -33,15 +33,27 @@ struct FItemDynamicInfoBase
 };
 
 USTRUCT(BlueprintType)
+struct FHeldItemInfo
+{
+    GENERATED_BODY()
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "HeldItemInfo")
+    FName ItemSocketName = "None";
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "HeldItemInfo")
+    FTransform  ItemItemAttachOffset;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "HeldItemInfo")
+    EAnimItemBlendType ItemAnimBlendType;
+};
+
+USTRUCT(BlueprintType)
 struct FItemTableRowInfoBase : public FTableRowBase
 {
     GENERATED_BODY()
     
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "DefaultSettings")
     UTexture2D* ItemWidgetTexture;
-
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "DefaultSettings")
-    UStaticMesh* ItemWorldStaticMesh;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "DefaultSettings")
     EContainerType ItemContainerType;
@@ -51,6 +63,15 @@ struct FItemTableRowInfoBase : public FTableRowBase
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "DefaultSettings")
     int32 MaxQuantityItemsInSlot = 1;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "DefaultSettings|WorldItem")
+    UStaticMesh* WorldItemStaticMesh;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "DefaultSettings|WorldItem")
+    float WorldItemMass;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "DefaultSettings|WorldItem")
+    FVector WorldItemScale = FVector(1.0f,1.0f,1.0f);
 };
 
 
@@ -64,6 +85,8 @@ class FRONTIERDIVER_API UItemBase : public UObject
 
 public:
 
+    bool bIsPlayerCanDropThisItem;
+
     int32 ThisItemID = 99;
 
     virtual bool FindDataTableByItemType();
@@ -72,21 +95,9 @@ public:
 
     virtual FItemDynamicInfoBase& GetItemDynamicInfo() { static FItemDynamicInfoBase DummyDynamicInfo; return DummyDynamicInfo; }
 
-    bool bUseCustomAddThisItemToInventory = false;
-
-    bool bUseCustomRemoveThisItemFromInventory = false;
-
-    bool bUseCustomUpdateWidgetForThisItem = false;
-
-    virtual void UpdateItemWidget(class UInventoryItemWidget* ItemWidget);
-
-	virtual bool AddThisItemToInventory(UInventoryComponent* Inventory);
-
-	virtual bool RemoveThisItemFromInventory(UInventoryComponent* Inventory, bool DestroyItem);
-
 protected:
     /*FT == ItemTableRowInfo*/
-    template<typename T, typename FT>
+    template<typename T, typename FT = FItemTableRowInfoBase>
     bool BaseFindDataTableByItemType();
 };
 

@@ -11,7 +11,6 @@
 #include "Components/CanvasPanel.h"
 #include "Components/TextBlock.h"
 #include "Components/Image.h"
-#include "Components/Inventory/Items/Modules/PickupDropItem/PickupDropItemIF.h"
 
 DEFINE_LOG_CATEGORY(LogInventoryWidget);
 
@@ -93,30 +92,19 @@ void UInventoryWidget::DropItemFromWidget(UItemBase* Item)
 {
     if (Item && Item->IsValidLowLevel() && !bIsInventoryHidden)
     {
-        if (IPickupDropItemIF* ItemIF = Cast<IPickupDropItemIF>(Item))
+        if (InventoryComponent->DropItemFromInventory(Item))
         {
-            if (ItemIF->DropItem(InventoryComponent))
+            if (bIsShowingItemInfo)
             {
-                if (bIsShowingItemInfo)
-                { 
-                    if (Item->GetItemDynamicInfo().QuantityItems == 0)
-                    {
-                        ShowItemInfo(nullptr);
-                    }
-                    else
-                    {
-                        ShowItemInfo(Item);
-                    }
-                }
                 if (Item->GetItemDynamicInfo().QuantityItems == 0)
                 {
-                    Item->ConditionalBeginDestroy();
+                    ShowItemInfo(nullptr);
+                }
+                else
+                {
+                    ShowItemInfo(Item);
                 }
             }
-        }
-        else
-        {
-            UE_LOG(LogInventoryWidget, Warning, TEXT("Item does not implement IPickupDropItemIF interface"));
         }
     }
 }
@@ -216,16 +204,11 @@ void UInventoryWidget::UpdateWidget(UItemBase* Item, UInventoryItemWidget* ItemW
     {
         if (Item)
         {
-            if (Item->bUseCustomUpdateWidgetForThisItem) { Item->UpdateItemWidget(ItemWidget); }
-            else
-            {
-                ItemWidget->WidgetImage->SetBrushFromTexture(Item->GetItemStaticInfo()->ItemWidgetTexture);
-                ItemWidget->WidgetTextBlock->SetText(FText::FromString(FString::Printf(TEXT("%03d"), Item->GetItemDynamicInfo().QuantityItems)));
-                ItemWidget->Item = Item;
-
-                ItemWidget->WidgetTextBlock->SetText(FText::AsNumber(Item->GetItemDynamicInfo().QuantityItems));
-                ItemWidget->bIsThisEmptyWidget = false;
-            }
+            ItemWidget->WidgetImage->SetBrushFromTexture(Item->GetItemStaticInfo()->ItemWidgetTexture);
+            ItemWidget->WidgetTextBlock->SetText(FText::FromString(FString::Printf(TEXT("%03d"), Item->GetItemDynamicInfo().QuantityItems)));
+            ItemWidget->Item = Item;
+            ItemWidget->WidgetTextBlock->SetText(FText::AsNumber(Item->GetItemDynamicInfo().QuantityItems));
+            ItemWidget->bIsThisEmptyWidget = false;
         }
         else if (!ItemWidget->bIsThisEmptyWidget)
         {

@@ -9,17 +9,3 @@ bool UItemBase::FindDataTableByItemType()
 {
     return false;
 }
-
-void  UItemBase::UpdateItemWidget(UInventoryItemWidget* ItemWidget)
-{
-}
-
-bool UItemBase::AddThisItemToInventory(UInventoryComponent* Inventory)
-{
-    return false;
-}
-
-bool UItemBase::RemoveThisItemFromInventory(UInventoryComponent* Inventory, bool DestroyItem)
-{
-    return false;
-}

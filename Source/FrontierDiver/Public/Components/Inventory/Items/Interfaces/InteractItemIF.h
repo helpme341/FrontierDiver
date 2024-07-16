@@ -4,7 +4,6 @@
 
 #include "CoreMinimal.h"
 #include "UObject/Interface.h"
-#include "Components/Inventory/Items/Modules/ItemIFBase.h"
 #include "InteractItemIF.generated.h"
 
 // This class does not need to be modified.
@@ -18,8 +17,8 @@ class UInventoryComponent;
 
 /**
  * 
- */
-class FRONTIERDIVER_API IInteractItemIF : public IItemIFBase
+ */ 
+class FRONTIERDIVER_API IInteractItemIF : public IInterface
 {
 	GENERATED_BODY()
 

@@ -5,7 +5,6 @@
 #include "CoreMinimal.h"
 #include "UObject/Interface.h"
 #include "Character/FrontierDiverCharacter.h"
-#include "Components/Inventory/Items/Modules/ItemIFBase.h"
 #include "TakeRemoveItemIF.generated.h"
 
 // This class does not need to be modified.
@@ -21,16 +20,11 @@ class UInventoryComponent;
 /**
  * 
  */
-class FRONTIERDIVER_API ITakeRemoveItemIF : public IItemIFBase
+class FRONTIERDIVER_API ITakeRemoveItemIF : public IInterface
 {
 	GENERATED_BODY()
 
-	// Add interface functions to this class. This is the class that will be inherited to implement this interface.
 public:
-
-	const virtual FName GetSocketNameForItem() =0;
-
-	const virtual EAnimItemBlendType GetAnimItemBlendType() = 0;
 
 	virtual bool UseStaticMesh() =0;
 
@@ -38,7 +32,7 @@ public:
 
 	virtual AStaticMeshActor* GetHeldMeshItem() =0;
 
-	const virtual FTransform GetHeldMeshItemOffset() =0;
+	virtual const struct FHeldItemInfo& GetHeldItemInfo() =0;
 
 	virtual void OnTakeItem(UInventoryComponent* Inventory) =0;
 

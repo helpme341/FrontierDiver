@@ -35,5 +35,5 @@ public:
 
 	FItemDynamicInfoBase ItemDynamicInfo;
 
-	void LoadDataToWorldItem(FItemDynamicInfoBase& DynamicInfo, TSubclassOf<UItemBase> NewItemType, UStaticMesh* NewItemMesh);
+	void LoadDataToWorldItem(FItemDynamicInfoBase& DynamicInfo, const FItemTableRowInfoBase* ItemTableRowInfo, TSubclassOf<UItemBase> NewItemType);
 };
