@@ -11,58 +11,44 @@
 #include "Engine/StaticMeshActor.h"
 
 DEFINE_LOG_CATEGORY(LogInventoryComponent);
-bool UInventoryComponent::AddItemToInventory(UItemBase* Item, bool DestroyItem)
-{
-    if (!Item || Item->ThisItemID != 99)
-    {
-        UE_LOG(LogInventoryComponent, Warning, TEXT("Item is nullptr or ThisItemID is not 99"));
-        return false;
-    }
-    if (!Item->FindDataTableByItemType())
-    {
-        UE_LOG(LogInventoryComponent, Warning, TEXT("Failed to find DataTable by ItemType"));
-        return false;
-    }
 
-    const FItemTableRowInfoBase* ItemTableRowInfo = Item->GetItemStaticInfo();
-    if (!ItemTableRowInfo || !Inventory.Contains(ItemTableRowInfo->ItemContainerType))
-    {
-        UE_LOG(LogInventoryComponent, Warning, TEXT("ItemTableRowInfo is nullptr or ItemContainerType not found in Inventory"));
-        return false;
-    }
-
-    TArray<UItemBase*>& ContainerInventory = Inventory[ItemTableRowInfo->ItemContainerType].ContainerInventory;
-    if (ContainerInventory.IsEmpty())
-    {
-        UE_LOG(LogInventoryComponent, Warning, TEXT("ContainerInventory is empty"));
-        return false;
-    }
+/*
+* return 0 =  ошибка добавления оно не возможно
+* return 1 =  предмет был добавлен
+* return 2 =  дредмет был застакан с оналогичным и удален
+*/
+int UInventoryComponent::AddItemToInventory(UItemBase* Item, UItemBase*& ItemResult)
+{ 
+    if (!Item || Item->ThisItemID != 99 || !Item->GetItemDynamicInfo() || !Item->FindDataTableByItemType(GetWorld()) ||
+        !Item->GetItemStaticInfo() || !Inventory.Contains(Item->GetItemStaticInfo()->ItemContainerType) ||
+        Inventory[Item->GetItemStaticInfo()->ItemContainerType].ContainerInventory.IsEmpty()) { return 0; }
 
     bool bCheckQuantity = Item->GetItemStaticInfo()->MaxQuantityItemsInSlot > 1;
-    if (Item->GetItemDynamicInfo() && Item->GetItemDynamicInfo()->ItemTypeName != "None" && Item->GetItemDynamicInfo()->QuantityItems != 0)
+
+    if (Item->GetItemDynamicInfo()->ItemTypeName != "None" && Item->GetItemDynamicInfo()->QuantityItems != 0)
     {
-        for (int32 Counter = 0; Counter < ContainerInventory.Num(); Counter++)
+        for (int32 Counter = 0; Counter < Inventory[Item->GetItemStaticInfo()->ItemContainerType].ContainerInventory.Num(); Counter++)
         {
-            UItemBase* ItemOnInspection = ContainerInventory[Counter];
+            UItemBase* ItemOnInspection = Inventory[Item->GetItemStaticInfo()->ItemContainerType].ContainerInventory[Counter];
 
             if (bCheckQuantity && ItemOnInspection && ItemOnInspection->GetItemDynamicInfo()->ItemTypeName == Item->GetItemDynamicInfo()->ItemTypeName && ItemOnInspection->GetClass() == Item->GetClass())
             {
-                if (ItemOnInspection->GetItemDynamicInfo()->QuantityItems + Item->GetItemDynamicInfo()->QuantityItems <= ItemTableRowInfo->MaxQuantityItemsInSlot)
+                if (ItemOnInspection->GetItemDynamicInfo()->QuantityItems + Item->GetItemDynamicInfo()->QuantityItems <= Item->GetItemStaticInfo()->MaxQuantityItemsInSlot)
                 {
                     ItemOnInspection->GetItemDynamicInfo()->QuantityItems += Item->GetItemDynamicInfo()->QuantityItems;
-                    Item->GetItemDynamicInfo()->QuantityItems = 0;
-                    if (DestroyItem) { Item->ConditionalBeginDestroy(); }
+                    Item->ConditionalBeginDestroy();
+                    ItemResult = ItemOnInspection;
                     InventoryWidget->UpdateWidgetByItem(ItemOnInspection, false);
-                    return true;
+                    return 2;
                 }
             }
 
             if (!ItemOnInspection)
             {
-                ContainerInventory[Counter] = Item;
+                Inventory[Item->GetItemStaticInfo()->ItemContainerType].ContainerInventory[Counter] = Item;
                 Item->ThisItemID = Counter;
                 InventoryWidget->UpdateWidgetByItem(Item, false);
-                return true;
+                return 1;
             }
         }
     }
@@ -70,60 +56,41 @@ bool UInventoryComponent::AddItemToInventory(UItemBase* Item, bool DestroyItem)
     {
         UE_LOG(LogInventoryComponent, Warning, TEXT("ItemDynamicInfo is nullptr or invalid"));
     }
-
-    return false;
+    return 0;
 }
 
-bool UInventoryComponent::RemoveItemFromInventory(UItemBase* Item, bool DestroyItem)
+/*
+* return 0 =  ошибка удаления оно не возможно
+* return 1 =  предмет удален из инвеноря 
+* return 2 =  предмет был застакон и из него был удален 1 копия
+*/
+int UInventoryComponent::RemoveItemFromInventory(UItemBase* Item)
 {
-    if (!Item || Item->ThisItemID == 99)
-    {
-        UE_LOG(LogInventoryComponent, Warning, TEXT("Item is nullptr or ThisItemID is 99"));
-        return false;
-    }
+    if (!Item || Item->ThisItemID == 99 || !Item->FindDataTableByItemType(GetWorld()) || !Item->GetItemDynamicInfo() ||
+        !Item->GetItemStaticInfo() || !Inventory[Item->GetItemStaticInfo()->ItemContainerType].ContainerInventory[Item->ThisItemID]) { return 0; }
 
-    if (!Item->FindDataTableByItemType())
-    {
-        UE_LOG(LogInventoryComponent, Warning, TEXT("Failed to find DataTable by ItemType"));
-        return false;
-    }
-
-    const FItemTableRowInfoBase* ItemTableRowInfo = Item->GetItemStaticInfo();
-    if (!ItemTableRowInfo)
-    {
-        UE_LOG(LogInventoryComponent, Warning, TEXT("ItemTableRowInfo is nullptr"));
-        return false;
-    }
-
-    if (ItemTableRowInfo->MaxQuantityItemsInSlot > 1 && Item->GetItemDynamicInfo()->QuantityItems > 1)
+    if (Item->GetItemStaticInfo()->MaxQuantityItemsInSlot > 1 && Item->GetItemDynamicInfo()->QuantityItems > 1)
     {
         Item->GetItemDynamicInfo()->QuantityItems--;
         InventoryWidget->UpdateWidgetByItem(Item, false);
-        return true;
+        return 2;
     }
-    else if (Inventory.Contains(ItemTableRowInfo->ItemContainerType))
+    else if (Inventory.Contains(Item->GetItemStaticInfo()->ItemContainerType))
     {
-        Inventory[ItemTableRowInfo->ItemContainerType].ContainerInventory[Item->ThisItemID] = nullptr;
+        Inventory[Item->GetItemStaticInfo()->ItemContainerType].ContainerInventory[Item->ThisItemID] = nullptr;
         InventoryWidget->UpdateWidgetByItem(Item, true);
-        if (DestroyItem)
-        {
-            Item->ConditionalBeginDestroy();
-        }
-        else
-        {
-            Item->ThisItemID = 99;
-        }
-        return true;
+        Item->ConditionalBeginDestroy();
+        return 1;
     }
-
-    return false;
+    return 0;
 }
 
 bool UInventoryComponent::PickupItemToInventory(AWorldItem* Item)
 {
-    if (!Item) return false;
+    if (!Item) { return false; }
 
     UItemBase* NewItem = NewObject<UItemBase>(this, Item->ItemType);
+
     if (!NewItem)
     {
         UE_LOG(LogInventoryComponent, Warning, TEXT("Failed to create NewItem"));
@@ -132,10 +99,7 @@ bool UInventoryComponent::PickupItemToInventory(AWorldItem* Item)
 
     if (Item->ItemDynamicInfo)
     {
-        if (NewItem->GetItemDynamicInfo())
-        {
-            NewItem->GetItemDynamicInfo()->ConditionalBeginDestroy();
-        }
+        if (NewItem->GetItemDynamicInfo()) { NewItem->GetItemDynamicInfo()->ConditionalBeginDestroy(); }
         NewItem->SetItemDynamicInfo(Item->ItemDynamicInfo);
     }
     else if (Item->ItemTypeName != "None")
@@ -148,46 +112,101 @@ bool UInventoryComponent::PickupItemToInventory(AWorldItem* Item)
         return false;
     }
 
-    if (AddItemToInventory(NewItem, true))
+    UItemBase* ItemResult;
+    switch (AddItemToInventory(NewItem, ItemResult))
+    {
+    case 0:
+    {
+        NewItem->ConditionalBeginDestroy();
+        return false;
+    }
+    case 1:
     {
         NewItem->OnPickupItemToInventory(Item);
         Item->Destroy();
         return true;
     }
-    else
+    case 2:
     {
-        NewItem->ConditionalBeginDestroy();
+        ItemResult->OnPickupItemToInventory(Item);
+        Item->Destroy();
+        return true;
+    }
+    default:
         return false;
     }
+    return false;
 }
 
-bool UInventoryComponent::DropItemFromInventory(UItemBase* Item)
+/*
+* return 0 =  ошибка
+* return 1 =  предмет удален из инвеноря
+* return 2 =  предмет был застакон и из него был удален
+*/
+int UInventoryComponent::DropItemFromInventory(UItemBase* Item)
 {
-    if (!Item || !Item->bIsPlayerCanDropThisItem)
+    if (!Item || !Item->bIsPlayerCanDropThisItem || !Item->FindDataTableByItemType(GetWorld()))
     {
         UE_LOG(LogInventoryComponent, Warning, TEXT("Item is nullptr or cannot be dropped"));
-        return false;
+        return 0;
     }
 
     AWorldItem* NewWorldItem = Item->GetWorld()->SpawnActor<AWorldItem>();
     if (!NewWorldItem)
     {
         UE_LOG(LogInventoryComponent, Warning, TEXT("Failed to spawn NewWorldItem"));
-        return false;
+        return 0;
     }
 
-    if (!Item->FindDataTableByItemType())
+    UItemDynamicInfo* ItemDynamicInfo = Item->GetItemDynamicInfo();
+    if (!ItemDynamicInfo)
     {
-        UE_LOG(LogInventoryComponent, Warning, TEXT("Failed to find DataTable by ItemType"));
         NewWorldItem->Destroy();
-        return false;
+        return 0;
     }
 
     if (bIsItemHeld && Item == HeldItem)
     {
         ITakeRemoveItemIF* TakeRemoveItemIF = Cast<ITakeRemoveItemIF>(HeldItem);
-        if (TakeRemoveItemIF && TakeRemoveItemIF->CanDrop() && RemoveItemFromInventory(Item, false))
+        if (TakeRemoveItemIF && TakeRemoveItemIF->CanDrop())
         {
+            int Result = 0;
+            switch (RemoveItemFromInventory(Item))
+            {
+            case 0:
+            {
+                NewWorldItem->Destroy();
+                return 0;
+            }
+            case 1:
+            {
+                NewWorldItem->LoadDataToWorldItem(ItemDynamicInfo, Item->GetItemStaticInfo(), Item->GetClass());
+                NewWorldItem->SetActorLocation(GetOwnerCharacter()->GetActorLocation() + GetOwnerCharacter()->GetActorForwardVector() * PlayerDropLocationOffset);
+                NewWorldItem->SetActorScale3D(Item->GetItemStaticInfo()->WorldItemScale);
+                if (TakeRemoveItemIF) { TakeRemoveItemIF->OnDropItem(NewWorldItem); }
+                Result = 1;
+                break;
+            }
+            case 2:
+            {
+                UItemDynamicInfo* ItemDynamic = DuplicateObject<UItemDynamicInfo>(Item->GetItemDynamicInfo(), GetOuter());
+                if (!ItemDynamic)
+                {
+                    NewWorldItem->Destroy();
+                    return false;
+                }
+                ItemDynamic->QuantityItems = 1;
+                NewWorldItem->LoadDataToWorldItem(ItemDynamic, Item->GetItemStaticInfo(), Item->GetClass());
+                NewWorldItem->SetActorLocation(GetOwnerCharacter()->GetActorLocation() + GetOwnerCharacter()->GetActorForwardVector() * PlayerDropLocationOffset);
+                NewWorldItem->SetActorScale3D(Item->GetItemStaticInfo()->WorldItemScale);
+                if (TakeRemoveItemIF) { TakeRemoveItemIF->OnDropItem(NewWorldItem); }
+                Result = 2;
+                break;
+            }
+            default:
+                return false;
+            }
+
             if (TakeRemoveItemIF->UseStaticMesh())
             {
                 TakeRemoveItemIF->GetHeldMeshItem()->Destroy();
@@ -200,47 +219,47 @@ bool UInventoryComponent::DropItemFromInventory(UItemBase* Item)
 
             HeldItem = nullptr;
             bIsItemHeld = false;
-
-            HandleItemDrop(Item, NewWorldItem, TakeRemoveItemIF);
-            return true;
+            return Result;
         }
     }
-    else if (RemoveItemFromInventory(Item, false))
+    else
     {
-        HandleItemDrop(Item, NewWorldItem, nullptr);
-        return true;
+        ITakeRemoveItemIF* TakeRemoveItemIF = Cast<ITakeRemoveItemIF>(HeldItem);
+        switch (RemoveItemFromInventory(Item))
+        {
+        case 0:
+        {
+            NewWorldItem->Destroy();
+            return 0;
+        }
+        case 1:
+        {
+            NewWorldItem->LoadDataToWorldItem(ItemDynamicInfo, Item->GetItemStaticInfo(), Item->GetClass());
+            NewWorldItem->SetActorLocation(GetOwnerCharacter()->GetActorLocation() + GetOwnerCharacter()->GetActorForwardVector() * PlayerDropLocationOffset);
+            NewWorldItem->SetActorScale3D(Item->GetItemStaticInfo()->WorldItemScale);
+            if (TakeRemoveItemIF) { TakeRemoveItemIF->OnDropItem(NewWorldItem); }
+            return 1;
+        }
+        case 2:
+        {
+            UItemDynamicInfo* ItemDynamic = DuplicateObject<UItemDynamicInfo>(Item->GetItemDynamicInfo(), GetOuter());
+            if (!ItemDynamic)
+            {
+                NewWorldItem->Destroy();
+                return false;
+            }
+            ItemDynamic->QuantityItems = 1;
+            NewWorldItem->LoadDataToWorldItem(ItemDynamic, Item->GetItemStaticInfo(), Item->GetClass());
+            NewWorldItem->SetActorLocation(GetOwnerCharacter()->GetActorLocation() + GetOwnerCharacter()->GetActorForwardVector() * PlayerDropLocationOffset);
+            NewWorldItem->SetActorScale3D(Item->GetItemStaticInfo()->WorldItemScale);
+            if (TakeRemoveItemIF) { TakeRemoveItemIF->OnDropItem(NewWorldItem); }
+            return 2;
+        }
+        default:
+            return 0;
+        }
     }
-
-    NewWorldItem->Destroy();
-    return false;
-}
-
-void UInventoryComponent::HandleItemDrop(UItemBase* Item, AWorldItem* NewWorldItem, ITakeRemoveItemIF* TakeRemoveItemIF)
-{
-    if (!Item || !NewWorldItem) return;
-
-    UItemDynamicInfo* ItemDynamic = DuplicateObject<UItemDynamicInfo>(Item->GetItemDynamicInfo(), GetOuter());
-    if (!ItemDynamic)
-    {
-        UE_LOG(LogInventoryComponent, Warning, TEXT("Failed to duplicate ItemDynamicInfo"));
-        return;
-    }
-
-    ItemDynamic->QuantityItems = 1;
-    NewWorldItem->LoadDataToWorldItem(ItemDynamic, Item->GetItemStaticInfo(), Item->GetClass());
-    NewWorldItem->SetActorLocation(GetOwnerCharacter()->GetActorLocation() + GetOwnerCharacter()->GetActorForwardVector() * PlayerDropLocationOffset);
-    NewWorldItem->SetActorScale3D(Item->GetItemStaticInfo()->WorldItemScale);
-
-    if (TakeRemoveItemIF)
-    {
-        TakeRemoveItemIF->OnDropItem(NewWorldItem);
-    }
-
-    if (Item->GetItemDynamicInfo()->QuantityItems == 0)
-    {
-        Item->GetItemDynamicInfo()->ConditionalBeginDestroy();
-        Item->ConditionalBeginDestroy();
-    }
+    return 0;
 }
 
 bool UInventoryComponent::TakeItemToHandsByID(int32 ID)

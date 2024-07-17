@@ -74,6 +74,8 @@ struct FItemTableRowInfoBase : public FTableRowBase
     FVector WorldItemScale = FVector(1.0f,1.0f,1.0f);
 };
 
+
+
 /**
  * 
  */
@@ -88,7 +90,7 @@ public:
 
     int32 ThisItemID = 99; 
 
-    virtual bool FindDataTableByItemType();
+    virtual bool FindDataTableByItemType(UWorld* World);
 
     virtual void OnPickupItemToInventory(class AWorldItem* Item) {};
 
@@ -101,17 +103,17 @@ public:
 protected:
     /*FT == ItemTableRowInfo*/
     template<typename T, typename FT = FItemTableRowInfoBase>
-    bool BaseFindDataTableByItemType();
+    bool BaseFindDataTableByItemType(UWorld* World);
 };
 
 template<typename T, typename FT>
-inline bool UItemBase::BaseFindDataTableByItemType()
+inline bool UItemBase::BaseFindDataTableByItemType(UWorld* World)
 {
     T* Item = Cast<T>(this);
     if (!Item->ItemTableRowInfo && Item->ItemDynamicInfo->ItemTypeName != "None")
     {
         TArray<AActor*> FoundActors;
-        UGameplayStatics::GetAllActorsOfClass(GetWorld(), AInventoryDataTableItemManager::StaticClass(),FoundActors);
+        UGameplayStatics::GetAllActorsOfClass(World, AInventoryDataTableItemManager::StaticClass(),FoundActors);
         if (FoundActors.Num() > 0)
         {
             AInventoryDataTableItemManager* FoundActor = Cast<AInventoryDataTableItemManager>(FoundActors[0]);

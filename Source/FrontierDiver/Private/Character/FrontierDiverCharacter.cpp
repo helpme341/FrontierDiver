@@ -16,6 +16,7 @@
 #include "Character/Interfaces/InteractionIF.h"
 #include "Components/Inventory/Widgets/InventoryWidget.h"
 #include "DrawDebugHelpers.h" 
+#include "Components/Inventory/Items/ItemsTypes/JewelryItem.h"
 
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
 
@@ -60,6 +61,11 @@ void AFrontierDiverCharacter::BeginPlay()
 			Subsystem->AddMappingContext(DefaultMappingContext, 0);
 		}
  	}
+	UJewelryItem* JewelryItemTest = NewObject<UJewelryItem>();
+	JewelryItemTest->GetItemDynamicInfo()->ItemTypeName = "1";
+	UItemBase* ItemResult;
+	FrontierDiverInventoryComponent->AddItemToInventory(JewelryItemTest, ItemResult);
+	FrontierDiverInventoryComponent->RemoveItemFromInventory(JewelryItemTest);
 }
 
 void AFrontierDiverCharacter::Tick(float DeltaTime)

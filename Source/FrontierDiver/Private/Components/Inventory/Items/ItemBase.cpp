@@ -2,11 +2,11 @@
 
 
 #include "Components/Inventory/Items/ItemBase.h"
-#include "Components/Inventory/InventoryComponent.h"
 #include "Components/Inventory/Widgets/InventoryItemWidget.h"
 #include "Components/Inventory/Items/WorldItem.h"
 
-bool UItemBase::FindDataTableByItemType()
+
+bool UItemBase::FindDataTableByItemType(UWorld* World)
 {
     return false;
 }

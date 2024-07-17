@@ -30,8 +30,8 @@ public:
 
     UJewelryItem();
 
-    bool FindDataTableByItemType() 
-        override { return BaseFindDataTableByItemType<UJewelryItem, FJewelryItemTableRowInfo>(); }
+    bool FindDataTableByItemType(UWorld* World)
+        override { return BaseFindDataTableByItemType<UJewelryItem, FJewelryItemTableRowInfo>(World); }
 
     const FItemTableRowInfoBase* GetItemStaticInfo() override;
 

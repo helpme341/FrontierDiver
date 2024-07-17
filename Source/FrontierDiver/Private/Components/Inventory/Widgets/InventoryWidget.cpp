@@ -29,7 +29,7 @@ void UInventoryWidget::LoadWidgestSlots()
     }
 }
 
-void UInventoryWidget::ShowItemInfo(UItemBase* Item)
+void UInventoryWidget::ShowItemInfo(UItemBase* Item)///////////////////////////////
 {
     if (Item->IsValidLowLevel() && Item->GetItemDynamicInfo()->IsValidLowLevel() && !bIsInventoryHidden)
     {
@@ -88,19 +88,20 @@ void UInventoryWidget::ShowItemInfo(UItemBase* Item)
     bIsShowingItemInfo = false;
 }
 
-void UInventoryWidget::DropItemFromWidget(UItemBase* Item)
+void UInventoryWidget::DropItemFromWidget(UItemBase* Item)////////////////
 {
     if (Item && Item->IsValidLowLevel() && !bIsInventoryHidden)
     {
-        if (InventoryComponent->DropItemFromInventory(Item))
+        int Result = InventoryComponent->DropItemFromInventory(Item);
+        if (Result != 0)
         {
             if (bIsShowingItemInfo)
             {
-                if (Item->GetItemDynamicInfo()->QuantityItems == 0)
+                if (Result == 1)
                 {
                     ShowItemInfo(nullptr);
                 }
-                else
+                else if (Result == 2)
                 {
                     ShowItemInfo(Item);
                 }
@@ -174,21 +175,18 @@ void UInventoryWidget::UpdateAllWidgets()
     }
 }
 
-void UInventoryWidget::UpdateWidgetByItem(UItemBase* Item, bool Clear)
+void UInventoryWidget::UpdateWidgetByItem(UItemBase* Item, bool Clear)//////////////
 {
-    if (!Item)
-    {
-        UE_LOG(LogInventoryWidget, Warning, TEXT("Item is nullptr"));
-        return;
-    }
-
     if (Clear)
     {
         UpdateWidget(nullptr, Widgets[Item->GetItemStaticInfo()->ItemContainerType].Array[Item->ThisItemID]);
     }
     else
     {
-        UpdateWidget(Item, Widgets[Item->GetItemStaticInfo()->ItemContainerType].Array[Item->ThisItemID]);
+        if (Item)
+        {
+            UpdateWidget(Item, Widgets[Item->GetItemStaticInfo()->ItemContainerType].Array[Item->ThisItemID]);
+        }
     }
 }
 

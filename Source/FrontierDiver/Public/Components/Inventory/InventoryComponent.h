@@ -6,6 +6,7 @@
 #include "Components/Base/CharacterComponentBase.h"
 #include "Components/Inventory/Items/ItemBase.h"
 #include "Components/Inventory/Items/WorldItem.h"
+#include <functional> 
 #include "InventoryComponent.generated.h"
 
 
@@ -81,11 +82,10 @@ public:
 	bool RemoveItemFromHands();
 
 	void BeginPlay() override;
-	bool AddItemToInventory(UItemBase* Item, bool DestroyItem);
-	bool RemoveItemFromInventory(UItemBase* Item, bool DestroyItem);
+	int AddItemToInventory(UItemBase* Item, UItemBase*& ItemResult);
+	int RemoveItemFromInventory(UItemBase* Item);
 	bool PickupItemToInventory(AWorldItem* Item);
-	bool DropItemFromInventory(UItemBase* Item);
-	void HandleItemDrop(UItemBase* Item, AWorldItem* NewWorldItem, class ITakeRemoveItemIF* TakeRemoveItemIF);
+	int DropItemFromInventory(UItemBase* Item);
 
 	bool FirstInteractWithHeldItem();
 	bool SecondInteractWithHeldItem();

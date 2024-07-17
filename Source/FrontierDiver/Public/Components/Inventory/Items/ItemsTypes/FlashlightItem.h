@@ -65,8 +65,8 @@ public:
 
 	AStaticMeshActor* HeldMeshItem;
 
-	bool FindDataTableByItemType()
-		override { return BaseFindDataTableByItemType<UFlashlightItem, FFlashlightItemTableRowInfo>(); }
+	bool FindDataTableByItemType(UWorld* World)
+		override { return BaseFindDataTableByItemType<UFlashlightItem, FFlashlightItemTableRowInfo>(World); }
 
 	const FItemTableRowInfoBase* GetItemStaticInfo()
 		override { return ItemTableRowInfo; }
