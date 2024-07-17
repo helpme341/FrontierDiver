@@ -31,9 +31,9 @@ void UInventoryWidget::LoadWidgestSlots()
 
 void UInventoryWidget::ShowItemInfo(UItemBase* Item)
 {
-    if (Item->IsValidLowLevel() && !bIsInventoryHidden)
+    if (Item->IsValidLowLevel() && Item->GetItemDynamicInfo()->IsValidLowLevel() && !bIsInventoryHidden)
     {
-        if (Item->GetItemDynamicInfo().QuantityItems == 0) { bIsShowingItemInfo = false; return; }
+        if (Item->GetItemDynamicInfo()->QuantityItems == 0) { bIsShowingItemInfo = false; return; }
         const FItemTableRowInfoBase* ItemStaticInfo = Item->GetItemStaticInfo();
         if (ItemStaticInfo)
         {
@@ -47,9 +47,9 @@ void UInventoryWidget::ShowItemInfo(UItemBase* Item)
             bIsShowingItemInfo = false;
             return;
         }
-        if (ItemNameTextBlock) { ItemNameTextBlock->SetText(FText::FromName(Item->GetItemDynamicInfo().ItemTypeName)); }
+        if (ItemNameTextBlock) { ItemNameTextBlock->SetText(FText::FromName(Item->GetItemDynamicInfo()->ItemTypeName)); }
 
-        FString QuantityString = FString::Printf(TEXT("%d/%d"), Item->GetItemDynamicInfo().QuantityItems, ItemStaticInfo->MaxQuantityItemsInSlot);
+        FString QuantityString = FString::Printf(TEXT("%d/%d"), Item->GetItemDynamicInfo()->QuantityItems, ItemStaticInfo->MaxQuantityItemsInSlot);
 
         if (ItemQuantityTextBlock) { ItemQuantityTextBlock->SetText(FText::FromString(QuantityString)); }
 
@@ -96,7 +96,7 @@ void UInventoryWidget::DropItemFromWidget(UItemBase* Item)
         {
             if (bIsShowingItemInfo)
             {
-                if (Item->GetItemDynamicInfo().QuantityItems == 0)
+                if (Item->GetItemDynamicInfo()->QuantityItems == 0)
                 {
                     ShowItemInfo(nullptr);
                 }
@@ -205,9 +205,9 @@ void UInventoryWidget::UpdateWidget(UItemBase* Item, UInventoryItemWidget* ItemW
         if (Item)
         {
             ItemWidget->WidgetImage->SetBrushFromTexture(Item->GetItemStaticInfo()->ItemWidgetTexture);
-            ItemWidget->WidgetTextBlock->SetText(FText::FromString(FString::Printf(TEXT("%03d"), Item->GetItemDynamicInfo().QuantityItems)));
+            ItemWidget->WidgetTextBlock->SetText(FText::FromString(FString::Printf(TEXT("%03d"), Item->GetItemDynamicInfo()->QuantityItems)));
             ItemWidget->Item = Item;
-            ItemWidget->WidgetTextBlock->SetText(FText::AsNumber(Item->GetItemDynamicInfo().QuantityItems));
+            ItemWidget->WidgetTextBlock->SetText(FText::AsNumber(Item->GetItemDynamicInfo()->QuantityItems));
             ItemWidget->bIsThisEmptyWidget = false;
         }
         else if (!ItemWidget->bIsThisEmptyWidget)

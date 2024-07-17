@@ -22,7 +22,7 @@ struct FJewelryItemTableRowInfo : public FItemTableRowInfoBase
 UCLASS()
 class FRONTIERDIVER_API UJewelryItem :
     public UItemBase, 
-    public TItemTmpl<FItemDynamicInfoBase, FJewelryItemTableRowInfo>
+    public TItemTmpl<UItemDynamicInfo, FJewelryItemTableRowInfo>
 {
     GENERATED_BODY()
 
@@ -35,6 +35,8 @@ public:
 
     const FItemTableRowInfoBase* GetItemStaticInfo() override;
 
-    FItemDynamicInfoBase& GetItemDynamicInfo() override;
+    UItemDynamicInfo* GetItemDynamicInfo() override;
+
+    void SetItemDynamicInfo(UItemDynamicInfo* DynamicInfo) override;
 };
  

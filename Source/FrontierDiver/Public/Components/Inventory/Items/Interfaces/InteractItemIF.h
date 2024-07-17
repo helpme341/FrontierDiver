@@ -25,11 +25,11 @@ class FRONTIERDIVER_API IInteractItemIF : public IInterface
 public:
 
 
-	virtual void  MainInteract(UInventoryComponent* Inventory) { return; };
+	virtual void  MainInteract(UInventoryComponent* Inventory) {};
 
-	virtual void FirstInteract(UInventoryComponent* Inventory) { return; };
+	virtual void FirstInteract(UInventoryComponent* Inventory) {};
 
-	virtual void SecondInteract(UInventoryComponent* Inventory) { return; };
+	virtual void SecondInteract(UInventoryComponent* Inventory) {};
 
-	virtual void ThirdInteract(UInventoryComponent* Inventory) { return; };
+	virtual void ThirdInteract(UInventoryComponent* Inventory) {};
 };

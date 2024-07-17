@@ -67,10 +67,10 @@ bool AWorldItem::MainInteract(AFrontierDiverCharacter* Character)
 }
 
 
-void AWorldItem::LoadDataToWorldItem(FItemDynamicInfoBase& DynamicInfo, const FItemTableRowInfoBase* ItemTableRowInfo, TSubclassOf<UItemBase> NewItemType)
+void AWorldItem::LoadDataToWorldItem(UItemDynamicInfo* ItemDynamic, const FItemTableRowInfoBase* ItemTableRowInfo, TSubclassOf<UItemBase> NewItemType)
 {
 	ItemType = NewItemType;
-	ItemDynamicInfo = DynamicInfo;
+	ItemDynamicInfo = ItemDynamic;
 	StaticMesh->SetStaticMesh(ItemTableRowInfo->WorldItemStaticMesh);
     StaticMesh->SetWorldScale3D(ItemTableRowInfo->WorldItemScale);
     if (FoundActor && FoundActor->WaterPhysicalMaterial) { StaticMesh->SetPhysMaterialOverride(FoundActor->WaterPhysicalMaterial); }

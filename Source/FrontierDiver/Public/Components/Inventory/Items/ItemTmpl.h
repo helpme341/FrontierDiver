@@ -18,7 +18,7 @@ class FRONTIERDIVER_API TItemTmpl
 {
 public:
 
-	DT ItemDynamicInfo;
+	DT* ItemDynamicInfo = NewObject<DT>();
 	TRT* ItemTableRowInfo;
 	TItemTmpl<DT, TRT>* GetItemTmpl();
 };

@@ -8,16 +8,21 @@
 #include "Components/Inventory/Items/Interfaces/TakeRemoveItemIF.h"
 #include "Components/Inventory/Items/ItemTmpl.h"
 #include "Character/FrontierDiverCharacter.h"
+#include "Engine/SpotLight.h"
 #include "FlashlightItem.generated.h"
 
-USTRUCT(BlueprintType)
-struct FFlashlightItemDynamicInfo : public FItemDynamicInfoBase
+UCLASS()
+class FRONTIERDIVER_API UFlashlightItemDynamicInfo : public UItemDynamicInfo
 {
 	GENERATED_BODY()
 
+public:
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "FlashlightSettings")
 	bool bIsFlashlightOn;
 
-	class ASpotLight* SpotLight;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "FlashlightSettings")
+	ASpotLight* SpotLight;
 };
 
 USTRUCT(BlueprintType)
@@ -48,7 +53,7 @@ class AWorldItem;
 UCLASS()
 class FRONTIERDIVER_API UFlashlightItem :
 	public UItemBase,
-	public TItemTmpl<FFlashlightItemDynamicInfo, FFlashlightItemTableRowInfo>,
+	public TItemTmpl<UFlashlightItemDynamicInfo, FFlashlightItemTableRowInfo>,
 	public ITakeRemoveItemIF,
 	public IInteractItemIF
 {
@@ -66,8 +71,12 @@ public:
 	const FItemTableRowInfoBase* GetItemStaticInfo()
 		override { return ItemTableRowInfo; }
 
-	FItemDynamicInfoBase& GetItemDynamicInfo() 
+
+	UItemDynamicInfo* GetItemDynamicInfo() 
 		override { return ItemDynamicInfo; }
+
+	void SetItemDynamicInfo(UItemDynamicInfo* DynamicInfo)
+		override { ItemDynamicInfo = Cast<UFlashlightItemDynamicInfo>(DynamicInfo);}
 
 	bool UseStaticMesh()
 		override { return true; }
@@ -77,6 +86,8 @@ public:
 
 	AStaticMeshActor* GetHeldMeshItem()
 		override { return  HeldMeshItem; }
+
+	const FTransform& GetWorldItemOffset() override;
 
 	bool CanDrop()
 		override { return true;};

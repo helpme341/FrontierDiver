@@ -33,9 +33,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TSubclassOf<UItemBase> ItemType;
 
-	FItemDynamicInfoBase ItemDynamicInfo;
+	UItemDynamicInfo* ItemDynamicInfo;
 
-	void LoadDataToWorldItem(FItemDynamicInfoBase& DynamicInfo, const FItemTableRowInfoBase* ItemTableRowInfo, TSubclassOf<UItemBase> NewItemType);
+	void LoadDataToWorldItem(UItemDynamicInfo* ItemDynamic, const FItemTableRowInfoBase* ItemTableRowInfo, TSubclassOf<UItemBase> NewItemType);
 
 private:
 

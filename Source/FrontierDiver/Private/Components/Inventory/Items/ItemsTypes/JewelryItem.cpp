@@ -14,7 +14,12 @@ const FItemTableRowInfoBase* UJewelryItem::GetItemStaticInfo()
 	return ItemTableRowInfo;
 }
 
-FItemDynamicInfoBase& UJewelryItem::GetItemDynamicInfo()
+UItemDynamicInfo* UJewelryItem::GetItemDynamicInfo()
 {
 	return ItemDynamicInfo;
+}
+
+void UJewelryItem::SetItemDynamicInfo(UItemDynamicInfo* DynamicInfo)
+{
+	ItemDynamicInfo = DynamicInfo;
 }

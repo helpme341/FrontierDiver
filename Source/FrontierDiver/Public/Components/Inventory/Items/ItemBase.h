@@ -9,7 +9,6 @@
 #include "Character/FrontierDiverCharacter.h"
 #include "ItemBase.generated.h"
 
-
 UENUM(BlueprintType)
 enum class EContainerType : uint8
 {
@@ -19,18 +18,18 @@ enum class EContainerType : uint8
     Array,
 };
 
-USTRUCT(BlueprintType)
-struct FItemDynamicInfoBase
+UCLASS()
+class FRONTIERDIVER_API UItemDynamicInfo : public UObject
 {
     GENERATED_BODY()
+
+public:
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "DefaultSettings")
     FName ItemTypeName = "None";
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "DefaultSettings")
     int32 QuantityItems = 1;
-
-    virtual ~FItemDynamicInfoBase() = default;
 };
 
 USTRUCT(BlueprintType)
@@ -75,7 +74,6 @@ struct FItemTableRowInfoBase : public FTableRowBase
     FVector WorldItemScale = FVector(1.0f,1.0f,1.0f);
 };
 
-
 /**
  * 
  */
@@ -98,7 +96,9 @@ public:
 
     virtual const FItemTableRowInfoBase* GetItemStaticInfo() { return nullptr; }
 
-    virtual FItemDynamicInfoBase& GetItemDynamicInfo() { static FItemDynamicInfoBase DummyDynamicInfo; return DummyDynamicInfo; }
+    virtual UItemDynamicInfo* GetItemDynamicInfo() { return nullptr; }
+
+    virtual void SetItemDynamicInfo(UItemDynamicInfo* DynamicInfo) {};
 
 protected:
     /*FT == ItemTableRowInfo*/
@@ -110,14 +110,14 @@ template<typename T, typename FT>
 inline bool UItemBase::BaseFindDataTableByItemType()
 {
     T* Item = Cast<T>(this);
-    if (!Item->ItemTableRowInfo && Item->ItemDynamicInfo.ItemTypeName != "None")
+    if (!Item->ItemTableRowInfo && Item->ItemDynamicInfo->ItemTypeName != "None")
     {
         TArray<AActor*> FoundActors;
         UGameplayStatics::GetAllActorsOfClass(GetWorld(), AInventoryDataTableItemManager::StaticClass(),FoundActors);
         if (FoundActors.Num() > 0)
         {
             AInventoryDataTableItemManager* FoundActor = Cast<AInventoryDataTableItemManager>(FoundActors[0]);
-            Item->ItemTableRowInfo = FoundActor->FindDataTableByItemType(T::StaticClass())->FindRow<FT>(Item->ItemDynamicInfo.ItemTypeName, "");
+            Item->ItemTableRowInfo = FoundActor->FindDataTableByItemType(T::StaticClass())->FindRow<FT>(Item->ItemDynamicInfo->ItemTypeName, "");
             return true;
         }
     }
