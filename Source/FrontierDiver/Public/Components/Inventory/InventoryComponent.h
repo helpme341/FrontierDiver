@@ -85,6 +85,7 @@ public:
 	bool RemoveItemFromInventory(UItemBase* Item, bool DestroyItem);
 	bool PickupItemToInventory(AWorldItem* Item);
 	bool DropItemFromInventory(UItemBase* Item);
+	void HandleItemDrop(UItemBase* Item, AWorldItem* NewWorldItem, class ITakeRemoveItemIF* TakeRemoveItemIF);
 
 	bool FirstInteractWithHeldItem();
 	bool SecondInteractWithHeldItem();

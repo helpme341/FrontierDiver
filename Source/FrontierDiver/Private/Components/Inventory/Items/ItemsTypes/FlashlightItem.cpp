@@ -14,10 +14,6 @@ UFlashlightItem::UFlashlightItem()
     bIsPlayerCanDropThisItem = true;
 }
 
-const FTransform& UFlashlightItem::GetWorldItemOffset()
-{
-    // TODO: вставьте здесь оператор return
-}
 
 const FHeldItemInfo& UFlashlightItem::GetHeldItemInfo()
 {
@@ -31,17 +27,23 @@ const FHeldItemInfo& UFlashlightItem::GetHeldItemInfo()
 
 void UFlashlightItem::ThirdInteract(UInventoryComponent* Inventory)
 {
-    if (ItemDynamicInfo->SpotLight)
+    if (ItemDynamicInfo)
     {
-        if (ItemDynamicInfo->bIsFlashlightOn)
+        if (ItemDynamicInfo->ItemTypeName != "None" && ItemDynamicInfo->QuantityItems >= 0)
         {
-            ItemDynamicInfo->SpotLight->SetActorHiddenInGame(true);
-            ItemDynamicInfo->bIsFlashlightOn = false;
-        }
-        else if (!ItemDynamicInfo->bIsFlashlightOn)
-        {
-            ItemDynamicInfo->SpotLight->SetActorHiddenInGame(false);
-            ItemDynamicInfo->bIsFlashlightOn = true;
+            if (ItemDynamicInfo->SpotLight)
+            {
+                if (ItemDynamicInfo->bIsFlashlightOn)
+                {
+                    ItemDynamicInfo->SpotLight->SetActorHiddenInGame(true);
+                    ItemDynamicInfo->bIsFlashlightOn = false;
+                }
+                else if (!ItemDynamicInfo->bIsFlashlightOn)
+                {
+                    ItemDynamicInfo->SpotLight->SetActorHiddenInGame(false);
+                    ItemDynamicInfo->bIsFlashlightOn = true;
+                }
+            }
         }
     }
 }

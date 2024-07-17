@@ -75,8 +75,27 @@ public:
 	UItemDynamicInfo* GetItemDynamicInfo() 
 		override { return ItemDynamicInfo; }
 
-	void SetItemDynamicInfo(UItemDynamicInfo* DynamicInfo)
-		override { ItemDynamicInfo = Cast<UFlashlightItemDynamicInfo>(DynamicInfo);}
+	void SetItemDynamicInfo(UItemDynamicInfo* DynamicInfo) override
+	{
+		// Проверка указателя на null
+		if (!DynamicInfo)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("DynamicInfo is nullptr!"));
+			return;
+		}
+
+		// Выполнение каста и проверка успешности
+		UFlashlightItemDynamicInfo* FlashlightInfo = Cast<UFlashlightItemDynamicInfo>(DynamicInfo);
+		if (FlashlightInfo)
+		{
+			// Установка нового значения
+			ItemDynamicInfo = FlashlightInfo;
+		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Failed to cast DynamicInfo to UFlashlightItemDynamicInfo!"));
+		}
+	}
 
 	bool UseStaticMesh()
 		override { return true; }
@@ -86,8 +105,6 @@ public:
 
 	AStaticMeshActor* GetHeldMeshItem()
 		override { return  HeldMeshItem; }
-
-	const FTransform& GetWorldItemOffset() override;
 
 	bool CanDrop()
 		override { return true;};

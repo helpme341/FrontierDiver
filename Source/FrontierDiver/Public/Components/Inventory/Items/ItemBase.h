@@ -90,8 +90,6 @@ public:
 
     virtual bool FindDataTableByItemType();
 
-    virtual const FTransform& GetWorldItemOffset();
-
     virtual void OnPickupItemToInventory(class AWorldItem* Item) {};
 
     virtual const FItemTableRowInfoBase* GetItemStaticInfo() { return nullptr; }

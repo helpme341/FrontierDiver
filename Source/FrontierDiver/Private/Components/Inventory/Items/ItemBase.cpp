@@ -10,9 +10,3 @@ bool UItemBase::FindDataTableByItemType()
 {
     return false;
 }
-
-const FTransform& UItemBase::GetWorldItemOffset()
-{
-    static const FTransform DefaultTransform = FTransform();
-    return DefaultTransform;
-}
