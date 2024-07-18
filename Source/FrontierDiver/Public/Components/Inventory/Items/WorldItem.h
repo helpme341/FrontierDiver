@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Character/Interfaces/InteractionIF.h"
+#include "Components/SceneComponent.h"
 #include "WorldItem.generated.h"
 
 class UItemBase;
@@ -27,17 +28,20 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UStaticMeshComponent* StaticMesh;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+	USceneComponent* SceneComponent;
+
 	UPROPERTY(EditAnywhere,BlueprintReadWrite)
 	FName ItemTypeName = "None";
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TSubclassOf<UItemBase> ItemType;
 
-	UItemDynamicInfo* ItemDynamicInfo;
+	TStrongObjectPtr<UItemDynamicInfo> ItemDynamicInfo;
 
-	void LoadDataToWorldItem(UItemDynamicInfo* ItemDynamic, const FItemTableRowInfoBase* ItemTableRowInfo, TSubclassOf<UItemBase> NewItemType);
+	void LoadDataToWorldItem(TStrongObjectPtr<UItemDynamicInfo> ItemDynamic, const TStrongObjectPtr<FItemTableRowInfoBase>& ItemTableRowInfo, TSubclassOf<UItemBase> NewItemType);
 
 private:
 
-	class AInventoryDataTableItemManager* FoundActor;
+	class TWeakObjectPtr<AInventoryDataTableItemManager> FoundActor;
 };

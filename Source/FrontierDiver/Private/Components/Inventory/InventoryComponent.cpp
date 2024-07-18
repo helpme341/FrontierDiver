@@ -17,9 +17,9 @@ DEFINE_LOG_CATEGORY(LogInventoryComponent);
 * return 1 =  предмет был добавлен
 * return 2 =  дредмет был застакан с оналогичным и удален
 */
-int UInventoryComponent::AddItemToInventory(UItemBase* Item, UItemBase*& ItemResult)
+int UInventoryComponent::AddItemToInventory(TStrongObjectPtr<UItemBase> Item, TStrongObjectPtr<UItemBase>& ItemResult)
 { 
-    if (!Item || Item->ThisItemID != 99 || !Item->GetItemDynamicInfo() || !Item->FindDataTableByItemType(GetWorld()) ||
+    if (!Item || !Item.IsValid() || Item->ThisItemID != 99 || !Item->GetItemDynamicInfo() || !Item->FindDataTableByItemType(GetWorld()) ||
         !Item->GetItemStaticInfo() || !Inventory.Contains(Item->GetItemStaticInfo()->ItemContainerType) ||
         Inventory[Item->GetItemStaticInfo()->ItemContainerType].ContainerInventory.IsEmpty()) { return 0; }
 
@@ -29,7 +29,7 @@ int UInventoryComponent::AddItemToInventory(UItemBase* Item, UItemBase*& ItemRes
     {
         for (int32 Counter = 0; Counter < Inventory[Item->GetItemStaticInfo()->ItemContainerType].ContainerInventory.Num(); Counter++)
         {
-            UItemBase* ItemOnInspection = Inventory[Item->GetItemStaticInfo()->ItemContainerType].ContainerInventory[Counter];
+            UItemBase* ItemOnInspection = Inventory[Item->GetItemStaticInfo()->ItemContainerType].ContainerInventory[Counter].Item;
 
             if (bCheckQuantity && ItemOnInspection && ItemOnInspection->GetItemDynamicInfo()->ItemTypeName == Item->GetItemDynamicInfo()->ItemTypeName && ItemOnInspection->GetClass() == Item->GetClass())
             {
@@ -64,7 +64,7 @@ int UInventoryComponent::AddItemToInventory(UItemBase* Item, UItemBase*& ItemRes
 * return 1 =  предмет удален из инвеноря 
 * return 2 =  предмет был застакон и из него был удален 1 копия
 */
-int UInventoryComponent::RemoveItemFromInventory(UItemBase* Item)
+int UInventoryComponent::RemoveItemFromInventory(TStrongObjectPtr<UItemBase> Item)
 {
     if (!Item || Item->ThisItemID == 99 || !Item->FindDataTableByItemType(GetWorld()) || !Item->GetItemDynamicInfo() ||
         !Item->GetItemStaticInfo() || !Inventory[Item->GetItemStaticInfo()->ItemContainerType].ContainerInventory[Item->ThisItemID]) { return 0; }
@@ -85,7 +85,7 @@ int UInventoryComponent::RemoveItemFromInventory(UItemBase* Item)
     return 0;
 }
 
-bool UInventoryComponent::PickupItemToInventory(AWorldItem* Item)
+bool UInventoryComponent::PickupItemToInventory(TStrongObjectPtr<AWorldItem> Item)
 {
     if (!Item) { return false; }
 
@@ -143,7 +143,7 @@ bool UInventoryComponent::PickupItemToInventory(AWorldItem* Item)
 * return 1 =  предмет удален из инвеноря
 * return 2 =  предмет был застакон и из него был удален
 */
-int UInventoryComponent::DropItemFromInventory(UItemBase* Item)
+int UInventoryComponent::DropItemFromInventory(TStrongObjectPtr<UItemBase> Item)
 {
     if (!Item || !Item->bIsPlayerCanDropThisItem || !Item->FindDataTableByItemType(GetWorld()))
     {
@@ -189,7 +189,7 @@ int UInventoryComponent::DropItemFromInventory(UItemBase* Item)
             }
             case 2:
             {
-                UItemDynamicInfo* ItemDynamic = DuplicateObject<UItemDynamicInfo>(Item->GetItemDynamicInfo(), GetOuter());
+                UItemDynamicInfo* ItemDynamic = DuplicateObject<UItemDynamicInfo>(ItemDynamicInfo, GetOuter());
                 if (!ItemDynamic)
                 {
                     NewWorldItem->Destroy();
@@ -242,7 +242,7 @@ int UInventoryComponent::DropItemFromInventory(UItemBase* Item)
         }
         case 2:
         {
-            UItemDynamicInfo* ItemDynamic = DuplicateObject<UItemDynamicInfo>(Item->GetItemDynamicInfo(), GetOuter());
+            UItemDynamicInfo* ItemDynamic = DuplicateObject<UItemDynamicInfo>(ItemDynamicInfo, GetOuter());
             if (!ItemDynamic)
             {
                 NewWorldItem->Destroy();

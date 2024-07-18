@@ -7,11 +7,14 @@
 #include "Components/Inventory/InventoryComponent.h"
 #include "Components/Inventory/Items/ItemBase.h"
 #include "Components/Inventory/InventoryDataTableItemManager.h"
-
+#include "Kismet/GameplayStatics.h"
 
 AWorldItem::AWorldItem()
 {
-	StaticMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("StaticMeshComponent"));
+    SceneComponent = CreateDefaultSubobject<USceneComponent>(TEXT("RootSceneComponent"));
+    RootComponent = SceneComponent;
+    StaticMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("StaticMeshComponent"));
+    StaticMesh->SetupAttachment(RootComponent);
     StaticMesh->SetSimulatePhysics(true);
     StaticMesh->SetLinearDamping(2.0f);
     StaticMesh->SetAngularDamping(1.0f);
@@ -23,39 +26,56 @@ void AWorldItem::OnConstruction(const FTransform& Transform)
 
     if (ItemTypeName != "None")
     {
-        if (!FoundActor)
+        if (!FoundActor.IsValid())
         {
             TArray<AActor*> FoundActors;
             UGameplayStatics::GetAllActorsOfClass(GetWorld(), AInventoryDataTableItemManager::StaticClass(), FoundActors);
-            
-            if (FoundActors.Num() > 0) { FoundActor = Cast<AInventoryDataTableItemManager>(FoundActors[0]); }
-            else { return; }
+
+            if (FoundActors.Num() > 0)
+            {
+                FoundActor = Cast<AInventoryDataTableItemManager>(FoundActors[0]);
+            }
+            else
+            {
+                UE_LOG(LogTemp, Warning, TEXT("No AInventoryDataTableItemManager actors found"));
+                return;
+            }
         }
 
-
-        UDataTable* DataTable = FoundActor->FindDataTableByItemType(ItemType);
-
-        if (DataTable)
+        AInventoryDataTableItemManager* ValidFoundActor = FoundActor.Get();
+        if (ValidFoundActor)
         {
-            FItemTableRowInfoBase* ItemRow = DataTable->FindRow<FItemTableRowInfoBase>(ItemTypeName, "");
+            UDataTable* DataTable = ValidFoundActor->FindDataTableByItemType(ItemType);
 
-            if (ItemRow)
+            if (DataTable)
             {
-                if (StaticMesh && ItemRow->WorldItemStaticMesh)
+                FItemTableRowInfoBase* ItemRow = DataTable->FindRow<FItemTableRowInfoBase>(ItemTypeName, "");
+
+                if (ItemRow)
                 {
-                    StaticMesh->SetStaticMesh(ItemRow->WorldItemStaticMesh);
-                    StaticMesh->SetMassOverrideInKg(NAME_None, ItemRow->WorldItemMass);
-                    StaticMesh->SetWorldScale3D(ItemRow->WorldItemScale);
-                    if (FoundActor->WaterPhysicalMaterial) { StaticMesh->SetPhysMaterialOverride(FoundActor->WaterPhysicalMaterial); }
+                    if (StaticMesh && ItemRow->WorldItemStaticMesh)
+                    {
+                        StaticMesh->SetStaticMesh(ItemRow->WorldItemStaticMesh);
+                        StaticMesh->SetMassOverrideInKg(NAME_None, ItemRow->WorldItemMass);
+                        StaticMesh->SetWorldScale3D(ItemRow->WorldItemScale);
+                        if (ValidFoundActor->WaterPhysicalMaterial)
+                        {
+                            StaticMesh->SetPhysMaterialOverride(ValidFoundActor->WaterPhysicalMaterial);
+                        }
+                    }
+                    else
+                    {
+                        UE_LOG(LogTemp, Warning, TEXT("StaticMesh or ItemWorldStaticMesh is null."));
+                    }
                 }
                 else
                 {
-                    UE_LOG(LogTemp, Warning, TEXT("StaticMesh or ItemWorldStaticMesh is null."));
+                    UE_LOG(LogTemp, Warning, TEXT("ItemRow not found for ItemTypeName: %s"), *ItemTypeName.ToString());
                 }
             }
             else
             {
-                UE_LOG(LogTemp, Warning, TEXT("ItemRow not found for ItemTypeName: %s"), *ItemTypeName.ToString());
+                UE_LOG(LogTemp, Warning, TEXT("DataTable not found for ItemType: %s"), *ItemType->GetName());
             }
         }
     }
@@ -63,16 +83,37 @@ void AWorldItem::OnConstruction(const FTransform& Transform)
 
 bool AWorldItem::MainInteract(AFrontierDiverCharacter* Character)
 {
-	return Character->GetComponentByClass<UInventoryComponent>()->PickupItemToInventory(this);
+    if (UInventoryComponent* InventoryComp = Character->FindComponentByClass<UInventoryComponent>())
+    {
+        return InventoryComp->PickupItemToInventory(this);
+    }
+    return false;
 }
 
-
-void AWorldItem::LoadDataToWorldItem(UItemDynamicInfo* ItemDynamic, const FItemTableRowInfoBase* ItemTableRowInfo, TSubclassOf<UItemBase> NewItemType)
+void AWorldItem::LoadDataToWorldItem(TStrongObjectPtr<UItemDynamicInfo> ItemDynamic, const TSharedPtr<FItemTableRowInfoBase> ItemTableRowInfo, TSubclassOf<UItemBase> NewItemType)
 {
-	ItemType = NewItemType;
-	ItemDynamicInfo = ItemDynamic;
-	StaticMesh->SetStaticMesh(ItemTableRowInfo->WorldItemStaticMesh);
-    StaticMesh->SetWorldScale3D(ItemTableRowInfo->WorldItemScale);
-    if (FoundActor && FoundActor->WaterPhysicalMaterial) { StaticMesh->SetPhysMaterialOverride(FoundActor->WaterPhysicalMaterial); }
-    StaticMesh->SetMassOverrideInKg(NAME_None, ItemTableRowInfo->WorldItemMass);
+    ItemType = NewItemType;
+    ItemDynamicInfo = MoveTemp(ItemDynamic);
+
+    if (StaticMesh && ItemTableRowInfo.IsValid())
+    {
+        StaticMesh->SetStaticMesh(ItemTableRowInfo->WorldItemStaticMesh);
+        StaticMesh->SetWorldScale3D(ItemTableRowInfo->WorldItemScale);
+        if (FoundActor.IsValid())
+        {
+            AInventoryDataTableItemManager* ValidFoundActor = FoundActor.Get();
+            if (ValidFoundActor)
+            {
+                if (ValidFoundActor->WaterPhysicalMaterial)
+                {
+                    StaticMesh->SetPhysMaterialOverride(ValidFoundActor->WaterPhysicalMaterial);
+                }
+            }
+        }
+        StaticMesh->SetMassOverrideInKg(NAME_None, ItemTableRowInfo->WorldItemMass);
+    }
+    else
+    {
+        UE_LOG(LogTemp, Warning, TEXT("StaticMesh or ItemTableRowInfo is null."));
+    }
 }

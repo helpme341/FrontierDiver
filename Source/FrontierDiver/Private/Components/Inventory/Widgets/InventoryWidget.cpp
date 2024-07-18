@@ -31,66 +31,51 @@ void UInventoryWidget::LoadWidgestSlots()
 
 void UInventoryWidget::ShowItemInfo(UItemBase* Item)///////////////////////////////
 {
-    if (Item->IsValidLowLevel() && Item->GetItemDynamicInfo()->IsValidLowLevel() && !bIsInventoryHidden)
+    if (Item && Item->GetItemDynamicInfo() && !bIsInventoryHidden && !bIsShowingItemInfo)
     {
-        if (Item->GetItemDynamicInfo()->QuantityItems == 0) { bIsShowingItemInfo = false; return; }
-        const FItemTableRowInfoBase* ItemStaticInfo = Item->GetItemStaticInfo();
-        if (ItemStaticInfo)
+        if (Item->FindDataTableByItemType(GetWorld()) || Item->GetItemStaticInfo())
         {
-            if (ItemImage) { ItemImage->SetBrushFromTexture(ItemStaticInfo->ItemWidgetTexture); }
+            ItemImage->SetBrushFromTexture(Item->GetItemStaticInfo()->ItemWidgetTexture);
+            ItemDescription->SetText(Item->GetItemStaticInfo()->ItemDescription);
+            ItemNameTextBlock->SetText(FText::FromName(Item->GetItemDynamicInfo()->ItemTypeName));
 
-            if (ItemDescription) { ItemDescription->SetText(ItemStaticInfo->ItemDescription); }
-        }
-        else
-        {
-            UE_LOG(LogInventoryWidget, Warning, TEXT("ItemStaticInfo is nullptr"));
-            bIsShowingItemInfo = false;
+            FString QuantityString = FString::Printf(TEXT("%d/%d"), Item->GetItemDynamicInfo()->QuantityItems, Item->GetItemStaticInfo()->MaxQuantityItemsInSlot);
+            ItemQuantityTextBlock->SetText(FText::FromString(QuantityString));
+
+            ItemImage->SetVisibility(ESlateVisibility::Visible);
+            ItemNameTextBlock->SetVisibility(ESlateVisibility::Visible);
+            ItemQuantityTextBlock->SetVisibility(ESlateVisibility::Visible);
+            ItemDescription->SetVisibility(ESlateVisibility::Visible);
+            bIsShowingItemInfo = true;
             return;
         }
-        if (ItemNameTextBlock) { ItemNameTextBlock->SetText(FText::FromName(Item->GetItemDynamicInfo()->ItemTypeName)); }
-
-        FString QuantityString = FString::Printf(TEXT("%d/%d"), Item->GetItemDynamicInfo()->QuantityItems, ItemStaticInfo->MaxQuantityItemsInSlot);
-
-        if (ItemQuantityTextBlock) { ItemQuantityTextBlock->SetText(FText::FromString(QuantityString)); }
-
-
-        if (ItemImage) { ItemImage->SetVisibility(ESlateVisibility::Visible); }
-        if (ItemNameTextBlock) { ItemNameTextBlock->SetVisibility(ESlateVisibility::Visible); }
-        if (ItemQuantityTextBlock) { ItemQuantityTextBlock->SetVisibility(ESlateVisibility::Visible); }
-        if (ItemDescription) { ItemDescription->SetVisibility(ESlateVisibility::Visible); }
-        bIsShowingItemInfo = true;
         return;
     }
     else if (!bIsInventoryHidden && bIsShowingItemInfo)
     {
-        if (ItemImage)
+        if (DefaultItemWidgetTexture)
         {
             ItemImage->SetBrushFromTexture(DefaultItemWidgetTexture);
             ItemImage->SetVisibility(ESlateVisibility::Hidden);
         }
-        if (ItemNameTextBlock)
-        {
-            ItemNameTextBlock->SetText(FText::GetEmpty());
-            ItemNameTextBlock->SetVisibility(ESlateVisibility::Hidden);
-        }
-        if (ItemQuantityTextBlock)
-        {
-            ItemQuantityTextBlock->SetText(FText::GetEmpty());
-            ItemQuantityTextBlock->SetVisibility(ESlateVisibility::Hidden);
-        }
-        if (ItemDescription)
-        {
-            ItemDescription->SetText(FText::GetEmpty());
-            ItemDescription->SetVisibility(ESlateVisibility::Hidden);
-        }
+
+        ItemNameTextBlock->SetText(FText::GetEmpty());
+        ItemNameTextBlock->SetVisibility(ESlateVisibility::Hidden);
+
+        ItemQuantityTextBlock->SetText(FText::GetEmpty());
+        ItemQuantityTextBlock->SetVisibility(ESlateVisibility::Hidden);
+
+        ItemDescription->SetText(FText::GetEmpty());
+        ItemDescription->SetVisibility(ESlateVisibility::Hidden);
         bIsShowingItemInfo = false;
+        return;
     }
     bIsShowingItemInfo = false;
 }
 
 void UInventoryWidget::DropItemFromWidget(UItemBase* Item)////////////////
 {
-    if (Item && Item->IsValidLowLevel() && !bIsInventoryHidden)
+    if (Item && !bIsInventoryHidden)
     {
         int Result = InventoryComponent->DropItemFromInventory(Item);
         if (Result != 0)

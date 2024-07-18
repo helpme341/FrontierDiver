@@ -33,21 +33,28 @@ enum class ECylinderInventorySlotType : uint8
 };
 
 USTRUCT(BlueprintType)
+struct FSharedContainerBase
+{
+	GENERATED_BODY()
+
+	TStrongObjectPtr<UItemBase> Item;
+};
+
+
+USTRUCT(BlueprintType)
 struct FContainerBase
 {
 	GENERATED_BODY()
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Testing")
-	TArray<UItemBase*> ContainerInventory;
+	TArray<FSharedContainerBase> ContainerInventory;
 
 	FContainerBase() {}
-
 
     FContainerBase(int32 InventorySlots)
 	{
 		for (int32 Counter = 0; Counter < InventorySlots; Counter++)
 		{
-			ContainerInventory.Add(nullptr);
+			ContainerInventory.Add(FSharedContainerBase());
 		}
 	}
 };
@@ -72,9 +79,11 @@ public:
 	TSubclassOf<UInventoryWidget> InventoryWidgetClass;
 
 	UFUNCTION(BlueprintCallable)
-	UInventoryWidget* GetInventoryWidget() { return InventoryWidget; }
+	UInventoryWidget* GetInventoryWidget() { return InventoryWidget.Get(); }
+
 	UFUNCTION(BlueprintCallable)
-	AFrontierDiverCharacter* GetOwnerCharacter() { return Cast<AFrontierDiverCharacter>(GetOwner()); }
+    AFrontierDiverCharacter* GetOwnerCharacter() { return Cast<AFrontierDiverCharacter>(GetOwner()); }
+
 	UFUNCTION(BlueprintCallable)
 	bool TakeItemToHandsByID(int32 ID);
 
@@ -82,23 +91,22 @@ public:
 	bool RemoveItemFromHands();
 
 	void BeginPlay() override;
-	int AddItemToInventory(UItemBase* Item, UItemBase*& ItemResult);
-	int RemoveItemFromInventory(UItemBase* Item);
-	bool PickupItemToInventory(AWorldItem* Item);
-	int DropItemFromInventory(UItemBase* Item);
+	int AddItemToInventory(TStrongObjectPtr<UItemBase> Item, TStrongObjectPtr<UItemBase>& ItemResult);
+	int RemoveItemFromInventory(TStrongObjectPtr<UItemBase> Item);
+	bool PickupItemToInventory(TStrongObjectPtr<AWorldItem> Item);
+	int DropItemFromInventory(TStrongObjectPtr<UItemBase> Item);
 
 	bool FirstInteractWithHeldItem();
 	bool SecondInteractWithHeldItem();
 	bool ThirdInteractWithHeldItem();
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Testing")
 	TMap<EContainerType, FContainerBase> Inventory{
 	  { EContainerType::ClothingOne, FContainerBase(1)},
 	  { EContainerType::ClothingTwo, FContainerBase(1)},
 	  { EContainerType::Array, FContainerBase(5)}
 	};
-	UInventoryWidget* InventoryWidget;
-	UItemBase* HeldItem;
+	TUniquePtr<UInventoryWidget> InventoryWidget;
+	TStrongObjectPtr<UItemBase> HeldItem;
 	bool bIsItemHeld;
 };
 

@@ -74,8 +74,6 @@ struct FItemTableRowInfoBase : public FTableRowBase
     FVector WorldItemScale = FVector(1.0f,1.0f,1.0f);
 };
 
-
-
 /**
  * 
  */
@@ -90,15 +88,15 @@ public:
 
     int32 ThisItemID = 99; 
 
-    virtual bool FindDataTableByItemType(UWorld* World);
+    virtual bool FindDataTableByItemType(TWeakObjectPtr<UWorld> World) { return false; };
 
-    virtual void OnPickupItemToInventory(class AWorldItem* Item) {};
+    virtual void OnPickupItemToInventory(class TStrongObjectPtr<AWorldItem> Item) {};
 
-    virtual const FItemTableRowInfoBase* GetItemStaticInfo() { return nullptr; }
+    virtual const TSharedPtr<FItemTableRowInfoBase> GetItemStaticInfo() { return nullptr; }
 
-    virtual UItemDynamicInfo* GetItemDynamicInfo() { return nullptr; }
+    virtual TStrongObjectPtr<UItemDynamicInfo> GetItemDynamicInfo() { return nullptr; }
 
-    virtual void SetItemDynamicInfo(UItemDynamicInfo* DynamicInfo) {};
+    virtual void SetItemDynamicInfo(TStrongObjectPtr<UItemDynamicInfo> DynamicInfo) {};
 
 protected:
     /*FT == ItemTableRowInfo*/
