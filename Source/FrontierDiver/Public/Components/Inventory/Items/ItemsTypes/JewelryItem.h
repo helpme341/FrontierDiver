@@ -20,7 +20,7 @@ struct FJewelryItemTableRowInfo : public FItemTableRowInfoBase
  * 
  */
 UCLASS()
-class FRONTIERDIVER_API UJewelryItem :
+class FRONTIERDIVER_API UJewelryItem : 
     public UItemBase, 
     public TItemTmpl<UItemDynamicInfo, FJewelryItemTableRowInfo>
 {

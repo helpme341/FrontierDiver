@@ -39,9 +39,9 @@ public:
 
 	TStrongObjectPtr<UItemDynamicInfo> ItemDynamicInfo;
 
-	void LoadDataToWorldItem(TStrongObjectPtr<UItemDynamicInfo> ItemDynamic, const TStrongObjectPtr<FItemTableRowInfoBase>& ItemTableRowInfo, TSubclassOf<UItemBase> NewItemType);
+	void LoadDataToWorldItem(UItemDynamicInfo* ItemDynamic, const FItemTableRowInfoBase* temTableRowInfo, TSubclassOf<UItemBase> NewItemType);
 
 private:
 
-	class TWeakObjectPtr<AInventoryDataTableItemManager> FoundActor;
+	class TStrongObjectPtr<AInventoryDataTableItemManager> FoundActor;
 };

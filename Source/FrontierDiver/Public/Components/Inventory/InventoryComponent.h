@@ -40,7 +40,6 @@ struct FSharedContainerBase
 	TStrongObjectPtr<UItemBase> Item;
 };
 
-
 USTRUCT(BlueprintType)
 struct FContainerBase
 {
@@ -73,8 +72,10 @@ class FRONTIERDIVER_API UInventoryComponent : public UCharacterComponentBase
 public:
 	UPROPERTY(EditDefaultsOnly, Category = "Settings")
 	float PlayerDropLocationOffset;
+
 	UPROPERTY(EditDefaultsOnly, Category = "Settings")
 	EContainerType QuickInventoryContainerType;
+
 	UPROPERTY(EditDefaultsOnly, Category = "Settings|UI") 
 	TSubclassOf<UInventoryWidget> InventoryWidgetClass;
 
@@ -91,10 +92,10 @@ public:
 	bool RemoveItemFromHands();
 
 	void BeginPlay() override;
-	int AddItemToInventory(TStrongObjectPtr<UItemBase> Item, TStrongObjectPtr<UItemBase>& ItemResult);
-	int RemoveItemFromInventory(TStrongObjectPtr<UItemBase> Item);
-	bool PickupItemToInventory(TStrongObjectPtr<AWorldItem> Item);
-	int DropItemFromInventory(TStrongObjectPtr<UItemBase> Item);
+	int AddItemToInventory(UItemBase* Item, UItemBase*& ItemResult);
+	int RemoveItemFromInventory(UItemBase* Item);
+	bool PickupItemToInventory(AWorldItem* Item);
+	int DropItemFromInventory(UItemBase* Item);
 
 	bool FirstInteractWithHeldItem();
 	bool SecondInteractWithHeldItem();
@@ -107,6 +108,7 @@ public:
 	};
 	TUniquePtr<UInventoryWidget> InventoryWidget;
 	TStrongObjectPtr<UItemBase> HeldItem;
+	UPROPERTY()
 	bool bIsItemHeld;
 };
 

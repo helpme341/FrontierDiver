@@ -88,15 +88,15 @@ public:
 
     int32 ThisItemID = 99; 
 
-    virtual bool FindDataTableByItemType(TWeakObjectPtr<UWorld> World) { return false; };
+    virtual bool FindDataTableByItemType(UWorld* World) { return false; };
 
-    virtual void OnPickupItemToInventory(class TStrongObjectPtr<AWorldItem> Item) {};
+    virtual void OnPickupItemToInventory(class AWorldItem* Item) {};
 
-    virtual const TSharedPtr<FItemTableRowInfoBase> GetItemStaticInfo() { return nullptr; }
+    virtual const FItemTableRowInfoBase* GetItemStaticInfo() { return nullptr; }
 
-    virtual TStrongObjectPtr<UItemDynamicInfo> GetItemDynamicInfo() { return nullptr; }
+    virtual UItemDynamicInfo* GetItemDynamicInfo() { return nullptr; }
 
-    virtual void SetItemDynamicInfo(TStrongObjectPtr<UItemDynamicInfo> DynamicInfo) {};
+    virtual void SetItemDynamicInfo(UItemDynamicInfo* DynamicInfo) {};
 
 protected:
     /*FT == ItemTableRowInfo*/
@@ -105,10 +105,10 @@ protected:
 };
 
 template<typename T, typename FT>
-inline bool UItemBase::BaseFindDataTableByItemType(UWorld* World)
+inline bool UItemBase::BaseFindDataTableByItemType(UWorld* World) // переписать 
 {
     T* Item = Cast<T>(this);
-    if (!Item->ItemTableRowInfo && Item->ItemDynamicInfo->ItemTypeName != "None")
+    if (!Item->ItemTableRowInfo.IsValid() && Item->ItemDynamicInfo->ItemTypeName != "None")
     {
         TArray<AActor*> FoundActors;
         UGameplayStatics::GetAllActorsOfClass(World, AInventoryDataTableItemManager::StaticClass(),FoundActors);

@@ -7,22 +7,37 @@
 #include "Engine/StaticMeshActor.h"
 #include "Components/Inventory/Items/WorldItem.h"
 
-
-
 UFlashlightItem::UFlashlightItem()
 {
     bIsPlayerCanDropThisItem = true;
 }
 
-
-const FHeldItemInfo& UFlashlightItem::GetHeldItemInfo()
+const FHeldItemInfo* UFlashlightItem::GetHeldItemInfo()
 {
     if (FindDataTableByItemType(GetWorld()))
     {
-        return ItemTableRowInfo->HeldItemInfo;
+        return ItemTableRowInfo->HeldItemInfo.Get();
     }
-    static const FHeldItemInfo DefaultHeldItemInfo = FHeldItemInfo();
-    return DefaultHeldItemInfo;
+    return nullptr;
+}
+
+void UFlashlightItem::SetItemDynamicInfo(UItemDynamicInfo* DynamicInfo)
+{
+    if (!DynamicInfo)
+    {
+        UE_LOG(LogTemp, Warning, TEXT("DynamicInfo is nullptr!"));
+        return;
+    }
+
+    UFlashlightItemDynamicInfo* FlashlightInfo = Cast<UFlashlightItemDynamicInfo>(DynamicInfo);
+    if (FlashlightInfo)
+    {
+        ItemDynamicInfo.Reset(FlashlightInfo);
+    }
+    else
+    {
+        UE_LOG(LogTemp, Warning, TEXT("Failed to cast DynamicInfo to UFlashlightItemDynamicInfo!"));
+    }
 }
 
 void UFlashlightItem::ThirdInteract(UInventoryComponent* Inventory)
@@ -61,7 +76,7 @@ void UFlashlightItem::OnTakeItem(UInventoryComponent* Inventory)
 {
     if (!ItemDynamicInfo->SpotLight)
     {
-        ItemDynamicInfo->SpotLight = GetWorld()->SpawnActor<ASpotLight>();
+        ItemDynamicInfo->SpotLight.Reset(GetWorld()->SpawnActor<ASpotLight>());
         if (ItemDynamicInfo->SpotLight)
         {
             ItemDynamicInfo->SpotLight->SetMobility(EComponentMobility::Movable);

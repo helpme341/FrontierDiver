@@ -116,8 +116,8 @@ void UInventoryWidget::CreateWidgets()
                 }
 
                 NewWidget->WidgetCanvasPanel->RenderTransform.Scale = Settings.WidgetSize;
-                NewWidget->InventoryWidget = this;
-                NewWidget->Item = InventoryComponent->Inventory[Elem.Key].ContainerInventory[Counter];
+                NewWidget->InventoryWidget.Reset(this);
+                NewWidget->Item.Reset(InventoryComponent->Inventory[Elem.Key].ContainerInventory[Counter].Item.Get());
 
                 UCanvasPanelSlot* CanvasSlot = ParentCanvasPanel->AddChildToCanvas(NewWidget);
                 CanvasSlot->SetPosition(CurrentPosition);
@@ -143,7 +143,7 @@ void UInventoryWidget::CreateWidgets()
                 }
 
                 if (!Settings.bIsQuickInventory) { NewWidget->SetVisibility(ESlateVisibility::Hidden); }
-                Widgets[Elem.Key].Array[Counter] = NewWidget;
+                Widgets[Elem.Key].Array[Counter].ItemWidget.Reset(NewWidget);
             }
         }
     }
@@ -155,7 +155,7 @@ void UInventoryWidget::UpdateAllWidgets()
     {
         for (int32 Counter = 0; Counter < Elem.Value.ContainerInventory.Num(); Counter++)
         {
-            UpdateWidget(Elem.Value.ContainerInventory[Counter], Widgets[Elem.Key].Array[Counter]);
+            UpdateWidget(Elem.Value.ContainerInventory[Counter].Item.Get(), Widgets[Elem.Key].Array[Counter].ItemWidget.Get());
         }
     }
 }
@@ -164,13 +164,13 @@ void UInventoryWidget::UpdateWidgetByItem(UItemBase* Item, bool Clear)//////////
 {
     if (Clear)
     {
-        UpdateWidget(nullptr, Widgets[Item->GetItemStaticInfo()->ItemContainerType].Array[Item->ThisItemID]);
+        UpdateWidget(nullptr, Widgets[Item->GetItemStaticInfo()->ItemContainerType].Array[Item->ThisItemID].ItemWidget.Get());
     }
     else
     {
         if (Item)
         {
-            UpdateWidget(Item, Widgets[Item->GetItemStaticInfo()->ItemContainerType].Array[Item->ThisItemID]);
+            UpdateWidget(Item, Widgets[Item->GetItemStaticInfo()->ItemContainerType].Array[Item->ThisItemID].ItemWidget.Get());
         }
     }
 }
@@ -189,7 +189,7 @@ void UInventoryWidget::UpdateWidget(UItemBase* Item, UInventoryItemWidget* ItemW
         {
             ItemWidget->WidgetImage->SetBrushFromTexture(Item->GetItemStaticInfo()->ItemWidgetTexture);
             ItemWidget->WidgetTextBlock->SetText(FText::FromString(FString::Printf(TEXT("%03d"), Item->GetItemDynamicInfo()->QuantityItems)));
-            ItemWidget->Item = Item;
+            ItemWidget->Item.Reset(Item);
             ItemWidget->WidgetTextBlock->SetText(FText::AsNumber(Item->GetItemDynamicInfo()->QuantityItems));
             ItemWidget->bIsThisEmptyWidget = false;
         }
@@ -213,9 +213,9 @@ void UInventoryWidget::SetNotQuickInventoryVisibility(bool Hide)
         {
             for (int32 Counter = 0; Counter < Widgets[ContainerSettings.Key].Array.Num(); Counter++)
             {
-                if (Widgets[ContainerSettings.Key].Array[Counter])
+                if (Widgets[ContainerSettings.Key].Array[Counter].ItemWidget)
                 {
-                    Widgets[ContainerSettings.Key].Array[Counter]->SetVisibility(NewWidgetsState);
+                    Widgets[ContainerSettings.Key].Array[Counter].ItemWidget->SetVisibility(NewWidgetsState);
                 }
             }
         }
@@ -232,9 +232,9 @@ void UInventoryWidget::SetAllInventoryVisibility(bool Hide)
     {
         for (int32 Counter = 0; Counter < Widgets[ContainerSettings.Key].Array.Num(); Counter++)
         {
-            if (Widgets[ContainerSettings.Key].Array[Counter])
+            if (Widgets[ContainerSettings.Key].Array[Counter].ItemWidget)
             {
-                Widgets[ContainerSettings.Key].Array[Counter]->SetVisibility(NewWidgetsState);
+                Widgets[ContainerSettings.Key].Array[Counter].ItemWidget->SetVisibility(NewWidgetsState);
             }
         }
     }

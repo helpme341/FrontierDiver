@@ -36,9 +36,14 @@ struct FWidgetContainerSettings
     int32 MaxWidgetsInOneLine = 1;
 };
 
-struct FWidgestContainer
+struct FWidgetContainerBase
 {
-    TArray<UInventoryItemWidget*> Array;
+    TStrongObjectPtr<UInventoryItemWidget> ItemWidget;
+};
+
+struct FWidgetContainer
+{
+    TArray<FWidgetContainerBase> Array;
 };
 
 class UInventoryComponent;
@@ -65,7 +70,7 @@ public:
     class UTexture2D* DefaultItemWidgetTexture;
 
     UFUNCTION(BlueprintCallable)
-    class UInventoryComponent* GetInventoryComponent() { return InventoryComponent; }
+    class UInventoryComponent* GetInventoryComponent() { return InventoryComponent.Get(); }
     UFUNCTION(BlueprintCallable)
     bool InventoryIsHidden() { return bIsInventoryHidden; }
     UFUNCTION(BlueprintCallable)
@@ -81,7 +86,7 @@ public:
     void ShowItemInfo(UItemBase* Item);
     void DropItemFromWidget(UItemBase* Item);
 
-    UInventoryComponent* InventoryComponent;
+    TStrongObjectPtr<UInventoryComponent> InventoryComponent;
 protected:
 
     UPROPERTY(meta = (BindWidget))
@@ -94,10 +99,14 @@ protected:
     UTextBlock* ItemQuantityTextBlock;
     UPROPERTY(meta = (BindWidget))
     UTextBlock* ItemDescription;
-
+    UPROPERTY()
     bool bIsWidgetsCreated;
+    UPROPERTY()
     bool bIsInventoryHidden = true;
+    UPROPERTY()
     bool bIsAllInventoryHidden;
+    UPROPERTY()
     bool bIsShowingItemInfo;
-    TMap<EContainerType, FWidgestContainer> Widgets;
+
+    TMap<EContainerType, FWidgetContainer> Widgets;
 };

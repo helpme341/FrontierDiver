@@ -32,7 +32,7 @@ public:
 
 	virtual AStaticMeshActor* GetHeldMeshItem() =0;
 
-	virtual const struct FHeldItemInfo& GetHeldItemInfo() =0;
+	virtual const struct FHeldItemInfo* GetHeldItemInfo() =0;
 
 	virtual bool CanDrop() = 0;
 

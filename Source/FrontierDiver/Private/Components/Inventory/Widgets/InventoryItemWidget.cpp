@@ -34,7 +34,7 @@ void UInventoryItemWidget::OnButtonPressed()
 {
     if (Item)
     {
-        InventoryWidget->DropItemFromWidget(Item);
+        InventoryWidget->DropItemFromWidget(Item.Get());
     }
 }
 
@@ -42,7 +42,7 @@ void UInventoryItemWidget::OnButtonHovered()
 {
     if (Item)
     {
-        InventoryWidget->ShowItemInfo(Item);
+        InventoryWidget->ShowItemInfo(Item.Get());
     }
 }
 

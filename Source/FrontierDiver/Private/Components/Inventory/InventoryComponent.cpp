@@ -17,9 +17,9 @@ DEFINE_LOG_CATEGORY(LogInventoryComponent);
 * return 1 =  предмет был добавлен
 * return 2 =  дредмет был застакан с оналогичным и удален
 */
-int UInventoryComponent::AddItemToInventory(TStrongObjectPtr<UItemBase> Item, TStrongObjectPtr<UItemBase>& ItemResult)
+int UInventoryComponent::AddItemToInventory(UItemBase* Item, UItemBase*& ItemResult)
 { 
-    if (!Item || !Item.IsValid() || Item->ThisItemID != 99 || !Item->GetItemDynamicInfo() || !Item->FindDataTableByItemType(GetWorld()) ||
+    if (!Item || Item->ThisItemID != 99 || !Item->GetItemDynamicInfo() || !Item->FindDataTableByItemType(GetWorld()) ||
         !Item->GetItemStaticInfo() || !Inventory.Contains(Item->GetItemStaticInfo()->ItemContainerType) ||
         Inventory[Item->GetItemStaticInfo()->ItemContainerType].ContainerInventory.IsEmpty()) { return 0; }
 
@@ -29,7 +29,7 @@ int UInventoryComponent::AddItemToInventory(TStrongObjectPtr<UItemBase> Item, TS
     {
         for (int32 Counter = 0; Counter < Inventory[Item->GetItemStaticInfo()->ItemContainerType].ContainerInventory.Num(); Counter++)
         {
-            UItemBase* ItemOnInspection = Inventory[Item->GetItemStaticInfo()->ItemContainerType].ContainerInventory[Counter].Item;
+            UItemBase* ItemOnInspection = Inventory[Item->GetItemStaticInfo()->ItemContainerType].ContainerInventory[Counter].Item.Get();
 
             if (bCheckQuantity && ItemOnInspection && ItemOnInspection->GetItemDynamicInfo()->ItemTypeName == Item->GetItemDynamicInfo()->ItemTypeName && ItemOnInspection->GetClass() == Item->GetClass())
             {
@@ -45,7 +45,7 @@ int UInventoryComponent::AddItemToInventory(TStrongObjectPtr<UItemBase> Item, TS
 
             if (!ItemOnInspection)
             {
-                Inventory[Item->GetItemStaticInfo()->ItemContainerType].ContainerInventory[Counter] = Item;
+                Inventory[Item->GetItemStaticInfo()->ItemContainerType].ContainerInventory[Counter].Item.Reset(Item);
                 Item->ThisItemID = Counter;
                 InventoryWidget->UpdateWidgetByItem(Item, false);
                 return 1;
@@ -64,10 +64,10 @@ int UInventoryComponent::AddItemToInventory(TStrongObjectPtr<UItemBase> Item, TS
 * return 1 =  предмет удален из инвеноря 
 * return 2 =  предмет был застакон и из него был удален 1 копия
 */
-int UInventoryComponent::RemoveItemFromInventory(TStrongObjectPtr<UItemBase> Item)
+int UInventoryComponent::RemoveItemFromInventory(UItemBase* Item)
 {
     if (!Item || Item->ThisItemID == 99 || !Item->FindDataTableByItemType(GetWorld()) || !Item->GetItemDynamicInfo() ||
-        !Item->GetItemStaticInfo() || !Inventory[Item->GetItemStaticInfo()->ItemContainerType].ContainerInventory[Item->ThisItemID]) { return 0; }
+        !Item->GetItemStaticInfo() || !Inventory[Item->GetItemStaticInfo()->ItemContainerType].ContainerInventory[Item->ThisItemID].Item) { return 0; }
 
     if (Item->GetItemStaticInfo()->MaxQuantityItemsInSlot > 1 && Item->GetItemDynamicInfo()->QuantityItems > 1)
     {
@@ -77,7 +77,7 @@ int UInventoryComponent::RemoveItemFromInventory(TStrongObjectPtr<UItemBase> Ite
     }
     else if (Inventory.Contains(Item->GetItemStaticInfo()->ItemContainerType))
     {
-        Inventory[Item->GetItemStaticInfo()->ItemContainerType].ContainerInventory[Item->ThisItemID] = nullptr;
+        Inventory[Item->GetItemStaticInfo()->ItemContainerType].ContainerInventory[Item->ThisItemID].Item = nullptr;
         InventoryWidget->UpdateWidgetByItem(Item, true);
         Item->ConditionalBeginDestroy();
         return 1;
@@ -85,7 +85,7 @@ int UInventoryComponent::RemoveItemFromInventory(TStrongObjectPtr<UItemBase> Ite
     return 0;
 }
 
-bool UInventoryComponent::PickupItemToInventory(TStrongObjectPtr<AWorldItem> Item)
+bool UInventoryComponent::PickupItemToInventory(AWorldItem* Item)
 {
     if (!Item) { return false; }
 
@@ -100,7 +100,7 @@ bool UInventoryComponent::PickupItemToInventory(TStrongObjectPtr<AWorldItem> Ite
     if (Item->ItemDynamicInfo)
     {
         if (NewItem->GetItemDynamicInfo()) { NewItem->GetItemDynamicInfo()->ConditionalBeginDestroy(); }
-        NewItem->SetItemDynamicInfo(Item->ItemDynamicInfo);
+        NewItem->SetItemDynamicInfo(Item->ItemDynamicInfo.Get());
     }
     else if (Item->ItemTypeName != "None")
     {
@@ -143,7 +143,7 @@ bool UInventoryComponent::PickupItemToInventory(TStrongObjectPtr<AWorldItem> Ite
 * return 1 =  предмет удален из инвеноря
 * return 2 =  предмет был застакон и из него был удален
 */
-int UInventoryComponent::DropItemFromInventory(TStrongObjectPtr<UItemBase> Item)
+int UInventoryComponent::DropItemFromInventory(UItemBase* Item)
 {
     if (!Item || !Item->bIsPlayerCanDropThisItem || !Item->FindDataTableByItemType(GetWorld()))
     {
@@ -165,9 +165,9 @@ int UInventoryComponent::DropItemFromInventory(TStrongObjectPtr<UItemBase> Item)
         return 0;
     }
 
-    if (bIsItemHeld && Item == HeldItem)
+    if (bIsItemHeld && Item == HeldItem.Get())
     {
-        ITakeRemoveItemIF* TakeRemoveItemIF = Cast<ITakeRemoveItemIF>(HeldItem);
+        ITakeRemoveItemIF* TakeRemoveItemIF = Cast<ITakeRemoveItemIF>(HeldItem.Get());
         if (TakeRemoveItemIF && TakeRemoveItemIF->CanDrop())
         {
             int Result = 0;
@@ -224,7 +224,7 @@ int UInventoryComponent::DropItemFromInventory(TStrongObjectPtr<UItemBase> Item)
     }
     else
     {
-        ITakeRemoveItemIF* TakeRemoveItemIF = Cast<ITakeRemoveItemIF>(HeldItem);
+        ITakeRemoveItemIF* TakeRemoveItemIF = Cast<ITakeRemoveItemIF>(HeldItem.Get());
         switch (RemoveItemFromInventory(Item))
         {
         case 0:
@@ -264,19 +264,19 @@ int UInventoryComponent::DropItemFromInventory(TStrongObjectPtr<UItemBase> Item)
 
 bool UInventoryComponent::TakeItemToHandsByID(int32 ID)
 {
-    if (bIsItemHeld || !Inventory[QuickInventoryContainerType].ContainerInventory[ID])
+    if (bIsItemHeld || !Inventory[QuickInventoryContainerType].ContainerInventory[ID].Item)
     {
         return false;
     }
 
-    ITakeRemoveItemIF* TakeRemoveItemIF = Cast<ITakeRemoveItemIF>(Inventory[QuickInventoryContainerType].ContainerInventory[ID]);
+    ITakeRemoveItemIF* TakeRemoveItemIF = Cast<ITakeRemoveItemIF>(Inventory[QuickInventoryContainerType].ContainerInventory[ID].Item.Get());
     if (!TakeRemoveItemIF)
     {
         return false;
     }
 
-    const FHeldItemInfo& HeldItemInfo = TakeRemoveItemIF->GetHeldItemInfo();
-    if (HeldItemInfo.ItemSocketName == "None" || HeldItemInfo.ItemAnimBlendType == EAnimItemBlendType::None)
+    const FHeldItemInfo* HeldItemInfo = TakeRemoveItemIF->GetHeldItemInfo();
+    if (HeldItemInfo->ItemSocketName == "None" || HeldItemInfo->ItemAnimBlendType == EAnimItemBlendType::None)
     {
         return false;
     }
@@ -294,10 +294,10 @@ bool UInventoryComponent::TakeItemToHandsByID(int32 ID)
         HeldMeshItem->GetStaticMeshComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
         FAttachmentTransformRules AttachmentRules(EAttachmentRule::SnapToTarget, true);
-        HeldMeshItem->AttachToComponent(GetOwnerCharacter()->Mesh1P, AttachmentRules, HeldItemInfo.ItemSocketName);
-        HeldMeshItem->AddActorLocalTransform(HeldItemInfo.ItemItemAttachOffset);
+        HeldMeshItem->AttachToComponent(GetOwnerCharacter()->Mesh1P, AttachmentRules, HeldItemInfo->ItemSocketName);
+        HeldMeshItem->AddActorLocalTransform(HeldItemInfo->ItemItemAttachOffset);
 
-        HeldItem = Inventory[QuickInventoryContainerType].ContainerInventory[ID];
+        HeldItem.Reset(Inventory[QuickInventoryContainerType].ContainerInventory[ID].Item.Get());
         HeldMeshItem->SetActorScale3D(HeldItem->GetItemStaticInfo()->WorldItemScale);
 
         if (HeldMeshItem->GetStaticMeshComponent() && HeldItem->GetItemStaticInfo()->WorldItemStaticMesh)
@@ -306,7 +306,7 @@ bool UInventoryComponent::TakeItemToHandsByID(int32 ID)
         }
 
         TakeRemoveItemIF->OnTakeItem(this);
-        GetOwnerCharacter()->AnimItemBlendTypeNow = HeldItemInfo.ItemAnimBlendType;
+        GetOwnerCharacter()->AnimItemBlendTypeNow = HeldItemInfo->ItemAnimBlendType;
         bIsItemHeld = true;
         return true;
     }
@@ -322,7 +322,7 @@ bool UInventoryComponent::RemoveItemFromHands()
 {
     if (!bIsItemHeld || !HeldItem) return false;
 
-    ITakeRemoveItemIF* TakeRemoveItemIF = Cast<ITakeRemoveItemIF>(HeldItem);
+    ITakeRemoveItemIF* TakeRemoveItemIF = Cast<ITakeRemoveItemIF>(HeldItem.Get());
     if (!TakeRemoveItemIF) return false;
 
     if (TakeRemoveItemIF->UseStaticMesh())
@@ -346,7 +346,7 @@ bool UInventoryComponent::FirstInteractWithHeldItem()
 {
     if (bIsItemHeld)
     {
-        IInteractItemIF* InteractItemIF = Cast<IInteractItemIF>(HeldItem);
+        IInteractItemIF* InteractItemIF = Cast<IInteractItemIF>(HeldItem.Get());
         if (InteractItemIF->_getUObject()->IsValidLowLevel()) { InteractItemIF->FirstInteract(this); }
         return true;
     }
@@ -357,7 +357,7 @@ bool UInventoryComponent::SecondInteractWithHeldItem()
 {
     if (bIsItemHeld)
     {
-        IInteractItemIF* InteractItemIF = Cast<IInteractItemIF>(HeldItem);
+        IInteractItemIF* InteractItemIF = Cast<IInteractItemIF>(HeldItem.Get());
         if (InteractItemIF->_getUObject()->IsValidLowLevel()) { InteractItemIF->SecondInteract(this); }
         return true;
     }
@@ -368,7 +368,7 @@ bool UInventoryComponent::ThirdInteractWithHeldItem()
 {
     if (bIsItemHeld)
     {
-        IInteractItemIF* InteractItemIF = Cast<IInteractItemIF>(HeldItem);
+        IInteractItemIF* InteractItemIF = Cast<IInteractItemIF>(HeldItem.Get());
         if (InteractItemIF->_getUObject()->IsValidLowLevel()) { InteractItemIF->ThirdInteract(this); }
         return true;
     }
@@ -383,11 +383,11 @@ void UInventoryComponent::BeginPlay()
         APlayerController* PlayerController = GetWorld()->GetFirstPlayerController();
         if (PlayerController)
         {
-            InventoryWidget = CreateWidget<UInventoryWidget>(PlayerController, InventoryWidgetClass);
+            InventoryWidget.Reset(CreateWidget<UInventoryWidget>(PlayerController, InventoryWidgetClass));
 
             if (InventoryWidget)
             {
-                InventoryWidget->InventoryComponent = this;
+                InventoryWidget->InventoryComponent.Reset(this);
                 InventoryWidget->LoadWidgestSlots();
                 InventoryWidget->CreateWidgets();
                 InventoryWidget->UpdateAllWidgets();

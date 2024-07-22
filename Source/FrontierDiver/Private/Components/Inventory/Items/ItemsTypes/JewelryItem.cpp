@@ -11,15 +11,15 @@ UJewelryItem::UJewelryItem()
 
 const FItemTableRowInfoBase* UJewelryItem::GetItemStaticInfo()
 {
-	return ItemTableRowInfo;
+	return ItemTableRowInfo.Get();
 }
 
 UItemDynamicInfo* UJewelryItem::GetItemDynamicInfo()
 {
-	return ItemDynamicInfo;
+	return ItemDynamicInfo.Get();
 }
 
 void UJewelryItem::SetItemDynamicInfo(UItemDynamicInfo* DynamicInfo)
 {
-	ItemDynamicInfo = DynamicInfo;
+	ItemDynamicInfo.Reset(DynamicInfo);
 }

@@ -33,7 +33,7 @@ void AWorldItem::OnConstruction(const FTransform& Transform)
 
             if (FoundActors.Num() > 0)
             {
-                FoundActor = Cast<AInventoryDataTableItemManager>(FoundActors[0]);
+                FoundActor.Reset(Cast<AInventoryDataTableItemManager>(FoundActors[0]));
             }
             else
             {
@@ -90,12 +90,12 @@ bool AWorldItem::MainInteract(AFrontierDiverCharacter* Character)
     return false;
 }
 
-void AWorldItem::LoadDataToWorldItem(TStrongObjectPtr<UItemDynamicInfo> ItemDynamic, const TSharedPtr<FItemTableRowInfoBase> ItemTableRowInfo, TSubclassOf<UItemBase> NewItemType)
+void AWorldItem::LoadDataToWorldItem(UItemDynamicInfo* ItemDynamic, const FItemTableRowInfoBase* ItemTableRowInfo, TSubclassOf<UItemBase> NewItemType)
 {
     ItemType = NewItemType;
-    ItemDynamicInfo = MoveTemp(ItemDynamic);
+    ItemDynamicInfo.Reset(MoveTemp(ItemDynamic));
 
-    if (StaticMesh && ItemTableRowInfo.IsValid())
+    if (StaticMesh && ItemTableRowInfo)
     {
         StaticMesh->SetStaticMesh(ItemTableRowInfo->WorldItemStaticMesh);
         StaticMesh->SetWorldScale3D(ItemTableRowInfo->WorldItemScale);

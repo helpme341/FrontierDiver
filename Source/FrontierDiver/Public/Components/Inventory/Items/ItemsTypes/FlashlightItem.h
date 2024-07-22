@@ -21,8 +21,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "FlashlightSettings")
 	bool bIsFlashlightOn;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "FlashlightSettings")
-	ASpotLight* SpotLight;
+	TStrongObjectPtr<ASpotLight> SpotLight;
 };
 
 USTRUCT(BlueprintType)
@@ -34,9 +33,7 @@ struct FFlashlightItemTableRowInfo : public FItemTableRowInfoBase
 	{
 		MaxQuantityItemsInSlot = 1;
 	}
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "CustomFlashlightSettings")
-	FHeldItemInfo HeldItemInfo;
+	TSharedPtr<FHeldItemInfo> HeldItemInfo;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "CustomFlashlightSettings|SocketNames")
 	FName ItemLightSocketName = "None";
@@ -63,53 +60,32 @@ public:
 
 	UFlashlightItem();
 
-	AStaticMeshActor* HeldMeshItem;
+	TStrongObjectPtr<AStaticMeshActor> HeldMeshItem;
 
 	bool FindDataTableByItemType(UWorld* World)
 		override { return BaseFindDataTableByItemType<UFlashlightItem, FFlashlightItemTableRowInfo>(World); }
 
 	const FItemTableRowInfoBase* GetItemStaticInfo()
-		override { return ItemTableRowInfo; }
-
+		override { return ItemTableRowInfo.Get(); }
 
 	UItemDynamicInfo* GetItemDynamicInfo() 
-		override { return ItemDynamicInfo; }
+		override { return ItemDynamicInfo.Get(); }
 
-	void SetItemDynamicInfo(UItemDynamicInfo* DynamicInfo) override
-	{
-		// Проверка указателя на null
-		if (!DynamicInfo)
-		{
-			UE_LOG(LogTemp, Warning, TEXT("DynamicInfo is nullptr!"));
-			return;
-		}
-
-		// Выполнение каста и проверка успешности
-		UFlashlightItemDynamicInfo* FlashlightInfo = Cast<UFlashlightItemDynamicInfo>(DynamicInfo);
-		if (FlashlightInfo)
-		{
-			// Установка нового значения
-			ItemDynamicInfo = FlashlightInfo;
-		}
-		else
-		{
-			UE_LOG(LogTemp, Warning, TEXT("Failed to cast DynamicInfo to UFlashlightItemDynamicInfo!"));
-		}
-	}
+	void SetItemDynamicInfo(UItemDynamicInfo* DynamicInfo) override;
 
 	bool UseStaticMesh()
 		override { return true; }
 
 	void SetHeldMeshItem(AStaticMeshActor* HeldMesh)
-		override { HeldMeshItem = HeldMesh; }
+		override { HeldMeshItem.Reset(HeldMesh); }
 
 	AStaticMeshActor* GetHeldMeshItem()
-		override { return  HeldMeshItem; }
+		override { return  HeldMeshItem.Get(); }
 
 	bool CanDrop()
 		override { return true;};
 
-	const FHeldItemInfo& GetHeldItemInfo() override;
+	const struct FHeldItemInfo* GetHeldItemInfo() override;
 
 	void ThirdInteract(UInventoryComponent* Inventory) override;
 
