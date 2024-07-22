@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+ // Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
@@ -18,12 +18,9 @@ class FRONTIERDIVER_API TItemTmpl
 {
 public:
 
-	DT* ItemDynamicInfo = NewObject<DT>();
-	TRT* ItemTableRowInfo;
+	TStrongObjectPtr<DT> ItemDynamicInfo = TStrongObjectPtr(NewObject<DT>());
+	TSharedPtr<TRT> ItemTableRowInfo;
 	TItemTmpl<DT, TRT>* GetItemTmpl();
-
-
-	2
 };
 
 template<typename DT, typename TRT>
