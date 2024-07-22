@@ -112,13 +112,12 @@ void UFlashlightItem::OnDropItem(AWorldItem* WorldItem)
 {
     if (ItemDynamicInfo->bIsFlashlightOn)
     {
-        if (ItemDynamicInfo->SpotLight)
-        {
-            ItemDynamicInfo->SpotLight->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
-            FAttachmentTransformRules AttachmentRules(EAttachmentRule::SnapToTarget, true);
-            ItemDynamicInfo->SpotLight->AttachToComponent(WorldItem->StaticMesh, AttachmentRules, ItemTableRowInfo->ItemLightSocketName);
-            ItemDynamicInfo->SpotLight->AddActorLocalTransform(ItemTableRowInfo->SpotLightAttachOffset);
-        }
+        if (!ItemDynamicInfo->SpotLight) { ItemDynamicInfo->SpotLight.Reset(GetWorld()->SpawnActor<ASpotLight>()); }
+        ItemDynamicInfo->SpotLight->SetMobility(EComponentMobility::Movable);
+        ItemDynamicInfo->SpotLight->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
+        FAttachmentTransformRules AttachmentRules(EAttachmentRule::SnapToTarget, true);
+        ItemDynamicInfo->SpotLight->AttachToComponent(WorldItem->StaticMesh, AttachmentRules, ItemTableRowInfo->ItemLightSocketName);
+        ItemDynamicInfo->SpotLight->AddActorLocalTransform(ItemTableRowInfo->SpotLightAttachOffset);
     }
     else if (ItemDynamicInfo->SpotLight)
     {

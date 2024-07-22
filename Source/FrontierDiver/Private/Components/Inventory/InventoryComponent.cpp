@@ -158,7 +158,6 @@ int UInventoryComponent::DropItemFromInventory(UItemBase* Item)
         return 0;
     }
 
-
     UItemDynamicInfo* ItemDynamicInfo = Item->GetItemDynamicInfo();
     if (!ItemDynamicInfo)
     {
@@ -166,10 +165,10 @@ int UInventoryComponent::DropItemFromInventory(UItemBase* Item)
         return 0;
     }
 
+    ITakeRemoveItemIF* TakeRemoveItemIF = Cast<ITakeRemoveItemIF>(Inventory[Item->GetItemStaticInfo()->ItemContainerType].ContainerInventory[Item->ThisItemID].Item.Get());
     int Result = RemoveItemFromInventory(Item);
     if (Result != 0)
     {
-        ITakeRemoveItemIF* TakeRemoveItemIF = Cast<ITakeRemoveItemIF>(HeldItem.Get());
         bool ItemHeld = bIsItemHeld && Item == HeldItem.Get();
         FVector DropLocation = GetOwnerCharacter()->GetActorLocation() + GetOwnerCharacter()->GetActorForwardVector() * PlayerDropLocationOffset;
 
@@ -189,7 +188,7 @@ int UInventoryComponent::DropItemFromInventory(UItemBase* Item)
             {
                 TakeRemoveItemIF->GetHeldMeshItem()->Destroy();
                 GetOwnerCharacter()->AnimItemBlendTypeNow = EAnimItemBlendType::None;
-            }
+            } 
             else
             {
                 // логика с скелет мешем 
@@ -226,10 +225,7 @@ bool UInventoryComponent::TakeItemToHandsByID(int32 ID)
     if (TakeRemoveItemIF->UseStaticMesh())
     {
         AStaticMeshActor* HeldMeshItem = GetWorld()->SpawnActor<AStaticMeshActor>();
-        if (!HeldMeshItem)
-        {
-            return false;
-        }
+        if (!HeldMeshItem) { return false; }
 
         TakeRemoveItemIF->SetHeldMeshItem(HeldMeshItem);
         HeldMeshItem->GetStaticMeshComponent()->SetMobility(EComponentMobility::Movable);
