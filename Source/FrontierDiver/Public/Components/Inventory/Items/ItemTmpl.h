@@ -21,6 +21,9 @@ public:
 	DT* ItemDynamicInfo = NewObject<DT>();
 	TRT* ItemTableRowInfo;
 	TItemTmpl<DT, TRT>* GetItemTmpl();
+
+
+	2
 };
 
 template<typename DT, typename TRT>
