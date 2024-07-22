@@ -31,7 +31,7 @@ void UInventoryWidget::LoadWidgestSlots()
 
 void UInventoryWidget::ShowItemInfo(UItemBase* Item)///////////////////////////////
 {
-    if (Item && Item->GetItemDynamicInfo() && !bIsInventoryHidden && !bIsShowingItemInfo)
+    if (Item && Item->GetItemDynamicInfo() && !bIsInventoryHidden)
     {
         if (Item->FindDataTableByItemType(GetWorld()) || Item->GetItemStaticInfo())
         {

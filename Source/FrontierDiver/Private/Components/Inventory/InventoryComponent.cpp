@@ -158,6 +158,7 @@ int UInventoryComponent::DropItemFromInventory(UItemBase* Item)
         return 0;
     }
 
+
     UItemDynamicInfo* ItemDynamicInfo = Item->GetItemDynamicInfo();
     if (!ItemDynamicInfo)
     {
@@ -165,48 +166,25 @@ int UInventoryComponent::DropItemFromInventory(UItemBase* Item)
         return 0;
     }
 
-    if (bIsItemHeld && Item == HeldItem.Get())
+    int Result = RemoveItemFromInventory(Item);
+    if (Result != 0)
     {
         ITakeRemoveItemIF* TakeRemoveItemIF = Cast<ITakeRemoveItemIF>(HeldItem.Get());
-        if (TakeRemoveItemIF && TakeRemoveItemIF->CanDrop())
-        {
-            int Result = 0;
-            switch (RemoveItemFromInventory(Item))
-            {
-            case 0:
-            {
-                NewWorldItem->Destroy();
-                return 0;
-            }
-            case 1:
-            {
-                NewWorldItem->LoadDataToWorldItem(ItemDynamicInfo, Item->GetItemStaticInfo(), Item->GetClass());
-                NewWorldItem->SetActorLocation(GetOwnerCharacter()->GetActorLocation() + GetOwnerCharacter()->GetActorForwardVector() * PlayerDropLocationOffset);
-                NewWorldItem->SetActorScale3D(Item->GetItemStaticInfo()->WorldItemScale);
-                if (TakeRemoveItemIF) { TakeRemoveItemIF->OnDropItem(NewWorldItem); }
-                Result = 1;
-                break;
-            }
-            case 2:
-            {
-                UItemDynamicInfo* ItemDynamic = DuplicateObject<UItemDynamicInfo>(ItemDynamicInfo, GetOuter());
-                if (!ItemDynamic)
-                {
-                    NewWorldItem->Destroy();
-                    return false;
-                }
-                ItemDynamic->QuantityItems = 1;
-                NewWorldItem->LoadDataToWorldItem(ItemDynamic, Item->GetItemStaticInfo(), Item->GetClass());
-                NewWorldItem->SetActorLocation(GetOwnerCharacter()->GetActorLocation() + GetOwnerCharacter()->GetActorForwardVector() * PlayerDropLocationOffset);
-                NewWorldItem->SetActorScale3D(Item->GetItemStaticInfo()->WorldItemScale);
-                if (TakeRemoveItemIF) { TakeRemoveItemIF->OnDropItem(NewWorldItem); }
-                Result = 2;
-                break;
-            }
-            default:
-                return false;
-            }
+        bool ItemHeld = bIsItemHeld && Item == HeldItem.Get();
+        FVector DropLocation = GetOwnerCharacter()->GetActorLocation() + GetOwnerCharacter()->GetActorForwardVector() * PlayerDropLocationOffset;
 
+        if (Result == 2)
+        {
+            ItemDynamicInfo = DuplicateObject<UItemDynamicInfo>(ItemDynamicInfo, GetOuter());
+            ItemDynamicInfo->QuantityItems = 1;
+        }
+
+        NewWorldItem->LoadDataToWorldItem(ItemDynamicInfo, Item->GetItemStaticInfo(), Item->GetClass(), DropLocation);
+        NewWorldItem->SetActorScale3D(Item->GetItemStaticInfo()->WorldItemScale);
+        if (TakeRemoveItemIF) { TakeRemoveItemIF->OnDropItem(NewWorldItem); }
+
+        if (ItemHeld)
+        {
             if (TakeRemoveItemIF->UseStaticMesh())
             {
                 TakeRemoveItemIF->GetHeldMeshItem()->Destroy();
@@ -219,46 +197,10 @@ int UInventoryComponent::DropItemFromInventory(UItemBase* Item)
 
             HeldItem = nullptr;
             bIsItemHeld = false;
-            return Result;
         }
+        return Result;
     }
-    else
-    {
-        ITakeRemoveItemIF* TakeRemoveItemIF = Cast<ITakeRemoveItemIF>(HeldItem.Get());
-        switch (RemoveItemFromInventory(Item))
-        {
-        case 0:
-        {
-            NewWorldItem->Destroy();
-            return 0;
-        }
-        case 1:
-        {
-            NewWorldItem->LoadDataToWorldItem(ItemDynamicInfo, Item->GetItemStaticInfo(), Item->GetClass());
-            NewWorldItem->SetActorLocation(GetOwnerCharacter()->GetActorLocation() + GetOwnerCharacter()->GetActorForwardVector() * PlayerDropLocationOffset);
-            NewWorldItem->SetActorScale3D(Item->GetItemStaticInfo()->WorldItemScale);
-            if (TakeRemoveItemIF) { TakeRemoveItemIF->OnDropItem(NewWorldItem); }
-            return 1;
-        }
-        case 2:
-        {
-            UItemDynamicInfo* ItemDynamic = DuplicateObject<UItemDynamicInfo>(ItemDynamicInfo, GetOuter());
-            if (!ItemDynamic)
-            {
-                NewWorldItem->Destroy();
-                return false;
-            }
-            ItemDynamic->QuantityItems = 1;
-            NewWorldItem->LoadDataToWorldItem(ItemDynamic, Item->GetItemStaticInfo(), Item->GetClass());
-            NewWorldItem->SetActorLocation(GetOwnerCharacter()->GetActorLocation() + GetOwnerCharacter()->GetActorForwardVector() * PlayerDropLocationOffset);
-            NewWorldItem->SetActorScale3D(Item->GetItemStaticInfo()->WorldItemScale);
-            if (TakeRemoveItemIF) { TakeRemoveItemIF->OnDropItem(NewWorldItem); }
-            return 2;
-        }
-        default:
-            return 0;
-        }
-    }
+    NewWorldItem->Destroy();
     return 0;
 }
 
@@ -383,7 +325,7 @@ void UInventoryComponent::BeginPlay()
         APlayerController* PlayerController = GetWorld()->GetFirstPlayerController();
         if (PlayerController)
         {
-            InventoryWidget.Reset(CreateWidget<UInventoryWidget>(PlayerController, InventoryWidgetClass));
+           InventoryWidget.Reset(CreateWidget<UInventoryWidget>(PlayerController, InventoryWidgetClass));
 
             if (InventoryWidget)
             {

@@ -39,7 +39,7 @@ public:
 
 	TStrongObjectPtr<UItemDynamicInfo> ItemDynamicInfo;
 
-	void LoadDataToWorldItem(UItemDynamicInfo* ItemDynamic, const FItemTableRowInfoBase* temTableRowInfo, TSubclassOf<UItemBase> NewItemType);
+	void LoadDataToWorldItem(UItemDynamicInfo* ItemDynamic, const FItemTableRowInfoBase* temTableRowInfo, TSubclassOf<UItemBase> NewItemType, FVector DropLocation);
 
 private:
 

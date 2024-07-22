@@ -90,7 +90,7 @@ bool AWorldItem::MainInteract(AFrontierDiverCharacter* Character)
     return false;
 }
 
-void AWorldItem::LoadDataToWorldItem(UItemDynamicInfo* ItemDynamic, const FItemTableRowInfoBase* ItemTableRowInfo, TSubclassOf<UItemBase> NewItemType)
+void AWorldItem::LoadDataToWorldItem(UItemDynamicInfo* ItemDynamic, const FItemTableRowInfoBase* ItemTableRowInfo, TSubclassOf<UItemBase> NewItemType, FVector DropLocation)
 {
     ItemType = NewItemType;
     ItemDynamicInfo.Reset(MoveTemp(ItemDynamic));
@@ -111,6 +111,7 @@ void AWorldItem::LoadDataToWorldItem(UItemDynamicInfo* ItemDynamic, const FItemT
             }
         }
         StaticMesh->SetMassOverrideInKg(NAME_None, ItemTableRowInfo->WorldItemMass);
+        StaticMesh->SetWorldLocation(DropLocation);
     }
     else
     {

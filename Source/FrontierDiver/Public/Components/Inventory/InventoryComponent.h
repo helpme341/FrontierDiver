@@ -106,7 +106,7 @@ public:
 	  { EContainerType::ClothingTwo, FContainerBase(1)},
 	  { EContainerType::Array, FContainerBase(5)}
 	};
-	TUniquePtr<UInventoryWidget> InventoryWidget;
+	TStrongObjectPtr<UInventoryWidget> InventoryWidget;
 	TStrongObjectPtr<UItemBase> HeldItem;
 	UPROPERTY()
 	bool bIsItemHeld;

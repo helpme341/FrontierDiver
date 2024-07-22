@@ -61,11 +61,6 @@ void AFrontierDiverCharacter::BeginPlay()
 			Subsystem->AddMappingContext(DefaultMappingContext, 0);
 		}
  	}
-	UJewelryItem* JewelryItemTest = NewObject<UJewelryItem>();
-	JewelryItemTest->GetItemDynamicInfo()->ItemTypeName = "1";
-	UItemBase* ItemResult;
-	FrontierDiverInventoryComponent->AddItemToInventory(JewelryItemTest, ItemResult);
-	FrontierDiverInventoryComponent->RemoveItemFromInventory(JewelryItemTest);
 }
 
 void AFrontierDiverCharacter::Tick(float DeltaTime)

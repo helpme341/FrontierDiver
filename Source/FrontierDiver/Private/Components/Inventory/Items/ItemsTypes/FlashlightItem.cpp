@@ -16,7 +16,7 @@ const FHeldItemInfo* UFlashlightItem::GetHeldItemInfo()
 {
     if (FindDataTableByItemType(GetWorld()))
     {
-        return ItemTableRowInfo->HeldItemInfo.Get();
+        return &ItemTableRowInfo->HeldItemInfo;
     }
     return nullptr;
 }

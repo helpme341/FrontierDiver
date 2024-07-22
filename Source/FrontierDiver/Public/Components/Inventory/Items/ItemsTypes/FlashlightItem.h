@@ -33,7 +33,9 @@ struct FFlashlightItemTableRowInfo : public FItemTableRowInfoBase
 	{
 		MaxQuantityItemsInSlot = 1;
 	}
-	TSharedPtr<FHeldItemInfo> HeldItemInfo;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "CustomFlashlightSettings|SocketNames")
+	FHeldItemInfo HeldItemInfo;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "CustomFlashlightSettings|SocketNames")
 	FName ItemLightSocketName = "None";
