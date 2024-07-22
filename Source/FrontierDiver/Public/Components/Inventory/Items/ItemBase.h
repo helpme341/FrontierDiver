@@ -115,10 +115,17 @@ inline bool UItemBase::BaseFindDataTableByItemType(UWorld* World) // переписать
         if (FoundActors.Num() > 0)
         {
             AInventoryDataTableItemManager* FoundActor = Cast<AInventoryDataTableItemManager>(FoundActors[0]);
-            Item->ItemTableRowInfo = FoundActor->FindDataTableByItemType(T::StaticClass())->FindRow<FT>(Item->ItemDynamicInfo->ItemTypeName, "");
-            return true;
+            if (UDataTable* DataTable =  FoundActor->FindDataTableByItemType(T::StaticClass()))
+            {
+                if (FT* FTRef = DataTable->FindRow<FT>(Item->ItemDynamicInfo->ItemTypeName, ""))
+                {
+                    Item->ItemTableRowInfo = MakeShared<FT>(*FTRef);
+                    return true;
+                }
+            }
+            return false;
         }
     }
-    else if (Item->ItemTableRowInfo) { return true; }
+    else if (Item->ItemTableRowInfo.IsValid()) { return true; }
     return false;
 }
