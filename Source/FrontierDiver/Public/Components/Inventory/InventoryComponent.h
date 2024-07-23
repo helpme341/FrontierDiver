@@ -104,7 +104,7 @@ public:
 	TMap<EContainerType, FContainerBase> Inventory{
 	  { EContainerType::ClothingOne, FContainerBase(1)},
 	  { EContainerType::ClothingTwo, FContainerBase(1)},
-	  { EContainerType::Array, FContainerBase(5)}
+	  { EContainerType::Array, FContainerBase(4)}
 	};
 	TStrongObjectPtr<UInventoryWidget> InventoryWidget;
 	TStrongObjectPtr<UItemBase> HeldItem;

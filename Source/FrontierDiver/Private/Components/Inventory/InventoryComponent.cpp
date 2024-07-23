@@ -19,7 +19,7 @@ DEFINE_LOG_CATEGORY(LogInventoryComponent);
 */
 int UInventoryComponent::AddItemToInventory(UItemBase* Item, UItemBase*& ItemResult)
 { 
-    if (!Item || Item->ThisItemID != 99 || !Item->GetItemDynamicInfo() || !Item->FindDataTableByItemType(GetWorld()) ||
+    if (!Item || Item->ItemID != 99 || !Item->GetItemDynamicInfo() || !Item->FindDataTableByItemType(GetWorld()) ||
         !Item->GetItemStaticInfo() || !Inventory.Contains(Item->GetItemStaticInfo()->ItemContainerType) ||
         Inventory[Item->GetItemStaticInfo()->ItemContainerType].ContainerInventory.IsEmpty()) { return 0; }
 
@@ -46,7 +46,7 @@ int UInventoryComponent::AddItemToInventory(UItemBase* Item, UItemBase*& ItemRes
             if (!ItemOnInspection)
             {
                 Inventory[Item->GetItemStaticInfo()->ItemContainerType].ContainerInventory[Counter].Item.Reset(Item);
-                Item->ThisItemID = Counter;
+                Item->ItemID = Counter;
                 InventoryWidget->UpdateWidgetByItem(Item, false);
                 return 1;
             }
@@ -66,8 +66,8 @@ int UInventoryComponent::AddItemToInventory(UItemBase* Item, UItemBase*& ItemRes
 */
 int UInventoryComponent::RemoveItemFromInventory(UItemBase* Item)
 {
-    if (!Item || Item->ThisItemID == 99 || !Item->FindDataTableByItemType(GetWorld()) || !Item->GetItemDynamicInfo() ||
-        !Item->GetItemStaticInfo() || !Inventory[Item->GetItemStaticInfo()->ItemContainerType].ContainerInventory[Item->ThisItemID].Item) { return 0; }
+    if (!Item || Item->ItemID == 99 || !Item->FindDataTableByItemType(GetWorld()) || !Item->GetItemDynamicInfo() ||
+        !Item->GetItemStaticInfo() || !Inventory[Item->GetItemStaticInfo()->ItemContainerType].ContainerInventory[Item->ItemID].Item) { return 0; }
 
     if (Item->GetItemStaticInfo()->MaxQuantityItemsInSlot > 1 && Item->GetItemDynamicInfo()->QuantityItems > 1)
     {
@@ -77,7 +77,7 @@ int UInventoryComponent::RemoveItemFromInventory(UItemBase* Item)
     }
     else if (Inventory.Contains(Item->GetItemStaticInfo()->ItemContainerType))
     {
-        Inventory[Item->GetItemStaticInfo()->ItemContainerType].ContainerInventory[Item->ThisItemID].Item = nullptr;
+        Inventory[Item->GetItemStaticInfo()->ItemContainerType].ContainerInventory[Item->ItemID].Item = nullptr;
         InventoryWidget->UpdateWidgetByItem(Item, true);
         Item->ConditionalBeginDestroy();
         return 1;
@@ -165,7 +165,7 @@ int UInventoryComponent::DropItemFromInventory(UItemBase* Item)
         return 0;
     }
 
-    ITakeRemoveItemIF* TakeRemoveItemIF = Cast<ITakeRemoveItemIF>(Inventory[Item->GetItemStaticInfo()->ItemContainerType].ContainerInventory[Item->ThisItemID].Item.Get());
+    ITakeRemoveItemIF* TakeRemoveItemIF = Cast<ITakeRemoveItemIF>(Inventory[Item->GetItemStaticInfo()->ItemContainerType].ContainerInventory[Item->ItemID].Item.Get());
     int Result = RemoveItemFromInventory(Item);
     if (Result != 0)
     {
@@ -326,9 +326,9 @@ void UInventoryComponent::BeginPlay()
             if (InventoryWidget)
             {
                 InventoryWidget->InventoryComponent.Reset(this);
-                InventoryWidget->LoadWidgestSlots();
-                InventoryWidget->CreateWidgets();
+                InventoryWidget->UpdateWidgetsUsability();
                 InventoryWidget->UpdateAllWidgets();
+                InventoryWidget->SetNotQuickInventoryVisibility(true);
                 InventoryWidget->AddToViewport(0);
             }
             else

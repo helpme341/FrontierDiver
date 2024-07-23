@@ -86,7 +86,7 @@ public:
 
     bool bIsPlayerCanDropThisItem;
 
-    int32 ThisItemID = 99; 
+    int32 ItemID = 99; 
 
     virtual bool FindDataTableByItemType(UWorld* World) { return false; };
 
