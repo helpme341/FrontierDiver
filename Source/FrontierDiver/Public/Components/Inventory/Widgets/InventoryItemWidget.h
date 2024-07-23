@@ -6,64 +6,59 @@
 #include "Blueprint/UserWidget.h"
 #include "InventoryItemWidget.generated.h"
 
-
-/**
- * 
- */
 UCLASS()
 class FRONTIERDIVER_API UInventoryItemWidget : public UUserWidget
 {
-	GENERATED_BODY()
+    GENERATED_BODY()
 
-public: 
+public:
+    UInventoryItemWidget(const FObjectInitializer& ObjectInitializer);
 
-	UInventoryItemWidget(const FObjectInitializer& ObjectInitializer);
+    virtual void NativeConstruct() override;
 
-	virtual void NativeConstruct() override;
+    UPROPERTY(EditAnywhere, BlueprintReadWrite)
+    EContainerType WidgetContainerType;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	EContainerType WidgetContainerType;
+    UPROPERTY(EditAnywhere, BlueprintReadWrite)
+    int32 WidgetID;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	int32  WidgetID;
+    UPROPERTY(meta = (BindWidget))
+    class UCanvasPanel* WidgetCanvasPanel;
 
-	UPROPERTY(meta = (BindWidget))
-	class UCanvasPanel* WidgetCanvasPanel;
+    UPROPERTY(meta = (BindWidget))
+    class UTextBlock* WidgetTextBlock;
 
-	UPROPERTY(meta = (BindWidget))
-	class UTextBlock* WidgetTextBlock;
+    UPROPERTY(meta = (BindWidget))
+    class UImage* WidgetImage;
 
-	UPROPERTY(meta = (BindWidget))
-	class UImage* WidgetImage;
+    UPROPERTY(meta = (BindWidget))
+    class UButton* WidgetButton;
 
-	UPROPERTY(meta = (BindWidget))
-	class UButton* WidgetButton;
+    UFUNCTION()
+    void OnButtonPressed();
 
-	UFUNCTION()
-	void OnButtonPressed();
+    UFUNCTION()
+    void OnButtonHovered();
 
-	UFUNCTION()
-	void OnButtonHovered();
+    UFUNCTION()
+    void OnButtonUnhovered();
 
-	UFUNCTION()
-	void OnButtonUnhovered();
+    UFUNCTION()
+    void UpdateWidget(UItemBase* ItemRef);
 
-	UFUNCTION()
-	void UpdateWidget(UItemBase* ItemRef);
+    UFUNCTION()
+    void SetWidgetUsability();
 
-	UFUNCTION()
-	void SetWidgetUsability();
+    UFUNCTION()
+    void SetWidgetVisibility(ESlateVisibility SlateVisibility, bool UpdateState);
 
-	UFUNCTION()
-	void SetWidgetVisibility(ESlateVisibility SlateVisibility, bool UpdateState);
+    TStrongObjectPtr<UItemBase> Item;
 
-	class TStrongObjectPtr<UItemBase> Item;
+    class TStrongObjectPtr<UInventoryWidget> InventoryWidget;
 
-	class TStrongObjectPtr<UInventoryWidget> InventoryWidget;
+    UPROPERTY()
+    bool bIsThisEmptyWidget = true;
 
-	UPROPERTY()
-	bool bIsThisEmptyWidget = true;
-
-	UPROPERTY()
-	bool bIsWidetUsability;
+    UPROPERTY()
+    bool bIsWidgetUsability;
 };

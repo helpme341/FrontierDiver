@@ -1,16 +1,11 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-
 #include "Components/Inventory/Widgets/InventoryWidget.h"
-#include "Components/CanvasPanel.h"
-#include "Components/CanvasPanelSlot.h"
-#include "Character/FrontierDiverCharacter.h"
-#include "Components/Inventory/InventoryComponent.h"
-#include "Components/Inventory/Items/ItemBase.h"
-#include "Components/Inventory/Widgets/InventoryItemWidget.h"
 #include "Components/CanvasPanel.h"
 #include "Components/TextBlock.h"
 #include "Components/Image.h"
+#include "Components/Inventory/InventoryComponent.h"
+#include "Components/Inventory/Items/ItemBase.h"
 
 DEFINE_LOG_CATEGORY(LogInventoryWidget);
 
@@ -19,7 +14,7 @@ UInventoryWidget::UInventoryWidget(const FObjectInitializer& ObjectInitializer)
 {
 }
 
-void UInventoryWidget::ShowItemInfo(UItemBase* Item)///////////////////////////////
+void UInventoryWidget::ShowItemInfo(UItemBase* Item)
 {
     if (Item && Item->GetItemDynamicInfo() && !bIsInventoryHidden)
     {
@@ -63,7 +58,7 @@ void UInventoryWidget::ShowItemInfo(UItemBase* Item)////////////////////////////
     bIsShowingItemInfo = false;
 }
 
-void UInventoryWidget::DropItemFromWidget(UItemBase* Item)////////////////
+void UInventoryWidget::DropItemFromWidget(UItemBase* Item)
 {
     if (Item && !bIsInventoryHidden)
     {
@@ -101,7 +96,7 @@ void UInventoryWidget::UpdateWidgetsUsability()
     OnUpdateWidgetsUsability.Broadcast();
 }
 
-void UInventoryWidget::UpdateWidgetByItem(UItemBase* Item, bool Clear)//////////////
+void UInventoryWidget::UpdateWidgetByItem(UItemBase* Item, bool Clear)
 {
     if (Clear)
     {

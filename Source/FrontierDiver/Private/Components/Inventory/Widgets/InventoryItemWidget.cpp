@@ -1,6 +1,5 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-
 #include "Components/Inventory/Widgets/InventoryItemWidget.h"
 #include "Components/Inventory/Items/ItemBase.h"
 #include "Components/Inventory/Widgets/InventoryWidget.h"
@@ -10,12 +9,9 @@
 #include "Components/Image.h"
 #include "Components/Inventory/InventoryComponent.h"
 
-
-
 UInventoryItemWidget::UInventoryItemWidget(const FObjectInitializer& ObjectInitializer)
     : Super(ObjectInitializer)
 {
-
 }
 
 void UInventoryItemWidget::NativeConstruct()
@@ -24,7 +20,6 @@ void UInventoryItemWidget::NativeConstruct()
 
     if (WidgetButton)
     {
-        // Get the outer widget of type UInventoryWidget
         InventoryWidget.Reset(GetTypedOuter<UInventoryWidget>());
 
         if (InventoryWidget)
@@ -39,16 +34,17 @@ void UInventoryItemWidget::NativeConstruct()
         WidgetButton->OnPressed.AddDynamic(this, &UInventoryItemWidget::OnButtonPressed);
     }
 }
+
 void UInventoryItemWidget::UpdateWidget(UItemBase* ItemRef)
 {
-    if (Item->ItemID == WidgetID && Item->GetItemStaticInfo()->ItemContainerType == WidgetContainerType)
+    if (Item && Item->ItemID == WidgetID && Item->GetItemStaticInfo()->ItemContainerType == WidgetContainerType)
     {
-        if (Item)
+        if (ItemRef)
         {
-            WidgetImage->SetBrushFromTexture(Item->GetItemStaticInfo()->ItemWidgetTexture);
-            WidgetTextBlock->SetText(FText::FromString(FString::Printf(TEXT("%03d"), Item->GetItemDynamicInfo()->QuantityItems)));
+            WidgetImage->SetBrushFromTexture(ItemRef->GetItemStaticInfo()->ItemWidgetTexture);
+            WidgetTextBlock->SetText(FText::FromString(FString::Printf(TEXT("%03d"), ItemRef->GetItemDynamicInfo()->QuantityItems)));
             Item.Reset(ItemRef);
-            WidgetTextBlock->SetText(FText::AsNumber(Item->GetItemDynamicInfo()->QuantityItems));
+            WidgetTextBlock->SetText(FText::AsNumber(ItemRef->GetItemDynamicInfo()->QuantityItems));
             bIsThisEmptyWidget = false;
         }
         else if (!bIsThisEmptyWidget)
@@ -63,12 +59,13 @@ void UInventoryItemWidget::UpdateWidget(UItemBase* ItemRef)
 
 void UInventoryItemWidget::SetWidgetUsability()
 {
-    bIsWidetUsability = InventoryWidget->InventoryComponent->Inventory[WidgetContainerType].ContainerInventory.IsValidIndex(WidgetID);
-    if (bIsWidetUsability)
+    UE_LOG(LogTemp, Warning, TEXT("SetWidgetUsability called for widget ID: %d"), WidgetID);
+    bIsWidgetUsability = InventoryWidget->GetInventoryComponent()->Inventory[WidgetContainerType].ContainerInventory.IsValidIndex(WidgetID);
+    if (bIsWidgetUsability)
     {
         SetVisibility(ESlateVisibility::Hidden);
     }
-    else if (!bIsWidetUsability)
+    else
     {
         SetVisibility(ESlateVisibility::Visible);
     }
@@ -76,13 +73,13 @@ void UInventoryItemWidget::SetWidgetUsability()
 
 void UInventoryItemWidget::SetWidgetVisibility(ESlateVisibility SlateVisibility, bool UpdateState)
 {
-    if (bIsWidetUsability)
+    if (bIsWidgetUsability)
     {
-        if (!UpdateState && !(InventoryWidget->InventoryComponent->QuickInventoryContainerType == WidgetContainerType))
+        if (!UpdateState && !(InventoryWidget->GetInventoryComponent()->QuickInventoryContainerType == WidgetContainerType))
         {
             SetVisibility(SlateVisibility);
         }
-        else if (UpdateState && InventoryWidget->InventoryComponent->QuickInventoryContainerType == WidgetContainerType)
+        else if (UpdateState && InventoryWidget->GetInventoryComponent()->QuickInventoryContainerType == WidgetContainerType)
         {
             SetVisibility(SlateVisibility);
         }
@@ -91,7 +88,7 @@ void UInventoryItemWidget::SetWidgetVisibility(ESlateVisibility SlateVisibility,
 
 void UInventoryItemWidget::OnButtonPressed()
 {
-    if (Item && bIsWidetUsability)
+    if (Item && bIsWidgetUsability)
     {
         InventoryWidget->DropItemFromWidget(Item.Get());
     }
@@ -99,7 +96,7 @@ void UInventoryItemWidget::OnButtonPressed()
 
 void UInventoryItemWidget::OnButtonHovered()
 {
-    if (Item && bIsWidetUsability)
+    if (Item && bIsWidgetUsability)
     {
         InventoryWidget->ShowItemInfo(Item.Get());
     }
@@ -107,7 +104,7 @@ void UInventoryItemWidget::OnButtonHovered()
 
 void UInventoryItemWidget::OnButtonUnhovered()
 {
-    if (Item && bIsWidetUsability)
+    if (Item && bIsWidgetUsability)
     {
         InventoryWidget->ShowItemInfo(nullptr);
     }

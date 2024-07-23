@@ -11,12 +11,11 @@
 class UInventoryComponent;
 class UTextBlock;
 
-
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FUpdateWidgetsInfo, UItemBase*, Item);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FUpdateWidgetsUsability);
 /*
 * true = изменить все
-* false = изменить только не быстрые виджеты 
+* false = изменить только не быстрые виджеты
 */
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FUpdateWidgetsVisibility, ESlateVisibility, SlateVisibility, bool, UpdateState);
 DECLARE_LOG_CATEGORY_EXTERN(LogInventoryWidget, Log, All);
@@ -27,24 +26,23 @@ class FRONTIERDIVER_API UInventoryWidget : public UUserWidget
     GENERATED_BODY()
 
 public:
-
     UInventoryWidget(const FObjectInitializer& ObjectInitializer);
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite)
     class UTexture2D* DefaultItemWidgetTexture;
 
-    UFUNCTION(BlueprintCallable) 
-    class UInventoryComponent* GetInventoryComponent() { return InventoryComponent.Get(); }
+    UFUNCTION(BlueprintCallable)
+    UInventoryComponent* GetInventoryComponent() { return InventoryComponent.Get(); }
 
     UFUNCTION(BlueprintCallable)
-    bool InventoryIsHidden() { return bIsInventoryHidden; }
+    bool InventoryIsHidden() const { return bIsInventoryHidden; }
 
     UFUNCTION(BlueprintCallable)
     void SetNotQuickInventoryVisibility(bool Hide);
 
     UFUNCTION(BlueprintCallable)
     void SetAllInventoryVisibility(bool Hide);
-    
+
     void UpdateWidgetsUsability();
     void UpdateWidgetByItem(UItemBase* Item, bool Clear);
     void UpdateAllWidgets();
@@ -53,7 +51,7 @@ public:
 
     UPROPERTY(BlueprintAssignable, Category = "Events")
     FUpdateWidgetsInfo OnUpdateWidgetsInfo;
-   
+
     UPROPERTY(BlueprintAssignable, Category = "Events")
     FUpdateWidgetsUsability OnUpdateWidgetsUsability;
 
@@ -61,25 +59,32 @@ public:
     FUpdateWidgetsVisibility OnUpdateWidgetsVisibility;
 
     TStrongObjectPtr<UInventoryComponent> InventoryComponent;
+
 protected:
+    UPROPERTY(meta = (BindWidget))
+    UCanvasPanel* ParentCanvasPanel;
 
     UPROPERTY(meta = (BindWidget))
-    class UCanvasPanel* ParentCanvasPanel;
-    UPROPERTY(meta = (BindWidget))
-    class UImage* ItemImage;
+    UImage* ItemImage;
+
     UPROPERTY(meta = (BindWidget))
     UTextBlock* ItemNameTextBlock;
+
     UPROPERTY(meta = (BindWidget))
     UTextBlock* ItemQuantityTextBlock;
+
     UPROPERTY(meta = (BindWidget))
     UTextBlock* ItemDescription;
 
     UPROPERTY()
-    bool bIsWidgetsCreated;
+    bool bIsWidgetsCreated = false;
+
     UPROPERTY()
-    bool bIsInventoryHidden;
+    bool bIsInventoryHidden = false;
+
     UPROPERTY()
-    bool bIsAllInventoryHidden;
+    bool bIsAllInventoryHidden = false;
+
     UPROPERTY()
-    bool bIsShowingItemInfo;
+    bool bIsShowingItemInfo = false;
 };

@@ -51,6 +51,13 @@ USTRUCT(BlueprintType)
 struct FItemTableRowInfoBase : public FTableRowBase
 {
     GENERATED_BODY()
+
+    FItemTableRowInfoBase()
+        : ItemWidgetTexture(nullptr),
+        ItemContainerType(EContainerType::Slot),
+        WorldItemStaticMesh(nullptr),
+        WorldItemMass(0.0f)
+    {}
     
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "DefaultSettings")
     UTexture2D* ItemWidgetTexture;
