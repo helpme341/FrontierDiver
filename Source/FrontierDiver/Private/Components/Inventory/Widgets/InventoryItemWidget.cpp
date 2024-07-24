@@ -58,30 +58,38 @@ void UInventoryItemWidget::UpdateWidget(UItemBase* ItemRef, bool Clear)
 
 void UInventoryItemWidget::SetWidgetUsability()
 {
-    UE_LOG(LogTemp, Warning, TEXT("SetWidgetUsability called for widget ID: %d"), WidgetID);
-    bIsWidgetUsability = InventoryWidget->GetInventoryComponent()->Inventory[WidgetContainerType].ContainerInventory.IsValidIndex(WidgetID);
-    if (bIsWidgetUsability)
+    // Получаем инвентарь для данного типа контейнера
+    TArray<FSharedContainerBase>& ContainerInventory = InventoryWidget->GetInventoryComponent()->Inventory[WidgetContainerType].ContainerInventory;
+
+    // Проверяем, есть ли элемент с данным WidgetID в контейнере
+    if (ContainerInventory.IsValidIndex(WidgetID))
     {
+        // Если индекс действителен, показываем виджет
         SetVisibility(ESlateVisibility::Visible);
+        bIsWidgetUsability = true;
     }
     else
     {
+        // Если индекс недействителен, скрываем виджет
         SetVisibility(ESlateVisibility::Hidden);
+        bIsWidgetUsability = false;
     }
 }
-
-void UInventoryItemWidget::SetWidgetVisibility(ESlateVisibility SlateVisibility, bool UpdateState)
+void UInventoryItemWidget::SetWidgetVisibility(bool Hide, bool UpdateState)
 {
     if (bIsWidgetUsability)
     {
-        if (!UpdateState && !(InventoryWidget->GetInventoryComponent()->QuickInventoryContainerType == WidgetContainerType))
+        SetVisibility(Hide ? ESlateVisibility::Hidden : ESlateVisibility::Visible);
+        /*
+        *         if (!UpdateState && !(InventoryWidget->GetInventoryComponent()->QuickInventoryContainerType == WidgetContainerType))
         {
-            SetVisibility(SlateVisibility);
+            SetVisibility(Hide ? ESlateVisibility::Hidden : ESlateVisibility::Visible);
         }
         else if (UpdateState && InventoryWidget->GetInventoryComponent()->QuickInventoryContainerType == WidgetContainerType)
         {
-            SetVisibility(SlateVisibility);
+            SetVisibility(Hide ? ESlateVisibility::Hidden : ESlateVisibility::Visible);
         }
+        */
     }
 }
 

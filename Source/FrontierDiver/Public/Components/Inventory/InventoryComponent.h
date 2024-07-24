@@ -77,7 +77,7 @@ public:
 	float PlayerDropLocationOffset;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Settings")
-	EContainerType QuickInventoryContainerType;
+	EContainerType QuickInventoryContainerType = EContainerType::QuickInventory;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Settings|UI") 
 	TSubclassOf<UInventoryWidget> InventoryWidgetClass;
@@ -105,10 +105,14 @@ public:
 	bool ThirdInteractWithHeldItem();
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TMap<EContainerType, FContainerBase> Inventory{
-	  { EContainerType::ClothingOne, FContainerBase(1)},
-	  { EContainerType::ClothingTwo, FContainerBase(1)},
-	  { EContainerType::Array, FContainerBase(5)}
+	  { EContainerType::Clothing, FContainerBase(1)},
+	  { EContainerType::Flippers, FContainerBase(1)},
+	  { EContainerType::BreathingTanks, FContainerBase(1)},
+	  { EContainerType::QuickInventory, FContainerBase(3)}
 	};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	int32 MaxCounterOfCreatedWidgets = 0;
 
 	void OnInventoryItemWidgetConstructed();
 	TStrongObjectPtr<UInventoryWidget> InventoryWidget;
@@ -119,6 +123,5 @@ public:
 private:
 
 	int32 CounterOfCreatedWidgets = 0;
-	int32 MaxCounterOfCreatedWidgets = 0;
 };
 

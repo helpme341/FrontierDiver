@@ -17,7 +17,7 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnUpdateWidgetsUsability);
 * true = изменить все
 * false = изменить только не быстрые виджеты
 */
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnUpdateWidgetsVisibility, ESlateVisibility, SlateVisibility, bool, UpdateState);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnUpdateWidgetsVisibility, bool, Hide, bool, UpdateState);
 DECLARE_LOG_CATEGORY_EXTERN(LogInventoryWidget, Log, All);
 
 UCLASS()

@@ -12,10 +12,11 @@
 UENUM(BlueprintType)
 enum class EContainerType : uint8
 {
-    Slot,
-    ClothingOne,
-    ClothingTwo,
-    Array,
+    None,
+    Clothing,
+    Flippers,
+    BreathingTanks,
+    QuickInventory,
 };
 
 UCLASS()
@@ -54,7 +55,7 @@ struct FItemTableRowInfoBase : public FTableRowBase
 
     FItemTableRowInfoBase()
         : ItemWidgetTexture(nullptr),
-        ItemContainerType(EContainerType::Slot),
+        ItemContainerType(EContainerType::None),
         WorldItemStaticMesh(nullptr),
         WorldItemMass(0.0f)
     {}

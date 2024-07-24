@@ -104,7 +104,7 @@ void UInventoryWidget::UpdateWidgetByItem(UItemBase* Item, bool Clear)
 void UInventoryWidget::SetNotQuickInventoryVisibility(bool Hide)
 {
     if (bIsInventoryHidden && Hide || !bIsInventoryHidden && !Hide) { return; }
-    OnUpdateWidgetsVisibility.Broadcast(Hide ? ESlateVisibility::Hidden : ESlateVisibility::Visible, false);
+    OnUpdateWidgetsVisibility.Broadcast(Hide, false);
     if (Hide && bIsShowingItemInfo) { ShowItemInfo(nullptr); }
     bIsInventoryHidden = Hide;
 }
@@ -112,6 +112,6 @@ void UInventoryWidget::SetNotQuickInventoryVisibility(bool Hide)
 void UInventoryWidget::SetAllInventoryVisibility(bool Hide)
 {
     if (bIsAllInventoryHidden && Hide || !bIsAllInventoryHidden && !Hide) { return; }
-    OnUpdateWidgetsVisibility.Broadcast(Hide ? ESlateVisibility::Hidden : ESlateVisibility::Visible, true);
+    OnUpdateWidgetsVisibility.Broadcast(Hide, true);
     bIsAllInventoryHidden = Hide;
 }

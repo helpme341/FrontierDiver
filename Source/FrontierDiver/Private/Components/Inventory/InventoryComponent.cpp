@@ -321,12 +321,16 @@ bool UInventoryComponent::ThirdInteractWithHeldItem()
 
 void UInventoryComponent::OnInventoryItemWidgetConstructed()
 {
-    CounterOfCreatedWidgets++;
-    if (CounterOfCreatedWidgets == MaxCounterOfCreatedWidgets)
+    if (MaxCounterOfCreatedWidgets != 0)
     {
-        InventoryWidget->UpdateWidgetsUsability();
-        InventoryWidget->UpdateAllWidgets();
-        InventoryWidget->SetNotQuickInventoryVisibility(true);
+        CounterOfCreatedWidgets++;
+        if (CounterOfCreatedWidgets == MaxCounterOfCreatedWidgets)
+        {
+            InventoryWidget->UpdateWidgetsUsability();
+            InventoryWidget->UpdateAllWidgets();
+            InventoryWidget->SetVisibility(ESlateVisibility::Visible);
+            InventoryWidget->SetNotQuickInventoryVisibility(true);
+        }
     }
 }
 
@@ -338,12 +342,13 @@ void UInventoryComponent::BeginPlay()
         APlayerController* PlayerController = GetWorld()->GetFirstPlayerController();
         if (PlayerController)
         {
-            for (auto& Elem : Inventory) { MaxCounterOfCreatedWidgets += Elem.Value.ContainerInventory.Num(); }
+            //for (auto& Elem : Inventory) { MaxCounterOfCreatedWidgets += Elem.Value.ContainerInventory.Num(); }
             InventoryWidget.Reset(CreateWidget<UInventoryWidget>(PlayerController, InventoryWidgetClass));
             if (InventoryWidget)
             {
                 InventoryWidget->InventoryComponent.Reset(this);
                 InventoryWidget->AddToViewport(0);
+                InventoryWidget->SetVisibility(ESlateVisibility::Hidden);
             }
             else
             {

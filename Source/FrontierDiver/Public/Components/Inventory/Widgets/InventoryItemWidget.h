@@ -51,7 +51,7 @@ public:
     void SetWidgetUsability();
 
     UFUNCTION()
-    void SetWidgetVisibility(ESlateVisibility SlateVisibility, bool UpdateState);
+    void SetWidgetVisibility(bool Hide, bool UpdateState);
 
     TStrongObjectPtr<UItemBase> Item;
 
