@@ -77,14 +77,14 @@ protected:
     UTextBlock* ItemDescription;
 
     UPROPERTY()
-    bool bIsWidgetsCreated = false;
+    bool bIsWidgetsCreated;
 
     UPROPERTY()
-    bool bIsInventoryHidden = false;
+    bool bIsInventoryHidden;
 
     UPROPERTY()
-    bool bIsAllInventoryHidden = false;
+    bool bIsAllInventoryHidden;
 
     UPROPERTY()
-    bool bIsShowingItemInfo = false;
+    bool bIsShowingItemInfo;
 };

@@ -79,17 +79,14 @@ void UInventoryItemWidget::SetWidgetVisibility(bool Hide, bool UpdateState)
 {
     if (bIsWidgetUsability)
     {
-        SetVisibility(Hide ? ESlateVisibility::Hidden : ESlateVisibility::Visible);
-        /*
-        *         if (!UpdateState && !(InventoryWidget->GetInventoryComponent()->QuickInventoryContainerType == WidgetContainerType))
+        if (!UpdateState && InventoryWidget->GetInventoryComponent()->QuickInventoryContainerType != WidgetContainerType)
+        {
+            SetVisibility(Hide ? ESlateVisibility::Hidden : ESlateVisibility::Visible );
+        }
+        else if (UpdateState)
         {
             SetVisibility(Hide ? ESlateVisibility::Hidden : ESlateVisibility::Visible);
         }
-        else if (UpdateState && InventoryWidget->GetInventoryComponent()->QuickInventoryContainerType == WidgetContainerType)
-        {
-            SetVisibility(Hide ? ESlateVisibility::Hidden : ESlateVisibility::Visible);
-        }
-        */
     }
 }
 

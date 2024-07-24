@@ -208,7 +208,6 @@ int UInventoryComponent::DropItemFromInventory(UItemBase* Item)
     return 0;
 }
 
-
 bool UInventoryComponent::TakeItemToHandsByID(int32 ID)
 {
     if (bIsItemHeld || !Inventory[QuickInventoryContainerType].ContainerInventory[ID].Item)
@@ -348,7 +347,6 @@ void UInventoryComponent::BeginPlay()
             {
                 InventoryWidget->InventoryComponent.Reset(this);
                 InventoryWidget->AddToViewport(0);
-                InventoryWidget->SetVisibility(ESlateVisibility::Hidden);
             }
             else
             {
