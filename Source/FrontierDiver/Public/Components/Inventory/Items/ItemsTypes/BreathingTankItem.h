@@ -38,6 +38,8 @@ public:
 
 	UBreathingTankItem();
 
+	void OnHeld();
+
 	bool FindDataTableByItemType(UWorld* World)
 		override { return BaseFindDataTableByItemType<UBreathingTankItem, FBreathingTankItemTableRowInfo>(World); }
 

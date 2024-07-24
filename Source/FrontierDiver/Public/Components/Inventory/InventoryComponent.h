@@ -66,7 +66,10 @@ public:
     AFrontierDiverCharacter* GetOwnerCharacter() { return Cast<AFrontierDiverCharacter>(GetOwner()); }
 
 	UFUNCTION(BlueprintCallable)
-	bool TakeItemToHandsByID(int32 ID);
+	bool HeldItemToHandsByID(int32 ID);
+
+	UFUNCTION(BlueprintCallable)
+	bool HeldBreathingTankItemByID(int32 ID);
 
 	UFUNCTION(BlueprintCallable)
 	bool RemoveItemFromHands();
@@ -94,8 +97,13 @@ public:
 	void OnInventoryItemWidgetConstructed();
 	TStrongObjectPtr<UInventoryWidget> InventoryWidget;
 	TStrongObjectPtr<UItemBase> HeldItem;
+	class TStrongObjectPtr<UBreathingTankItem> HeldBreathingTankItem;
+	
 	UPROPERTY()
 	bool bIsItemHeld;
+
+	UPROPERTY()
+	bool bIsBreathingTankItemHeld;
 
 private:
 

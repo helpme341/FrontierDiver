@@ -9,6 +9,7 @@
 #include "Components/Inventory/Items/Interfaces/TakeRemoveItemIF.h"
 #include "Components/Inventory/Items/Interfaces/InteractItemIF.h"
 #include "Engine/StaticMeshActor.h"
+#include "Components/Inventory/Items/ItemsTypes/BreathingTankItem.h"
 
 DEFINE_LOG_CATEGORY(LogInventoryComponent);
 
@@ -208,7 +209,7 @@ int UInventoryComponent::DropItemFromInventory(UItemBase* Item)
     return 0;
 }
 
-bool UInventoryComponent::TakeItemToHandsByID(int32 ID)
+bool UInventoryComponent::HeldItemToHandsByID(int32 ID)
 {
     if (bIsItemHeld || !Inventory[QuickInventoryContainerType].ContainerInventory[ID].Item)
     {
@@ -261,6 +262,19 @@ bool UInventoryComponent::TakeItemToHandsByID(int32 ID)
     return false;
 }
 
+bool UInventoryComponent::HeldBreathingTankItemByID(int32 ID)
+{
+    if (bIsBreathingTankItemHeld || !Inventory[EContainerType::BreathingTanks].ContainerInventory[ID].Item) { return false; }
+
+    if (UBreathingTankItem* BreathingTankItem = Cast<UBreathingTankItem>(Inventory[EContainerType::BreathingTanks].ContainerInventory[ID].Item.Get()))
+    {
+        HeldBreathingTankItem.Reset(BreathingTankItem);
+        bIsBreathingTankItemHeld = true;
+        BreathingTankItem->OnHeld();
+    }
+    return false;
+}
+
 bool UInventoryComponent::RemoveItemFromHands()
 {
     if (!bIsItemHeld || !HeldItem) return false;
@@ -290,7 +304,7 @@ bool UInventoryComponent::FirstInteractWithHeldItem()
     if (bIsItemHeld)
     {
         IInteractItemIF* InteractItemIF = Cast<IInteractItemIF>(HeldItem.Get());
-        if (InteractItemIF->_getUObject()->IsValidLowLevel()) { InteractItemIF->FirstInteract(this); }
+        if (InteractItemIF) { InteractItemIF->FirstInteract(this); }
         return true;
     }
     return false;
@@ -301,7 +315,7 @@ bool UInventoryComponent::SecondInteractWithHeldItem()
     if (bIsItemHeld)
     {
         IInteractItemIF* InteractItemIF = Cast<IInteractItemIF>(HeldItem.Get());
-        if (InteractItemIF->_getUObject()->IsValidLowLevel()) { InteractItemIF->SecondInteract(this); }
+        if (InteractItemIF) { InteractItemIF->SecondInteract(this); }
         return true;
     }
     return false;
@@ -312,7 +326,7 @@ bool UInventoryComponent::ThirdInteractWithHeldItem()
     if (bIsItemHeld)
     {
         IInteractItemIF* InteractItemIF = Cast<IInteractItemIF>(HeldItem.Get());
-        if (InteractItemIF->_getUObject()->IsValidLowLevel()) { InteractItemIF->ThirdInteract(this); }
+        if (InteractItemIF) { InteractItemIF->ThirdInteract(this); }
         return true;
     }
     return false;
