@@ -86,7 +86,7 @@ void UInventoryWidget::UpdateAllWidgets()
     {
         for (int32 Counter = 0; Counter < Elem.Value.ContainerInventory.Num(); Counter++)
         {
-            OnUpdateWidgetsInfo.Broadcast(Elem.Value.ContainerInventory[Counter].Item.Get());
+            OnUpdateWidgetsInfo.Broadcast(Elem.Value.ContainerInventory[Counter].Item.Get(), false);
         }
     }
 }
@@ -98,17 +98,7 @@ void UInventoryWidget::UpdateWidgetsUsability()
 
 void UInventoryWidget::UpdateWidgetByItem(UItemBase* Item, bool Clear)
 {
-    if (Clear)
-    {
-        OnUpdateWidgetsInfo.Broadcast(nullptr);
-    }
-    else
-    {
-        if (Item)
-        {
-            OnUpdateWidgetsInfo.Broadcast(Item);
-        }
-    }
+    OnUpdateWidgetsInfo.Broadcast(Item, Clear);
 }
 
 void UInventoryWidget::SetNotQuickInventoryVisibility(bool Hide)

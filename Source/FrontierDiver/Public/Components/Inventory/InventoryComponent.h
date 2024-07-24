@@ -45,6 +45,7 @@ struct FContainerBase
 {
 	GENERATED_BODY()
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TArray<FSharedContainerBase> ContainerInventory;
 
 	FContainerBase() {}
@@ -70,6 +71,8 @@ class FRONTIERDIVER_API UInventoryComponent : public UCharacterComponentBase
 	GENERATED_BODY()
 
 public:
+	UInventoryComponent();
+
 	UPROPERTY(EditDefaultsOnly, Category = "Settings")
 	float PlayerDropLocationOffset;
 
@@ -100,15 +103,22 @@ public:
 	bool FirstInteractWithHeldItem();
 	bool SecondInteractWithHeldItem();
 	bool ThirdInteractWithHeldItem();
-
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TMap<EContainerType, FContainerBase> Inventory{
 	  { EContainerType::ClothingOne, FContainerBase(1)},
 	  { EContainerType::ClothingTwo, FContainerBase(1)},
-	  { EContainerType::Array, FContainerBase(4)}
+	  { EContainerType::Array, FContainerBase(5)}
 	};
+
+	void OnInventoryItemWidgetConstructed();
 	TStrongObjectPtr<UInventoryWidget> InventoryWidget;
 	TStrongObjectPtr<UItemBase> HeldItem;
 	UPROPERTY()
 	bool bIsItemHeld;
+
+private:
+
+	int32 CounterOfCreatedWidgets = 0;
+	int32 MaxCounterOfCreatedWidgets = 0;
 };
 

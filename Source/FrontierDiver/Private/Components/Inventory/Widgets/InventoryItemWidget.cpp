@@ -33,26 +33,25 @@ void UInventoryItemWidget::NativeConstruct()
         WidgetButton->OnUnhovered.AddDynamic(this, &UInventoryItemWidget::OnButtonUnhovered);
         WidgetButton->OnPressed.AddDynamic(this, &UInventoryItemWidget::OnButtonPressed);
     }
+    InventoryWidget->GetInventoryComponent()->OnInventoryItemWidgetConstructed();
 }
 
-void UInventoryItemWidget::UpdateWidget(UItemBase* ItemRef)
+void UInventoryItemWidget::UpdateWidget(UItemBase* ItemRef, bool Clear)
 {
-    if (Item && Item->ItemID == WidgetID && Item->GetItemStaticInfo()->ItemContainerType == WidgetContainerType)
+    if (ItemRef && ItemRef->ItemID == WidgetID && ItemRef->GetItemStaticInfo()->ItemContainerType == WidgetContainerType)
     {
-        if (ItemRef)
+        if (!Clear)
         {
             WidgetImage->SetBrushFromTexture(ItemRef->GetItemStaticInfo()->ItemWidgetTexture);
             WidgetTextBlock->SetText(FText::FromString(FString::Printf(TEXT("%03d"), ItemRef->GetItemDynamicInfo()->QuantityItems)));
             Item.Reset(ItemRef);
             WidgetTextBlock->SetText(FText::AsNumber(ItemRef->GetItemDynamicInfo()->QuantityItems));
-            bIsThisEmptyWidget = false;
         }
-        else if (!bIsThisEmptyWidget)
+        else
         {
             WidgetImage->SetBrushFromTexture(InventoryWidget->DefaultItemWidgetTexture);
             WidgetTextBlock->SetText(FText());
             Item = nullptr;
-            bIsThisEmptyWidget = true;
         }
     }
 }
@@ -63,11 +62,11 @@ void UInventoryItemWidget::SetWidgetUsability()
     bIsWidgetUsability = InventoryWidget->GetInventoryComponent()->Inventory[WidgetContainerType].ContainerInventory.IsValidIndex(WidgetID);
     if (bIsWidgetUsability)
     {
-        SetVisibility(ESlateVisibility::Hidden);
+        SetVisibility(ESlateVisibility::Visible);
     }
     else
     {
-        SetVisibility(ESlateVisibility::Visible);
+        SetVisibility(ESlateVisibility::Hidden);
     }
 }
 

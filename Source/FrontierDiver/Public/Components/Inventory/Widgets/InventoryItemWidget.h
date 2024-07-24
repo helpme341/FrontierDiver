@@ -34,6 +34,7 @@ public:
     UPROPERTY(meta = (BindWidget))
     class UButton* WidgetButton;
 
+
     UFUNCTION()
     void OnButtonPressed();
 
@@ -44,7 +45,7 @@ public:
     void OnButtonUnhovered();
 
     UFUNCTION()
-    void UpdateWidget(UItemBase* ItemRef);
+    void UpdateWidget(UItemBase* ItemRef, bool Clear);
 
     UFUNCTION()
     void SetWidgetUsability();
@@ -55,9 +56,6 @@ public:
     TStrongObjectPtr<UItemBase> Item;
 
     class TStrongObjectPtr<UInventoryWidget> InventoryWidget;
-
-    UPROPERTY()
-    bool bIsThisEmptyWidget = true;
 
     UPROPERTY()
     bool bIsWidgetUsability;

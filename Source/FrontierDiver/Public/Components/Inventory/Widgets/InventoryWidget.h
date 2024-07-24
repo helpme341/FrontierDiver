@@ -11,13 +11,13 @@
 class UInventoryComponent;
 class UTextBlock;
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FUpdateWidgetsInfo, UItemBase*, Item);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FUpdateWidgetsUsability);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnUpdateWidgetsInfo, UItemBase*, Item, bool, Clear);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnUpdateWidgetsUsability);
 /*
 * true = изменить все
 * false = изменить только не быстрые виджеты
 */
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FUpdateWidgetsVisibility, ESlateVisibility, SlateVisibility, bool, UpdateState);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnUpdateWidgetsVisibility, ESlateVisibility, SlateVisibility, bool, UpdateState);
 DECLARE_LOG_CATEGORY_EXTERN(LogInventoryWidget, Log, All);
 
 UCLASS()
@@ -50,13 +50,13 @@ public:
     void DropItemFromWidget(UItemBase* Item);
 
     UPROPERTY(BlueprintAssignable, Category = "Events")
-    FUpdateWidgetsInfo OnUpdateWidgetsInfo;
+    FOnUpdateWidgetsInfo OnUpdateWidgetsInfo;
 
     UPROPERTY(BlueprintAssignable, Category = "Events")
-    FUpdateWidgetsUsability OnUpdateWidgetsUsability;
+    FOnUpdateWidgetsUsability OnUpdateWidgetsUsability;
 
     UPROPERTY(BlueprintAssignable, Category = "Events")
-    FUpdateWidgetsVisibility OnUpdateWidgetsVisibility;
+    FOnUpdateWidgetsVisibility OnUpdateWidgetsVisibility;
 
     TStrongObjectPtr<UInventoryComponent> InventoryComponent;
 
