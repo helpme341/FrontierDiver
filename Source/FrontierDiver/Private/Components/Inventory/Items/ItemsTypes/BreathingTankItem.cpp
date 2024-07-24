@@ -8,10 +8,6 @@ UBreathingTankItem::UBreathingTankItem()
 	bIsPlayerCanDropThisItem = true;
 }
 
-void UBreathingTankItem::OnHeld()
-{
-}
-
 void UBreathingTankItem::SetItemDynamicInfo(UItemDynamicInfo* DynamicInfo)
 {
     if (!DynamicInfo)

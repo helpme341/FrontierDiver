@@ -22,6 +22,11 @@ struct FBreathingTankItemTableRowInfo : public FItemTableRowInfoBase
 	{
 		MaxQuantityItemsInSlot = 1;
 	}
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "CustomBreathingTankSettings")
+	float MaxAir = 1.0f;
+
+
 };
 
 
@@ -38,8 +43,6 @@ public:
 
 	UBreathingTankItem();
 
-	void OnHeld();
-
 	bool FindDataTableByItemType(UWorld* World)
 		override { return BaseFindDataTableByItemType<UBreathingTankItem, FBreathingTankItemTableRowInfo>(World); }
 
@@ -50,4 +53,7 @@ public:
 		override { return ItemDynamicInfo.Get(); }
 
 	void SetItemDynamicInfo(UItemDynamicInfo* DynamicInfo) override;
+
+	float GetBreathingTankMaxAir() { return ItemTableRowInfo->MaxAir; }
+
 };

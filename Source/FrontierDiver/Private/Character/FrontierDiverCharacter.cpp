@@ -16,7 +16,6 @@
 #include "Character/Interfaces/InteractionIF.h"
 #include "Components/Inventory/Widgets/InventoryWidget.h"
 #include "DrawDebugHelpers.h" 
-#include "Components/Inventory/Items/ItemsTypes/JewelryItem.h"
 
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
 
@@ -45,8 +44,7 @@ AFrontierDiverCharacter::AFrontierDiverCharacter()
 	FrontierDiverCameraComponent->SetRelativeLocation(FVector(-10.f, 0.f, 60.f)); // Position the camera
 	FrontierDiverCameraComponent->bUsePawnControlRotation = true;
 
-	FrontierDiverInventoryComponent = CreateDefaultSubobject<UInventoryComponent>(TEXT("InventoryComponent"));
-
+	InventoryComponent = CreateDefaultSubobject<UInventoryComponent>(TEXT("InventoryComponent"));
 }
 
 // Called when the game starts or when spawned
@@ -54,6 +52,9 @@ void AFrontierDiverCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 	
+	GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_Swimming);
+	GetCharacterMovement()->GravityScale = 0.15;
+
 	if (APlayerController* PlayerController = Cast<APlayerController>(Controller))
 	{
 		if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
@@ -61,35 +62,56 @@ void AFrontierDiverCharacter::BeginPlay()
 			Subsystem->AddMappingContext(DefaultMappingContext, 0);
 		}
  	}
-}
 
-void AFrontierDiverCharacter::Tick(float DeltaTime)
-{
-}
-
-void AFrontierDiverCharacter::ChangeMovementMode(EMovementMode NewMovementMode)
-{
-	switch (NewMovementMode)
+	AirUsageTimerDel =  FTimerDelegate::CreateLambda([this]()
 	{
-	case MOVE_Walking:
-		GetCharacterMovement()->SetMovementMode(NewMovementMode);
-		if (bIsSwimming)
-		{
-			GetCharacterMovement()->GetPhysicsVolume()->bWaterVolume = false;
-			GetCharacterMovement()->GravityScale = 1.0;
-			bIsSwimming = false;
-		}
-		break;
-	case MOVE_Swimming:
-		if (!bIsSwimming) {
-			GetCharacterMovement()->SetMovementMode(NewMovementMode);
-			GetCharacterMovement()->GravityScale = 0.15;
-			GetCharacterMovement()->GetPhysicsVolume()->bWaterVolume = true;
-			bIsSwimming = true; 
-		}
-		break;
-	default:
-		break;
+		this->UseAir(AirConsumptionRate);
+	});
+}
+
+void AFrontierDiverCharacter::UseAir(float AirAmount)
+{
+	CurrentAir = FMath::Clamp(CurrentAir - AirAmount, 0.0f, MaxAir);
+
+	if (CurrentAir <= 0.0f)
+	{
+		// Handle out of air logic here
+		UE_LOG(LogTemp, Warning, TEXT("Out of air!"));
+	}
+}
+
+void AFrontierDiverCharacter::ReplenishAir(float AirAmount)
+{
+	CurrentAir = FMath::Clamp(CurrentAir + AirAmount, 0.0f, MaxAir);
+}
+
+void AFrontierDiverCharacter::IncreaseMaxAir(float Amount)
+{
+	MaxAir += Amount;
+	CurrentAir = FMath::Clamp(CurrentAir, 0.0f, MaxAir);
+}
+
+void AFrontierDiverCharacter::DecreaseMaxAir(float Amount)
+{
+	MaxAir = FMath::Clamp(MaxAir - Amount, 0.0f, MaxAir);
+	CurrentAir = FMath::Clamp(CurrentAir, 0.0f, MaxAir);
+}
+
+void AFrontierDiverCharacter::StartUsingAir()
+{
+	if (!bIsAirUsing)
+	{
+		GetWorld()->GetTimerManager().SetTimer(AirUsageTimerHandle, AirUsageTimerDel, AirRefreshRate, true);
+		bIsAirUsing = true;
+	}
+}
+
+void AFrontierDiverCharacter::StopUsingAir()
+{
+	if (bIsAirUsing)
+	{
+		GetWorld()->GetTimerManager().ClearTimer(AirUsageTimerHandle);
+		bIsAirUsing = false;
 	}
 }
 
@@ -105,7 +127,7 @@ void AFrontierDiverCharacter::Move(const FInputActionValue& Value)
 
 void AFrontierDiverCharacter::Look(const FInputActionValue& Value)
 {
-	if (FrontierDiverInventoryComponent->InventoryWidget->InventoryIsHidden())
+	if (InventoryComponent->InventoryWidget->InventoryIsHidden())
 	{
 		// input is a Vector2D
 		FVector2D LookAxisVector = Value.Get<FVector2D>();
@@ -150,36 +172,35 @@ void AFrontierDiverCharacter::MainInteract()
 
 void AFrontierDiverCharacter::FirstInteract()
 {
-	if (FrontierDiverInventoryComponent->FirstInteractWithHeldItem()) { return; }
+	if (InventoryComponent->FirstInteractWithHeldItem()) { return; }
 	// ещё логика
 }
 
 void AFrontierDiverCharacter::SecondInteract()
 {
-	if (FrontierDiverInventoryComponent->SecondInteractWithHeldItem()) { return; }
+	if (InventoryComponent->SecondInteractWithHeldItem()) { return; }
 	// ещё логика
 }
 
 void AFrontierDiverCharacter::ThirdInteract()
 {
-	if (FrontierDiverInventoryComponent->ThirdInteractWithHeldItem()) { return; }
+	if (InventoryComponent->ThirdInteractWithHeldItem()) { return; }
 	// ещё логика
 }
-
 
 void AFrontierDiverCharacter::OpenCloseInventory()
 {
 	APlayerController* PlayerController = GetWorld()->GetFirstPlayerController();
 	if (PlayerController)
 	{
-		if (FrontierDiverInventoryComponent->InventoryWidget->InventoryIsHidden())
+		if (InventoryComponent->InventoryWidget->InventoryIsHidden())
 		{
 			// Открытие инвентаря
 			PlayerController->bShowMouseCursor = true;
 			PlayerController->bEnableClickEvents = true;
 			PlayerController->bEnableMouseOverEvents = true;
-			PlayerController->SetInputMode(FInputModeGameAndUI().SetWidgetToFocus(FrontierDiverInventoryComponent->InventoryWidget->TakeWidget()).SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock));
-			FrontierDiverInventoryComponent->InventoryWidget->SetNotQuickInventoryVisibility(false);
+			PlayerController->SetInputMode(FInputModeGameAndUI().SetWidgetToFocus(InventoryComponent->InventoryWidget->TakeWidget()).SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock));
+			InventoryComponent->InventoryWidget->SetNotQuickInventoryVisibility(false);
 		}
 		else
 		{
@@ -188,7 +209,7 @@ void AFrontierDiverCharacter::OpenCloseInventory()
 			PlayerController->bEnableClickEvents = false;
 			PlayerController->bEnableMouseOverEvents = false;
 			PlayerController->SetInputMode(FInputModeGameOnly());
-			FrontierDiverInventoryComponent->InventoryWidget->SetNotQuickInventoryVisibility(true);
+			InventoryComponent->InventoryWidget->SetNotQuickInventoryVisibility(true);
 		}
 	}
 }

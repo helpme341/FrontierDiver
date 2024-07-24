@@ -264,15 +264,35 @@ bool UInventoryComponent::HeldItemToHandsByID(int32 ID)
 
 bool UInventoryComponent::HeldBreathingTankItemByID(int32 ID)
 {
-    if (bIsBreathingTankItemHeld || !Inventory[EContainerType::BreathingTanks].ContainerInventory[ID].Item) { return false; }
+    if (!Inventory[EContainerType::BreathingTanks].ContainerInventory[ID].Item) { return false; }
 
-    if (UBreathingTankItem* BreathingTankItem = Cast<UBreathingTankItem>(Inventory[EContainerType::BreathingTanks].ContainerInventory[ID].Item.Get()))
+    UBreathingTankItem* BreathingTankItem;
+    if (!(BreathingTankItem = Cast<UBreathingTankItem>(Inventory[EContainerType::BreathingTanks].ContainerInventory[ID].Item.Get()))) { return false; }
+    if (!BreathingTankItem->FindDataTableByItemType(GetWorld())) { return false; }
+    if (BreathingTankItem == HeldBreathingTankItem.Get()) { return false; }
+
+    if (bIsBreathingTankItemHeld)
+    {
+        if (!HeldBreathingTankItem->FindDataTableByItemType(GetWorld())) { return false; }
+        GetOwnerCharacter()->DecreaseMaxAir(HeldBreathingTankItem->GetBreathingTankMaxAir());
+        HeldBreathingTankItem.Reset(BreathingTankItem);
+        GetOwnerCharacter()->IncreaseMaxAir(HeldBreathingTankItem->GetBreathingTankMaxAir());
+    }
+    else
     {
         HeldBreathingTankItem.Reset(BreathingTankItem);
+        GetOwnerCharacter()->IncreaseMaxAir(HeldBreathingTankItem->GetBreathingTankMaxAir());
         bIsBreathingTankItemHeld = true;
-        BreathingTankItem->OnHeld();
     }
-    return false;
+}
+
+bool UInventoryComponent::RemoveBreathingTankItem()
+{
+    if (!bIsBreathingTankItemHeld && !HeldBreathingTankItem) { return false; }
+    if(!HeldBreathingTankItem->FindDataTableByItemType(GetWorld())) { return false; }
+    GetOwnerCharacter()->DecreaseMaxAir(HeldBreathingTankItem->GetBreathingTankMaxAir());
+    HeldBreathingTankItem = nullptr;
+    bIsBreathingTankItemHeld = false;
 }
 
 bool UInventoryComponent::RemoveItemFromHands()

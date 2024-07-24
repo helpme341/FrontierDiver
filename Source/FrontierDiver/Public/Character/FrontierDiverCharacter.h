@@ -22,8 +22,6 @@ class UInputMappingContext;
 struct FInputActionValue;
 class UInventoryComponent;
 
-
-
 DECLARE_LOG_CATEGORY_EXTERN(LogTemplateCharacter, Log, All);
 
 UCLASS()
@@ -39,7 +37,7 @@ private:
 
 	/** Inventory Component */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
-	UInventoryComponent* FrontierDiverInventoryComponent;
+	UInventoryComponent* InventoryComponent;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputMappingContext* DefaultMappingContext;
@@ -78,6 +76,43 @@ private:
 
 public:
 
+	// Variables for air management
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Air Management")
+	float CurrentAir;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Air Management")
+	float AirRefreshRate;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Air Management")
+	float AirConsumptionRate;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Air Management")
+	float MaxAir;
+
+	// Methods for air management
+	UFUNCTION(BlueprintCallable, Category = "Air Management")
+	void UseAir(float AirAmount);
+
+	UFUNCTION(BlueprintCallable, Category = "Air Management")
+	void ReplenishAir(float AirAmount);
+
+	UFUNCTION(BlueprintCallable, Category = "Air Management")
+	void IncreaseMaxAir(float Amount);
+
+	UFUNCTION(BlueprintCallable, Category = "Air Management")
+	void DecreaseMaxAir(float Amount);
+
+	FTimerHandle AirUsageTimerHandle;
+
+	FTimerDelegate AirUsageTimerDel;
+
+	bool bIsAirUsing;
+
+	void StartUsingAir();
+	void StopUsingAir();
+
+public:
+
 	/** First person camera */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera)
 	UCameraComponent* FrontierDiverCameraComponent;
@@ -90,13 +125,8 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	class UInputAction* LookAction;
 
-	bool bIsSwimming;
-
 	UPROPERTY(EditInstanceOnly, BlueprintReadOnly, Category = "Settings")
 	EAnimItemBlendType  AnimItemBlendTypeNow;
-
-	UFUNCTION(BlueprintCallable)
-	void ChangeMovementMode(EMovementMode NewMovementMode);
 
 protected:
 	/** Called for movement input */

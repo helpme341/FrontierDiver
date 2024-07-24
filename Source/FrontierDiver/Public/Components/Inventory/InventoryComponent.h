@@ -69,10 +69,16 @@ public:
 	bool HeldItemToHandsByID(int32 ID);
 
 	UFUNCTION(BlueprintCallable)
-	bool HeldBreathingTankItemByID(int32 ID);
+	bool RemoveItemFromHands();
+
 
 	UFUNCTION(BlueprintCallable)
-	bool RemoveItemFromHands();
+	bool HeldBreathingTankItemByID(int32 ID);
+
+
+	UFUNCTION(BlueprintCallable)
+	bool RemoveBreathingTankItem();
+
 
 	void BeginPlay() override;
 	int AddItemToInventory(UItemBase* Item, UItemBase*& ItemResult);
