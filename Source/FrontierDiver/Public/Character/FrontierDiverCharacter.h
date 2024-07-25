@@ -80,10 +80,6 @@ public:
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "Air Management")
 	float CurrentAir = 1.0f;
 
-	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "Air Management")
-	float CurrentMaxAir = 1.0f;
-
-
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Air Management")
 	float AirRefreshRate = 1.0f;
 
@@ -93,8 +89,6 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Air Management")
 	float MaxAir = 1.0f;
 
-
-
 	// Methods for air management
 	UFUNCTION(BlueprintCallable, Category = "Air Management")
 	void UseAir(float AirAmount);
@@ -103,10 +97,10 @@ public:
 	void ReplenishAir(float AirAmount);
 
 	UFUNCTION(BlueprintCallable, Category = "Air Management")
-	void IncreaseMaxAir(float Amount);
+	float GetGlobalCurrentAir();
 
 	UFUNCTION(BlueprintCallable, Category = "Air Management")
-	void DecreaseMaxAir(float Amount);
+	float GetGlobalMaxAir();
 
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "Air Management")
 	bool bIsAirUsing;

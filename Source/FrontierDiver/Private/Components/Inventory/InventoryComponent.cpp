@@ -264,43 +264,62 @@ bool UInventoryComponent::HeldItemToHandsByID(int32 ID)
 
 bool UInventoryComponent::HeldBreathingTankItemByID(int32 ID)
 {
-    if (!Inventory[EContainerType::BreathingTanks].ContainerInventory[ID].Item) { return false; }
+    if (!Inventory[EContainerType::BreathingTanks].ContainerInventory.IsValidIndex(ID) ||
+        !Inventory[EContainerType::BreathingTanks].ContainerInventory[ID].Item)
+    {
+        UE_LOG(LogTemp, Warning, TEXT("HeldBreathingTankItemByID: Invalid index or item is null. ID: %d"), ID);
+        return false;
+    }
 
     UBreathingTankItem* BreathingTankItem = Cast<UBreathingTankItem>(Inventory[EContainerType::BreathingTanks].ContainerInventory[ID].Item.Get());
-    if (!BreathingTankItem) { return false; }
-    if (!BreathingTankItem->FindDataTableByItemType(GetWorld())) { return false; }
-    if (BreathingTankItem == HeldBreathingTankItem.Get()) { return false; }
+    if (!BreathingTankItem || !BreathingTankItem->FindDataTableByItemType(GetWorld()))
+    {
+        UE_LOG(LogTemp, Warning, TEXT("HeldBreathingTankItemByID: Invalid BreathingTankItem or DataTable not found. ID: %d"), ID);
+        return false;
+    }
+
+    if (BreathingTankItem == HeldBreathingTankItem.Get())
+    {
+        UE_LOG(LogTemp, Warning, TEXT("HeldBreathingTankItemByID: BreathingTankItem is already held. ID: %d"), ID);
+        return false;
+    }
 
     if (bIsBreathingTankItemHeld)
     {
-        if (!HeldBreathingTankItem->FindDataTableByItemType(GetWorld())) { return false; }
-        GetOwnerCharacter()->DecreaseMaxAir(HeldBreathingTankItem->GetBreathingTankMaxAir());
-        GetOwnerCharacter()->UseAir(HeldBreathingTankItem->GetBreathingTankAir());
-        HeldBreathingTankItem.Reset(BreathingTankItem);
-        GetOwnerCharacter()->IncreaseMaxAir(HeldBreathingTankItem->GetBreathingTankMaxAir());
-        GetOwnerCharacter()->ReplenishAir(HeldBreathingTankItem->GetBreathingTankAir());
-        return true;
+        if (!HeldBreathingTankItem->FindDataTableByItemType(GetWorld()))
+        {
+            UE_LOG(LogTemp, Warning, TEXT("HeldBreathingTankItemByID: Current held item DataTable not found."));
+            return false;
+        }
+
+        // cдесь логика обновления балона визуално если нужно))
     }
-    else
-    {
-        HeldBreathingTankItem.Reset(BreathingTankItem);
-        GetOwnerCharacter()->CurrentMaxAir += HeldBreathingTankItem->GetBreathingTankMaxAir();
-        GetOwnerCharacter()->CurrentAir += HeldBreathingTankItem->GetBreathingTankAir();
-        bIsBreathingTankItemHeld = true;
-        return true;
-    }
-    return false;
+
+    // Назначаем новый баллон
+    HeldBreathingTankItem.Reset(BreathingTankItem);
+    bIsBreathingTankItemHeld = true;
+    UE_LOG(LogTemp, Warning, TEXT("Breathing tank item held successfully. ID: %d"), ID);
+    return true;
 }
 
 bool UInventoryComponent::RemoveBreathingTankItem()
 {
-    if (!bIsBreathingTankItemHeld && !HeldBreathingTankItem) { return false; }
-    if(!HeldBreathingTankItem->FindDataTableByItemType(GetWorld())) { return false; }
-    HeldBreathingTankItem->SetBreathingTankAir(GetOwnerCharacter()->CurrentAir - GetOwnerCharacter()->MaxAir);
-    GetOwnerCharacter()->CurrentMaxAir -= HeldBreathingTankItem->GetBreathingTankMaxAir();
-    GetOwnerCharacter()->CurrentAir -= HeldBreathingTankItem->GetBreathingTankAir();
-    HeldBreathingTankItem = nullptr;
+    if (!bIsBreathingTankItemHeld || !HeldBreathingTankItem)
+    {
+        UE_LOG(LogTemp, Warning, TEXT("RemoveBreathingTankItem: No item is currently held."));
+        return false;
+    }
+
+    if (!HeldBreathingTankItem->FindDataTableByItemType(GetWorld()))
+    {
+        UE_LOG(LogTemp, Warning, TEXT("RemoveBreathingTankItem: Held item DataTable not found."));
+        return false;
+    }
+
+    HeldBreathingTankItem.Reset();
     bIsBreathingTankItemHeld = false;
+
+    UE_LOG(LogTemp, Warning, TEXT("Breathing tank item removed successfully."));
     return true;
 }
 

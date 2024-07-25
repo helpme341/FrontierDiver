@@ -59,7 +59,10 @@ public:
 
 	float GetBreathingTankMaxAir() { return ItemTableRowInfo->MaxAir; }
 
-	void SetBreathingTankAir(float Amount) { ItemDynamicInfo->CurrentAir = Amount; }
+	void SetBreathingTankAir(float Amount)
+	{
+		ItemDynamicInfo->CurrentAir = FMath::Clamp(ItemDynamicInfo->CurrentAir + Amount, 0.0f, ItemTableRowInfo->MaxAir);
+	}
 
 	float GetBreathingTankAir() { return ItemDynamicInfo->CurrentAir; }
 };

@@ -27,7 +27,6 @@ AFrontierDiverCharacter::AFrontierDiverCharacter()
 
 	GetCapsuleComponent()->InitCapsuleSize(55.f, 96.0f);
 
-
 	
 	// Create a mesh component that will be used when being viewed from a '1st person' view (when controlling this pawn)
 	Mesh1P = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("CharacterMesh1P"));
@@ -51,7 +50,6 @@ AFrontierDiverCharacter::AFrontierDiverCharacter()
 void AFrontierDiverCharacter::BeginPlay()
 {
 	Super::BeginPlay();
-	
 	GetCharacterMovement()->GetPhysicsVolume()->bWaterVolume = true;
 	GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_Swimming);
 	GetCharacterMovement()->GravityScale = 0.15;
@@ -67,30 +65,50 @@ void AFrontierDiverCharacter::BeginPlay()
 
 void AFrontierDiverCharacter::UseAir(float AirAmount)
 {
-	CurrentAir = FMath::Clamp(CurrentAir - AirAmount, 0.0f, MaxAir);
+	if (AirAmount <= 0) { return; }
+	if (InventoryComponent->bIsBreathingTankItemHeld && InventoryComponent->HeldBreathingTankItem->GetBreathingTankAir() > 0)
+	{
+		InventoryComponent->HeldBreathingTankItem->SetBreathingTankAir(-AirAmount);
+	}
+	else if (CurrentAir > 0)
+	{
+		CurrentAir = FMath::Clamp(CurrentAir - AirAmount, 0.0f, MaxAir);
+	}
 
 	if (CurrentAir <= 0.0f)
 	{
-		// Handle out of air logic here
-		UE_LOG(LogTemp, Warning, TEXT("Out of air!"));
+		UE_LOG(LogTemp, Warning, TEXT("Out of air!"));///////
 	}
 }
 
 void AFrontierDiverCharacter::ReplenishAir(float AirAmount)
 {
-	CurrentAir = FMath::Clamp(CurrentAir + AirAmount, 0.0f, MaxAir);
+	if (CurrentAir < MaxAir)
+	{
+		CurrentAir = FMath::Clamp(CurrentAir + AirAmount, 0.0f, MaxAir);
+	}
+	else if (InventoryComponent->bIsBreathingTankItemHeld && InventoryComponent->HeldBreathingTankItem->GetBreathingTankAir() < InventoryComponent->HeldBreathingTankItem->GetBreathingTankMaxAir())
+	{
+		InventoryComponent->HeldBreathingTankItem->SetBreathingTankAir(AirAmount);
+	}
 }
 
-void AFrontierDiverCharacter::IncreaseMaxAir(float Amount)
+float AFrontierDiverCharacter::GetGlobalCurrentAir()
 {
-	MaxAir += Amount;
-	CurrentAir = FMath::Clamp(CurrentAir, 0.0f, MaxAir);
+	if (InventoryComponent->bIsBreathingTankItemHeld)
+	{
+		return CurrentAir + InventoryComponent->HeldBreathingTankItem->GetBreathingTankAir();
+	}
+	return CurrentAir;
 }
 
-void AFrontierDiverCharacter::DecreaseMaxAir(float Amount)
+float AFrontierDiverCharacter::GetGlobalMaxAir()
 {
-	MaxAir = FMath::Clamp(MaxAir - Amount, 0.0f, MaxAir);
-	CurrentAir = FMath::Clamp(CurrentAir, 0.0f, MaxAir);
+	if (InventoryComponent->bIsBreathingTankItemHeld)
+	{
+		return MaxAir + InventoryComponent->HeldBreathingTankItem->GetBreathingTankMaxAir();
+	}
+	return MaxAir;
 }
 
 void AFrontierDiverCharacter::StartUsingAir()
