@@ -52,6 +52,7 @@ void AFrontierDiverCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 	
+	GetCharacterMovement()->GetPhysicsVolume()->bWaterVolume = true;
 	GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_Swimming);
 	GetCharacterMovement()->GravityScale = 0.15;
 
@@ -62,11 +63,6 @@ void AFrontierDiverCharacter::BeginPlay()
 			Subsystem->AddMappingContext(DefaultMappingContext, 0);
 		}
  	}
-
-	AirUsageTimerDel =  FTimerDelegate::CreateLambda([this]()
-	{
-		this->UseAir(AirConsumptionRate);
-	});
 }
 
 void AFrontierDiverCharacter::UseAir(float AirAmount)
@@ -101,6 +97,10 @@ void AFrontierDiverCharacter::StartUsingAir()
 {
 	if (!bIsAirUsing)
 	{
+		AirUsageTimerDel = FTimerDelegate::CreateLambda([this]()
+			{
+				this->UseAir(AirConsumptionRate);
+			});
 		GetWorld()->GetTimerManager().SetTimer(AirUsageTimerHandle, AirUsageTimerDel, AirRefreshRate, true);
 		bIsAirUsing = true;
 	}
@@ -120,8 +120,10 @@ void AFrontierDiverCharacter::Move(const FInputActionValue& Value)
 	// input is a Vector2D
 	FVector2D MovementVector = Value.Get<FVector2D>();
 
-	if (!bIsSwimming) { AddMovementInput(GetActorForwardVector(), MovementVector.Y); }
-	else { AddMovementInput(GetControlRotation().Vector(), MovementVector.Y); }
+	//if (!bIsSwimming) { AddMovementInput(GetActorForwardVector(), MovementVector.Y); }
+	//else { AddMovementInput(GetControlRotation().Vector(), MovementVector.Y); }
+
+	AddMovementInput(GetActorForwardVector(), MovementVector.Y);
 	AddMovementInput(GetActorRightVector(), MovementVector.X);
 }
 

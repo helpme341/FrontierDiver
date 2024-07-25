@@ -266,8 +266,8 @@ bool UInventoryComponent::HeldBreathingTankItemByID(int32 ID)
 {
     if (!Inventory[EContainerType::BreathingTanks].ContainerInventory[ID].Item) { return false; }
 
-    UBreathingTankItem* BreathingTankItem;
-    if (!(BreathingTankItem = Cast<UBreathingTankItem>(Inventory[EContainerType::BreathingTanks].ContainerInventory[ID].Item.Get()))) { return false; }
+    UBreathingTankItem* BreathingTankItem = Cast<UBreathingTankItem>(Inventory[EContainerType::BreathingTanks].ContainerInventory[ID].Item.Get());
+    if (!BreathingTankItem) { return false; }
     if (!BreathingTankItem->FindDataTableByItemType(GetWorld())) { return false; }
     if (BreathingTankItem == HeldBreathingTankItem.Get()) { return false; }
 
@@ -275,24 +275,33 @@ bool UInventoryComponent::HeldBreathingTankItemByID(int32 ID)
     {
         if (!HeldBreathingTankItem->FindDataTableByItemType(GetWorld())) { return false; }
         GetOwnerCharacter()->DecreaseMaxAir(HeldBreathingTankItem->GetBreathingTankMaxAir());
+        GetOwnerCharacter()->UseAir(HeldBreathingTankItem->GetBreathingTankAir());
         HeldBreathingTankItem.Reset(BreathingTankItem);
         GetOwnerCharacter()->IncreaseMaxAir(HeldBreathingTankItem->GetBreathingTankMaxAir());
+        GetOwnerCharacter()->ReplenishAir(HeldBreathingTankItem->GetBreathingTankAir());
+        return true;
     }
     else
     {
         HeldBreathingTankItem.Reset(BreathingTankItem);
-        GetOwnerCharacter()->IncreaseMaxAir(HeldBreathingTankItem->GetBreathingTankMaxAir());
+        GetOwnerCharacter()->CurrentMaxAir += HeldBreathingTankItem->GetBreathingTankMaxAir();
+        GetOwnerCharacter()->CurrentAir += HeldBreathingTankItem->GetBreathingTankAir();
         bIsBreathingTankItemHeld = true;
+        return true;
     }
+    return false;
 }
 
 bool UInventoryComponent::RemoveBreathingTankItem()
 {
     if (!bIsBreathingTankItemHeld && !HeldBreathingTankItem) { return false; }
     if(!HeldBreathingTankItem->FindDataTableByItemType(GetWorld())) { return false; }
-    GetOwnerCharacter()->DecreaseMaxAir(HeldBreathingTankItem->GetBreathingTankMaxAir());
+    HeldBreathingTankItem->SetBreathingTankAir(GetOwnerCharacter()->CurrentAir - GetOwnerCharacter()->MaxAir);
+    GetOwnerCharacter()->CurrentMaxAir -= HeldBreathingTankItem->GetBreathingTankMaxAir();
+    GetOwnerCharacter()->CurrentAir -= HeldBreathingTankItem->GetBreathingTankAir();
     HeldBreathingTankItem = nullptr;
     bIsBreathingTankItemHeld = false;
+    return true;
 }
 
 bool UInventoryComponent::RemoveItemFromHands()

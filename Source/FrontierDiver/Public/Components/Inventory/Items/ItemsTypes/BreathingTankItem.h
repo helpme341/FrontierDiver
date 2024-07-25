@@ -11,6 +11,9 @@ UCLASS()
 class FRONTIERDIVER_API UBreathingTankItemDynamicInfo : public UItemDynamicInfo
 {
 	GENERATED_BODY()
+public:
+	UPROPERTY()
+	float CurrentAir = 100.0f;
 };
 
 USTRUCT(BlueprintType)
@@ -24,7 +27,7 @@ struct FBreathingTankItemTableRowInfo : public FItemTableRowInfoBase
 	}
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "CustomBreathingTankSettings")
-	float MaxAir = 1.0f;
+	float MaxAir = 100.0f;
 
 
 };
@@ -56,4 +59,7 @@ public:
 
 	float GetBreathingTankMaxAir() { return ItemTableRowInfo->MaxAir; }
 
+	void SetBreathingTankAir(float Amount) { ItemDynamicInfo->CurrentAir = Amount; }
+
+	float GetBreathingTankAir() { return ItemDynamicInfo->CurrentAir; }
 };

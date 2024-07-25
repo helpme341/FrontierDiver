@@ -77,17 +77,23 @@ private:
 public:
 
 	// Variables for air management
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Air Management")
-	float CurrentAir;
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "Air Management")
+	float CurrentAir = 1.0f;
+
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "Air Management")
+	float CurrentMaxAir = 1.0f;
+
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Air Management")
-	float AirRefreshRate;
+	float AirRefreshRate = 1.0f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Air Management")
-	float AirConsumptionRate;
+	float AirConsumptionRate = 1.0f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Air Management")
-	float MaxAir;
+	float MaxAir = 1.0f;
+
+
 
 	// Methods for air management
 	UFUNCTION(BlueprintCallable, Category = "Air Management")
@@ -102,14 +108,17 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Air Management")
 	void DecreaseMaxAir(float Amount);
 
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "Air Management")
+	bool bIsAirUsing;
+
+	UFUNCTION(BlueprintCallable, Category = "Air Management")
+	void StartUsingAir();
+	UFUNCTION(BlueprintCallable, Category = "Air Management")
+	void StopUsingAir();
+
 	FTimerHandle AirUsageTimerHandle;
 
 	FTimerDelegate AirUsageTimerDel;
-
-	bool bIsAirUsing;
-
-	void StartUsingAir();
-	void StopUsingAir();
 
 public:
 
@@ -148,8 +157,6 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
 protected:
 	// APawn interface
 	virtual void SetupPlayerInputComponent(UInputComponent* InputComponent) override;
