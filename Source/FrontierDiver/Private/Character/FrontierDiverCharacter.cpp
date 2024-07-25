@@ -16,6 +16,7 @@
 #include "Character/Interfaces/InteractionIF.h"
 #include "Components/Inventory/Widgets/InventoryWidget.h"
 #include "DrawDebugHelpers.h" 
+#include "Widgets/MainWidget.h"
 
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
 
@@ -60,7 +61,18 @@ void AFrontierDiverCharacter::BeginPlay()
 		{
 			Subsystem->AddMappingContext(DefaultMappingContext, 0);
 		}
- 	}
+
+		MainWidget = CreateWidget<UMainWidget>(PlayerController, MainWidgetClass);
+		if (MainWidget)
+		{
+			MainWidget->AddToViewport();
+		}
+
+		MainWidget->DiverCharacter.Reset(this);
+		InventoryComponent->BeginLogic(this);
+		MainWidget->InventoryWidget = InventoryComponent->InventoryWidget;
+		MainWidget->UpdateWidgetForAir();
+	}
 }
 
 void AFrontierDiverCharacter::UseAir(float AirAmount)
@@ -69,10 +81,12 @@ void AFrontierDiverCharacter::UseAir(float AirAmount)
 	if (InventoryComponent->bIsBreathingTankItemHeld && InventoryComponent->HeldBreathingTankItem->GetBreathingTankAir() > 0)
 	{
 		InventoryComponent->HeldBreathingTankItem->SetBreathingTankAir(-AirAmount);
+		MainWidget->UpdateWidgetForAir();
 	}
 	else if (CurrentAir > 0)
 	{
 		CurrentAir = FMath::Clamp(CurrentAir - AirAmount, 0.0f, MaxAir);
+		MainWidget->UpdateWidgetForAir();
 	}
 
 	if (CurrentAir <= 0.0f)
@@ -86,10 +100,12 @@ void AFrontierDiverCharacter::ReplenishAir(float AirAmount)
 	if (CurrentAir < MaxAir)
 	{
 		CurrentAir = FMath::Clamp(CurrentAir + AirAmount, 0.0f, MaxAir);
+		MainWidget->UpdateWidgetForAir();
 	}
 	else if (InventoryComponent->bIsBreathingTankItemHeld && InventoryComponent->HeldBreathingTankItem->GetBreathingTankAir() < InventoryComponent->HeldBreathingTankItem->GetBreathingTankMaxAir())
 	{
 		InventoryComponent->HeldBreathingTankItem->SetBreathingTankAir(AirAmount);
+		MainWidget->UpdateWidgetForAir();
 	}
 }
 

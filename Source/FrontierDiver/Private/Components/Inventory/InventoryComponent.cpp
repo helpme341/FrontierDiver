@@ -10,6 +10,7 @@
 #include "Components/Inventory/Items/Interfaces/InteractItemIF.h"
 #include "Engine/StaticMeshActor.h"
 #include "Components/Inventory/Items/ItemsTypes/BreathingTankItem.h"
+#include "Widgets/MainWidget.h"
 
 DEFINE_LOG_CATEGORY(LogInventoryComponent);
 
@@ -298,6 +299,7 @@ bool UInventoryComponent::HeldBreathingTankItemByID(int32 ID)
     // Назначаем новый баллон
     HeldBreathingTankItem.Reset(BreathingTankItem);
     bIsBreathingTankItemHeld = true;
+    DiverCharacter->MainWidget->UpdateWidgetForAir();
     UE_LOG(LogTemp, Warning, TEXT("Breathing tank item held successfully. ID: %d"), ID);
     return true;
 }
@@ -318,6 +320,7 @@ bool UInventoryComponent::RemoveBreathingTankItem()
 
     HeldBreathingTankItem.Reset();
     bIsBreathingTankItemHeld = false;
+    DiverCharacter->MainWidget->UpdateWidgetForAir();
 
     UE_LOG(LogTemp, Warning, TEXT("Breathing tank item removed successfully."));
     return true;
@@ -398,12 +401,16 @@ void UInventoryComponent::OnInventoryItemWidgetConstructed()
 void UInventoryComponent::BeginPlay()
 {
     Super::BeginPlay();
+}
+
+void UInventoryComponent::BeginLogic(AFrontierDiverCharacter* Character)
+{
+    DiverCharacter = Character;
     if (InventoryWidgetClass)
     {
         APlayerController* PlayerController = GetWorld()->GetFirstPlayerController();
         if (PlayerController)
         {
-            //for (auto& Elem : Inventory) { MaxCounterOfCreatedWidgets += Elem.Value.ContainerInventory.Num(); }
             InventoryWidget.Reset(CreateWidget<UInventoryWidget>(PlayerController, InventoryWidgetClass));
             if (InventoryWidget)
             {

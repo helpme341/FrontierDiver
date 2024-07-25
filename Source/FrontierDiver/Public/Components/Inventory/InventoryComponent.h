@@ -63,7 +63,7 @@ public:
 	UInventoryWidget* GetInventoryWidget() { return InventoryWidget.Get(); }
 
 	UFUNCTION(BlueprintCallable)
-    AFrontierDiverCharacter* GetOwnerCharacter() { return Cast<AFrontierDiverCharacter>(GetOwner()); }
+	AFrontierDiverCharacter* GetOwnerCharacter() { return DiverCharacter; }
 
 	UFUNCTION(BlueprintCallable)
 	bool HeldItemToHandsByID(int32 ID);
@@ -81,6 +81,7 @@ public:
 
 
 	void BeginPlay() override;
+	void BeginLogic(AFrontierDiverCharacter* Character);
 	int AddItemToInventory(UItemBase* Item, UItemBase*& ItemResult);
 	int RemoveItemFromInventory(UItemBase* Item);
 	bool PickupItemToInventory(AWorldItem* Item);
@@ -112,6 +113,8 @@ public:
 	bool bIsBreathingTankItemHeld;
 
 private:
+
+	AFrontierDiverCharacter* DiverCharacter;
 
 	int32 CounterOfCreatedWidgets = 0;
 };
