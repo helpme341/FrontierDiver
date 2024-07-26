@@ -55,7 +55,6 @@ struct FItemTableRowInfoBase : public FTableRowBase
 
     FItemTableRowInfoBase()
         : ItemWidgetTexture(nullptr),
-        ItemContainerType(EContainerType::None),
         WorldItemStaticMesh(nullptr),
         WorldItemMass(0.0f)
     {}
@@ -64,10 +63,11 @@ struct FItemTableRowInfoBase : public FTableRowBase
     UTexture2D* ItemWidgetTexture;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "DefaultSettings")
-    EContainerType ItemContainerType;
-
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "DefaultSettings")
     FText ItemDescription;
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "DefaultSettings")
+    TSet<EContainerType> ItemContainerTypes = {
+        EContainerType::QuickInventory
+    };
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "DefaultSettings")
     int32 MaxQuantityItemsInSlot = 1;
@@ -92,9 +92,14 @@ class FRONTIERDIVER_API UItemBase : public UObject
 
 public:
 
+    UPROPERTY()
     bool bIsPlayerCanDropThisItem;
 
-    int32 ItemID = 99; 
+    UPROPERTY()
+    EContainerType ItemContainerType;
+
+    UPROPERTY()
+    int32 ItemID = 99;
 
     virtual bool FindDataTableByItemType(UWorld* World) { return false; };
 

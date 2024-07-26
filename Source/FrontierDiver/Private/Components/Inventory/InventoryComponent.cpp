@@ -26,17 +26,22 @@ UInventoryComponent::UInventoryComponent()
 */
 int UInventoryComponent::AddItemToInventory(UItemBase* Item, UItemBase*& ItemResult)
 { 
-    if (!Item || Item->ItemID != 99 || !Item->GetItemDynamicInfo() || !Item->FindDataTableByItemType(GetWorld()) ||
-        !Item->GetItemStaticInfo() || !Inventory.Contains(Item->GetItemStaticInfo()->ItemContainerType) ||
-        Inventory[Item->GetItemStaticInfo()->ItemContainerType].ContainerInventory.IsEmpty()) { return 0; }
+    if (!Item || Item->ItemID != 99 || !Item->GetItemDynamicInfo() || !Item->FindDataTableByItemType(GetWorld()) || !Item->GetItemStaticInfo() ) { return 0; }
+
+    EContainerType ItemContainerType;
+    for (EContainerType Enum : Item->GetItemStaticInfo()->ItemContainerTypes)
+    {
+        if (Inventory.Contains(Enum) && !Inventory[Enum].ContainerInventory.IsEmpty()) { ItemContainerType = Enum; break; }
+    }
+    if (ItemContainerType == EContainerType::None) { return 0; }
 
     bool bCheckQuantity = Item->GetItemStaticInfo()->MaxQuantityItemsInSlot > 1;
 
     if (Item->GetItemDynamicInfo()->ItemTypeName != "None" && Item->GetItemDynamicInfo()->QuantityItems != 0)
     {
-        for (int32 Counter = 0; Counter < Inventory[Item->GetItemStaticInfo()->ItemContainerType].ContainerInventory.Num(); Counter++)
+        for (int32 Counter = 0; Counter < Inventory[ItemContainerType].ContainerInventory.Num(); Counter++)
         {
-            UItemBase* ItemOnInspection = Inventory[Item->GetItemStaticInfo()->ItemContainerType].ContainerInventory[Counter].Item.Get();
+            UItemBase* ItemOnInspection = Inventory[ItemContainerType].ContainerInventory[Counter].Item.Get();
 
             if (bCheckQuantity && ItemOnInspection && ItemOnInspection->GetItemDynamicInfo()->ItemTypeName == Item->GetItemDynamicInfo()->ItemTypeName && ItemOnInspection->GetClass() == Item->GetClass())
             {
@@ -52,8 +57,9 @@ int UInventoryComponent::AddItemToInventory(UItemBase* Item, UItemBase*& ItemRes
 
             if (!ItemOnInspection)
             {
-                Inventory[Item->GetItemStaticInfo()->ItemContainerType].ContainerInventory[Counter].Item.Reset(Item);
+                Inventory[ItemContainerType].ContainerInventory[Counter].Item.Reset(Item);
                 Item->ItemID = Counter;
+                Item->ItemContainerType = ItemContainerType;
                 InventoryWidget->UpdateWidgetByItem(Item, false);
                 return 1;
             }
@@ -73,8 +79,7 @@ int UInventoryComponent::AddItemToInventory(UItemBase* Item, UItemBase*& ItemRes
 */
 int UInventoryComponent::RemoveItemFromInventory(UItemBase* Item)
 {
-    if (!Item || Item->ItemID == 99 || !Item->FindDataTableByItemType(GetWorld()) || !Item->GetItemDynamicInfo() ||
-        !Item->GetItemStaticInfo() || !Inventory[Item->GetItemStaticInfo()->ItemContainerType].ContainerInventory[Item->ItemID].Item) { return 0; }
+    if (!Item || Item->ItemID == 99 || !Item->FindDataTableByItemType(GetWorld()) || !Item->GetItemDynamicInfo() || !Item->GetItemStaticInfo()) { return 0; }
 
     if (Item->GetItemStaticInfo()->MaxQuantityItemsInSlot > 1 && Item->GetItemDynamicInfo()->QuantityItems > 1)
     {
@@ -82,9 +87,9 @@ int UInventoryComponent::RemoveItemFromInventory(UItemBase* Item)
         InventoryWidget->UpdateWidgetByItem(Item, false);
         return 2;
     }
-    else if (Inventory.Contains(Item->GetItemStaticInfo()->ItemContainerType))
+    else if (Inventory.Contains(Item->ItemContainerType))
     {
-        Inventory[Item->GetItemStaticInfo()->ItemContainerType].ContainerInventory[Item->ItemID].Item = nullptr;
+        Inventory[Item->ItemContainerType].ContainerInventory[Item->ItemID].Item = nullptr;
         InventoryWidget->UpdateWidgetByItem(Item, true);
         Item->ConditionalBeginDestroy();
         return 1;
@@ -172,7 +177,7 @@ int UInventoryComponent::DropItemFromInventory(UItemBase* Item)
         return 0;
     }
 
-    ITakeRemoveItemIF* TakeRemoveItemIF = Cast<ITakeRemoveItemIF>(Inventory[Item->GetItemStaticInfo()->ItemContainerType].ContainerInventory[Item->ItemID].Item.Get());
+    ITakeRemoveItemIF* TakeRemoveItemIF = Cast<ITakeRemoveItemIF>(Inventory[Item->ItemContainerType].ContainerInventory[Item->ItemID].Item.Get());
     int Result = RemoveItemFromInventory(Item);
     if (Result != 0)
     {

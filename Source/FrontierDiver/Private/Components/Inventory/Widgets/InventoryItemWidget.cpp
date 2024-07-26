@@ -58,7 +58,7 @@ void UInventoryItemWidget::NativeOnDragDetected(const FGeometry& InGeometry, con
 
 void UInventoryItemWidget::UpdateWidget(UItemBase* ItemRef, bool Clear)
 {
-    if (ItemRef && ItemRef->ItemID == WidgetID && ItemRef->GetItemStaticInfo()->ItemContainerType == WidgetContainerType)
+    if (ItemRef && ItemRef->ItemID == WidgetID && ItemRef->ItemContainerType == WidgetContainerType)
     {
         if (!Clear)
         {
