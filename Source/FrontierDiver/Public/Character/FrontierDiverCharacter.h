@@ -138,6 +138,8 @@ public:
 	UPROPERTY(EditInstanceOnly, BlueprintReadOnly, Category = "Settings")
 	EAnimItemBlendType  AnimItemBlendTypeNow;
 
+	void OpenCloseInventory();
+
 protected:
 	/** Called for movement input */
 	void Move(const FInputActionValue& Value);
@@ -152,8 +154,6 @@ protected:
 	void SecondInteract();
 
 	void ThirdInteract();
-
-	void OpenCloseInventory();
 
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
