@@ -16,13 +16,7 @@ public:
 
     virtual void NativeConstruct() override;
 
-    virtual FReply NativeOnKeyDown(const FGeometry& InGeometry, const FKeyEvent& InKeyEvent) override;
-    virtual FReply NativeOnKeyUp(const FGeometry& InGeometry, const FKeyEvent& InKeyEvent) override;
-
-    virtual FReply NativeOnMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& MouseEvent) override;
-    virtual FReply NativeOnMouseButtonUp(const FGeometry& InGeometry, const FPointerEvent& MouseEvent) override;
-    virtual FReply NativeOnMouseMove(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) override;
-    virtual void NativeOnMouseLeave(const FPointerEvent& InMouseEvent) override;
+    //virtual FReply NativeOnMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& MouseEvent) override;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite)
     EContainerType WidgetContainerType;
@@ -42,6 +36,10 @@ public:
     UPROPERTY(meta = (BindWidget))
     class UButton* WidgetButton;
 
+
+    UFUNCTION()
+    void OnButtonHovered();
+
     UFUNCTION()
     void OnButtonUnhovered();
 
@@ -60,6 +58,4 @@ public:
 
     UPROPERTY()
     bool bIsWidgetUsability;
-
-    bool bIsShowingItemInfo;
 };
