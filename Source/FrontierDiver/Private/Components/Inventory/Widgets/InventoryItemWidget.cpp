@@ -34,7 +34,6 @@ void UInventoryItemWidget::NativeConstruct()
     InventoryWidget->GetInventoryComponent()->OnInventoryItemWidgetConstructed();
 }
 
-/**
 FReply UInventoryItemWidget::NativeOnMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& MouseEvent)
 {
     if (WidgetButton && Item && bIsWidgetUsability)
@@ -52,7 +51,10 @@ FReply UInventoryItemWidget::NativeOnMouseButtonDown(const FGeometry& InGeometry
     }
     return Super::NativeOnMouseButtonDown(InGeometry, MouseEvent);
 }
-*/
+
+void UInventoryItemWidget::NativeOnDragDetected(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent, UDragDropOperation*& OutOperation)
+{
+}
 
 void UInventoryItemWidget::UpdateWidget(UItemBase* ItemRef, bool Clear)
 {

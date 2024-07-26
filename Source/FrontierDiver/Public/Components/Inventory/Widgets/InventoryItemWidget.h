@@ -16,7 +16,8 @@ public:
 
     virtual void NativeConstruct() override;
 
-    //virtual FReply NativeOnMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& MouseEvent) override;
+    virtual FReply NativeOnMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& MouseEvent) override;
+    virtual void NativeOnDragDetected(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent, UDragDropOperation*& OutOperation) override;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite)
     EContainerType WidgetContainerType;
