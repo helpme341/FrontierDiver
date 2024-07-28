@@ -14,10 +14,16 @@ class FRONTIERDIVER_API UInventoryItemWidget : public UUserWidget
 public:
     UInventoryItemWidget(const FObjectInitializer& ObjectInitializer);
 
-    virtual void NativeConstruct() override;
+    void NativeConstruct() override;
 
-    virtual FReply NativeOnMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& MouseEvent) override;
-    virtual void NativeOnDragDetected(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent, UDragDropOperation*& OutOperation) override;
+    FReply NativeOnMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& MouseEvent) override;
+    FReply NativeOnMouseButtonUp(const FGeometry& InGeometry, const FPointerEvent& MouseEvent) override;
+    //void NativeOnDragDetected(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent, UDragDropOperation*& OutOperation) override; ////////////
+    bool NativeOnDrop(const FGeometry& InGeometry, const FDragDropEvent& InDragDropEvent, UDragDropOperation* InOperation) override; ////////////////
+
+    virtual void NativeOnMouseEnter(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent);
+    virtual void NativeOnMouseLeave(const FPointerEvent& InMouseEvent);
+    virtual FReply NativeOnKeyDown(const FGeometry& InGeometry, const FKeyEvent& InKeyEvent) override;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite)
     EContainerType WidgetContainerType;
@@ -34,16 +40,6 @@ public:
     UPROPERTY(meta = (BindWidget))
     class UImage* WidgetImage;
 
-    UPROPERTY(meta = (BindWidget))
-    class UButton* WidgetButton;
-
-
-    UFUNCTION()
-    void OnButtonHovered();
-
-    UFUNCTION()
-    void OnButtonUnhovered();
-
     UFUNCTION()
     void UpdateWidget(UItemBase* ItemRef, bool Clear);
 
@@ -56,6 +52,8 @@ public:
     TStrongObjectPtr<UItemBase> Item;
 
     class TStrongObjectPtr<UInventoryWidget> InventoryWidget;
+
+    class APlayerController* PlayerController;
 
     UPROPERTY()
     bool bIsWidgetUsability;

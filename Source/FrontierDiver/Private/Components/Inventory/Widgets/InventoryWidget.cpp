@@ -6,12 +6,14 @@
 #include "Components/Image.h"
 #include "Components/Inventory/InventoryComponent.h"
 #include "Components/Inventory/Items/ItemBase.h"
+#include "Components/Inventory/Widgets/DragItemWidget.h"
 
 DEFINE_LOG_CATEGORY(LogInventoryWidget);
 
 UInventoryWidget::UInventoryWidget(const FObjectInitializer& ObjectInitializer)
     : Super(ObjectInitializer)
 {
+    bIsFocusable = false;
 }
 
 void UInventoryWidget::ShowItemInfo(UItemBase* Item)

@@ -28,7 +28,7 @@ int UInventoryComponent::AddItemToInventory(UItemBase* Item, UItemBase*& ItemRes
 { 
     if (!Item || Item->ItemID != 99 || !Item->GetItemDynamicInfo() || !Item->FindDataTableByItemType(GetWorld()) || !Item->GetItemStaticInfo() ) { return 0; }
 
-    EContainerType ItemContainerType;
+    EContainerType ItemContainerType = EContainerType::None;
     for (EContainerType Enum : Item->GetItemStaticInfo()->ItemContainerTypes)
     {
         if (Inventory.Contains(Enum) && !Inventory[Enum].ContainerInventory.IsEmpty()) { ItemContainerType = Enum; break; }

@@ -5,55 +5,96 @@
 #include "Components/Inventory/Widgets/InventoryWidget.h"
 #include "Components/CanvasPanel.h"
 #include "Components/TextBlock.h"
-#include "Components/Button.h"
 #include "Components/Image.h"
 #include "Components/Inventory/InventoryComponent.h"
+#include "Components/Inventory/Widgets/InventoryDragDropOperation.h"
+#include "Blueprint/WidgetBlueprintLibrary.h"
+#include "Components/Inventory/Widgets/DragItemWidget.h"
 
 UInventoryItemWidget::UInventoryItemWidget(const FObjectInitializer& ObjectInitializer)
     : Super(ObjectInitializer)
 {
+    bIsFocusable = true;
+    SetIsEnabled(true);
 }
 
 void UInventoryItemWidget::NativeConstruct()
 {
     Super::NativeConstruct();
 
-    if (WidgetButton)
+    InventoryWidget.Reset(GetTypedOuter<UInventoryWidget>());
+    if (InventoryWidget)
     {
-        InventoryWidget.Reset(GetTypedOuter<UInventoryWidget>());
-
-        if (InventoryWidget)
-        {
-            InventoryWidget->OnUpdateWidgetsInfo.AddDynamic(this, &UInventoryItemWidget::UpdateWidget);
-            InventoryWidget->OnUpdateWidgetsUsability.AddDynamic(this, &UInventoryItemWidget::SetWidgetUsability);
-            InventoryWidget->OnUpdateWidgetsVisibility.AddDynamic(this, &UInventoryItemWidget::SetWidgetVisibility);
-        }
-        WidgetButton->OnUnhovered.AddDynamic(this, &UInventoryItemWidget::OnButtonUnhovered);
-        WidgetButton->OnHovered.AddDynamic(this, &UInventoryItemWidget::OnButtonHovered);
+        InventoryWidget->OnUpdateWidgetsInfo.AddDynamic(this, &UInventoryItemWidget::UpdateWidget);
+        InventoryWidget->OnUpdateWidgetsUsability.AddDynamic(this, &UInventoryItemWidget::SetWidgetUsability);
+        InventoryWidget->OnUpdateWidgetsVisibility.AddDynamic(this, &UInventoryItemWidget::SetWidgetVisibility);
     }
     InventoryWidget->GetInventoryComponent()->OnInventoryItemWidgetConstructed();
 }
 
 FReply UInventoryItemWidget::NativeOnMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& MouseEvent)
 {
-    if (WidgetButton && Item && bIsWidgetUsability)
+    if (Item && bIsWidgetUsability)
     {
         if (MouseEvent.GetEffectingButton() == EKeys::RightMouseButton)
         {
             InventoryWidget->DropItemFromWidget(Item.Get());
             return FReply::Handled();
         }
-        else if (MouseEvent.GetEffectingButton() == EKeys::LeftMouseButton)
-        {
-            // логика взятия придмета в руки
-            return FReply::Handled();
-        }
     }
+    
+    if (MouseEvent.GetEffectingButton() == EKeys::LeftMouseButton)
+    {
+        InventoryWidget->DropItemFromWidget(Item.Get());
+        return FReply::Handled();
+        //UInventoryDragDropOperation* DragDropOp = Cast<UInventoryDragDropOperation>(UWidgetBlueprintLibrary::CreateDragDropOperation(UInventoryDragDropOperation::StaticClass()));
+        //if (DragDropOp)
+        //{
+        //    UDragItemWidget* DraggedWidget = CreateWidget<UDragItemWidget>(GetWorld(), InventoryWidget->DragItemWidget);
+        //    DragDropOp->Item = Item;
+        //    DragDropOp->DefaultDragVisual = DraggedWidget;
+        //}
+        //return UWidgetBlueprintLibrary::DetectDragIfPressed(MouseEvent, this, EKeys::LeftMouseButton).NativeReply;
+    }
+
     return Super::NativeOnMouseButtonDown(InGeometry, MouseEvent);
 }
 
-void UInventoryItemWidget::NativeOnDragDetected(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent, UDragDropOperation*& OutOperation)
+bool UInventoryItemWidget::NativeOnDrop(const FGeometry& InGeometry, const FDragDropEvent& InDragDropEvent, UDragDropOperation* InOperation)
 {
+    if (UInventoryDragDropOperation* DragDropOperation = Cast<UInventoryDragDropOperation>(InOperation))
+    {
+        //InventoryWidget->InventoryComponent->AddItemToInventory()
+        return true; // Возвращаем true, если операция была успешной
+    }
+    return Super::NativeOnDrop(InGeometry, InDragDropEvent, InOperation);
+}
+
+FReply UInventoryItemWidget::NativeOnMouseButtonUp(const FGeometry& InGeometry, const FPointerEvent& MouseEvent)
+{
+    if (!PlayerController) { PlayerController = UGameplayStatics::GetPlayerController(GetWorld(), 0); }
+    FInputModeGameOnly InputMode;
+    PlayerController->SetInputMode(InputMode);
+    return FReply::Handled();
+}
+
+void UInventoryItemWidget::NativeOnMouseEnter(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent)
+{
+    if (Item && bIsWidgetUsability) { InventoryWidget->ShowItemInfo(Item.Get()); }
+}
+
+void UInventoryItemWidget::NativeOnMouseLeave(const FPointerEvent& InMouseEvent)
+{
+    if (Item && bIsWidgetUsability) { InventoryWidget->ShowItemInfo(nullptr); }
+}
+
+FReply UInventoryItemWidget::NativeOnKeyDown(const FGeometry& InGeometry, const FKeyEvent& InKeyEvent)
+{
+    if (InKeyEvent.GetKey() == EKeys::Tab)
+    {
+        return FReply::Handled();
+    }
+    return Super::NativeOnKeyDown(InGeometry, InKeyEvent);
 }
 
 void UInventoryItemWidget::UpdateWidget(UItemBase* ItemRef, bool Clear)
@@ -99,14 +140,4 @@ void UInventoryItemWidget::SetWidgetVisibility(bool Hide, bool UpdateState)
         if (!UpdateState && InventoryWidget->GetInventoryComponent()->QuickInventoryContainerType != WidgetContainerType) { SetVisibility(Hide ? ESlateVisibility::Hidden : ESlateVisibility::Visible); }
         else if (UpdateState) { SetVisibility(Hide ? ESlateVisibility::Hidden : ESlateVisibility::Visible); }
     }
-}
-
-void UInventoryItemWidget::OnButtonHovered()
-{
-    if (Item && bIsWidgetUsability) { InventoryWidget->ShowItemInfo(Item.Get()); }
-}
-
-void UInventoryItemWidget::OnButtonUnhovered()
-{
-    if (Item && bIsWidgetUsability) { InventoryWidget->ShowItemInfo(nullptr); }
 }

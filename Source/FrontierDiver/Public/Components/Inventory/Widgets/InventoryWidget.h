@@ -29,6 +29,9 @@ public:
     UInventoryWidget(const FObjectInitializer& ObjectInitializer);
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite)
+    class TSubclassOf<UDragItemWidget> DragItemWidget;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite)
     class UTexture2D* DefaultItemWidgetTexture;
 
     UFUNCTION(BlueprintCallable)
