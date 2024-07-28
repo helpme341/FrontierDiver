@@ -6,6 +6,7 @@
 #include "Components/Inventory/Items/ItemBase.h"
 #include "Components/Inventory/Items/ItemTmpl.h"
 #include "Components/Inventory/Widgets/InventoryItemWidget.h"
+#include "Components/Inventory/Widgets/InventoryWidget.h"
 #include "Components/TextBlock.h"
 #include "BreathingTankItem.generated.h"
 
@@ -34,7 +35,6 @@ struct FBreathingTankItemTableRowInfo : public FItemTableRowInfoBase
 
 };
 
-class UTextBlock;
 
 /**
  * 
@@ -63,9 +63,18 @@ public:
 
 	float GetBreathingTankMaxAir() { return ItemTableRowInfo->MaxAir; }
 
+
+	void CustomUpdateWidget() override;
+
+	void CustomShowItemInfo()  override;
+
+	void CustomUpdateItemInfo()  override;
+
+
 	void SetBreathingTankAir(float Amount)
 	{
 		ItemDynamicInfo->CurrentAir = FMath::Clamp(ItemDynamicInfo->CurrentAir + Amount, 0.0f, ItemTableRowInfo->MaxAir);
+		ItemWidget->InventoryWidget->UpdateItemInfo();
 		if(ItemWidget.IsValid()) { ItemWidget->WidgetTextBlock->SetText(FText::FromString(FString::Printf(TEXT("%.1f"), ItemDynamicInfo->CurrentAir))); }
 	}
 

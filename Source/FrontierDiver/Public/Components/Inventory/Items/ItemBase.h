@@ -94,8 +94,13 @@ class FRONTIERDIVER_API UItemBase : public UObject
 
 public:
 
-    UPROPERTY()
     bool bIsPlayerCanDropThisItem;
+
+    bool bUseCustomUpdateWidget;
+
+    bool bUseCustomShowItemInfo;
+
+    bool bUseCustomUpdateItemInfo;
 
     UPROPERTY()
     EContainerType ItemContainerType;
@@ -112,6 +117,12 @@ public:
     virtual void OnAddItemToInventory() {};
 
     virtual void OnRemoveItemFromInventory() {};
+
+    virtual void CustomUpdateWidget() {};
+
+    virtual void CustomShowItemInfo() {};
+
+    virtual void CustomUpdateItemInfo() {};
 
     virtual const FItemTableRowInfoBase* GetItemStaticInfo() { return nullptr; }
 

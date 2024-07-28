@@ -6,7 +6,6 @@
 #include "Components/Image.h"
 #include "Components/Inventory/InventoryComponent.h"
 #include "Components/Inventory/Items/ItemBase.h"
-#include "Components/Inventory/Widgets/DragItemWidget.h"
 
 DEFINE_LOG_CATEGORY(LogInventoryWidget);
 
@@ -18,27 +17,39 @@ UInventoryWidget::UInventoryWidget(const FObjectInitializer& ObjectInitializer)
 
 void UInventoryWidget::ShowItemInfo(UItemBase* Item)
 {
-    if (Item && Item->GetItemDynamicInfo() && !bIsInventoryHidden)
+    if (Item && Item->GetItemDynamicInfo() && !bIsInventoryHidden && !ShowingItem.IsValid())
     {
-        if (Item->FindDataTableByItemType(GetWorld()) || Item->GetItemStaticInfo())
+        if (Item->bUseCustomShowItemInfo)
         {
-            ItemImage->SetBrushFromTexture(Item->GetItemStaticInfo()->ItemWidgetTexture);
-            ItemDescription->SetText(Item->GetItemStaticInfo()->ItemDescription);
-            ItemNameTextBlock->SetText(FText::FromName(Item->GetItemDynamicInfo()->ItemTypeName));
-
-            FString QuantityString = FString::Printf(TEXT("%d/%d"), Item->GetItemDynamicInfo()->QuantityItems, Item->GetItemStaticInfo()->MaxQuantityItemsInSlot);
-            ItemQuantityTextBlock->SetText(FText::FromString(QuantityString));
-
+            Item->CustomShowItemInfo();
             ItemImage->SetVisibility(ESlateVisibility::Visible);
             ItemNameTextBlock->SetVisibility(ESlateVisibility::Visible);
             ItemQuantityTextBlock->SetVisibility(ESlateVisibility::Visible);
             ItemDescription->SetVisibility(ESlateVisibility::Visible);
             bIsShowingItemInfo = true;
-            return;
+            ShowingItem.Reset(Item);
         }
-        return;
+        else
+        {
+            if (Item->FindDataTableByItemType(GetWorld()) || Item->GetItemStaticInfo())
+            {
+                ItemImage->SetBrushFromTexture(Item->GetItemStaticInfo()->ItemWidgetTexture);
+                ItemDescription->SetText(Item->GetItemStaticInfo()->ItemDescription);
+                ItemNameTextBlock->SetText(FText::FromName(Item->GetItemDynamicInfo()->ItemTypeName));
+
+                FString QuantityString = FString::Printf(TEXT("%d/%d"), Item->GetItemDynamicInfo()->QuantityItems, Item->GetItemStaticInfo()->MaxQuantityItemsInSlot);
+                
+                ItemQuantityTextBlock->SetText(FText::FromString(QuantityString));
+                ItemImage->SetVisibility(ESlateVisibility::Visible);
+                ItemNameTextBlock->SetVisibility(ESlateVisibility::Visible);
+                ItemQuantityTextBlock->SetVisibility(ESlateVisibility::Visible);
+                ItemDescription->SetVisibility(ESlateVisibility::Visible);
+                bIsShowingItemInfo = true;
+                ShowingItem.Reset(Item);
+            }
+        }
     }
-    else if (!bIsInventoryHidden && bIsShowingItemInfo)
+    else if (!bIsInventoryHidden && bIsShowingItemInfo && ShowingItem.IsValid())
     {
         if (DefaultItemWidgetTexture)
         {
@@ -55,9 +66,23 @@ void UInventoryWidget::ShowItemInfo(UItemBase* Item)
         ItemDescription->SetText(FText::GetEmpty());
         ItemDescription->SetVisibility(ESlateVisibility::Hidden);
         bIsShowingItemInfo = false;
-        return;
+        ShowingItem.Reset();
     }
-    bIsShowingItemInfo = false;
+}
+
+void UInventoryWidget::UpdateItemInfo()
+{
+    if (bIsShowingItemInfo && ShowingItem.IsValid())
+    {
+        if (ShowingItem->bUseCustomUpdateItemInfo) { ShowingItem->CustomUpdateItemInfo(); }
+        else
+        {
+            ItemImage->SetBrushFromTexture(ShowingItem->GetItemStaticInfo()->ItemWidgetTexture);
+            ItemDescription->SetText(ShowingItem->GetItemStaticInfo()->ItemDescription);
+            ItemNameTextBlock->SetText(FText::FromName(ShowingItem->GetItemDynamicInfo()->ItemTypeName));
+            FString QuantityString = FString::Printf(TEXT("%d/%d"), ShowingItem->GetItemDynamicInfo()->QuantityItems, ShowingItem->GetItemStaticInfo()->MaxQuantityItemsInSlot);
+        }
+    }
 }
 
 void UInventoryWidget::DropItemFromWidget(UItemBase* Item)

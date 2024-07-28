@@ -6,6 +6,7 @@
 #include "Blueprint/UserWidget.h"
 #include "Components/Inventory/Widgets/InventoryItemWidget.h"
 #include "Components/Inventory/Items/ItemBase.h"
+#include "Components/Inventory/Widgets/DragItemWidget.h"
 #include "InventoryWidget.generated.h"
 
 class UInventoryComponent;
@@ -29,7 +30,7 @@ public:
     UInventoryWidget(const FObjectInitializer& ObjectInitializer);
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite)
-    class TSubclassOf<UDragItemWidget> DragItemWidget;
+    TSubclassOf<UDragItemWidget> DragItemWidget;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite)
     class UTexture2D* DefaultItemWidgetTexture;
@@ -50,6 +51,7 @@ public:
     void UpdateWidgetByItem(UItemBase* Item, bool Clear);
     void UpdateAllWidgets();
     void ShowItemInfo(UItemBase* Item);
+    void UpdateItemInfo();
     void DropItemFromWidget(UItemBase* Item);
 
     FOnUpdateWidgetsInfo OnUpdateWidgetsInfo;
@@ -60,7 +62,9 @@ public:
 
     TStrongObjectPtr<UInventoryComponent> InventoryComponent;
 
-protected:
+    TStrongObjectPtr<UItemBase> ShowingItem;
+
+
     UPROPERTY(meta = (BindWidget))
     UCanvasPanel* ParentCanvasPanel;
 
@@ -75,6 +79,8 @@ protected:
 
     UPROPERTY(meta = (BindWidget))
     UTextBlock* ItemDescription;
+
+protected:
 
     UPROPERTY()
     bool bIsWidgetsCreated;

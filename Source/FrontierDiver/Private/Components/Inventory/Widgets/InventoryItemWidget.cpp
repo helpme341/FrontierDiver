@@ -45,16 +45,15 @@ FReply UInventoryItemWidget::NativeOnMouseButtonDown(const FGeometry& InGeometry
     
     if (MouseEvent.GetEffectingButton() == EKeys::LeftMouseButton)
     {
-        InventoryWidget->DropItemFromWidget(Item.Get());
-        return FReply::Handled();
-        //UInventoryDragDropOperation* DragDropOp = Cast<UInventoryDragDropOperation>(UWidgetBlueprintLibrary::CreateDragDropOperation(UInventoryDragDropOperation::StaticClass()));
-        //if (DragDropOp)
-        //{
-        //    UDragItemWidget* DraggedWidget = CreateWidget<UDragItemWidget>(GetWorld(), InventoryWidget->DragItemWidget);
-        //    DragDropOp->Item = Item;
-        //    DragDropOp->DefaultDragVisual = DraggedWidget;
-        //}
-        //return UWidgetBlueprintLibrary::DetectDragIfPressed(MouseEvent, this, EKeys::LeftMouseButton).NativeReply;
+        UInventoryDragDropOperation* DragDropOp = Cast<UInventoryDragDropOperation>(UWidgetBlueprintLibrary::CreateDragDropOperation(UInventoryDragDropOperation::StaticClass()));
+        if (DragDropOp)
+        {
+            UDragItemWidget* DraggedWidget = CreateWidget<UDragItemWidget>(GetWorld(), InventoryWidget->DragItemWidget);
+            DragDropOp->Item = Item;
+            DragDropOp->DefaultDragVisual = DraggedWidget;
+            return FReply::Handled();
+        }
+        return UWidgetBlueprintLibrary::DetectDragIfPressed(MouseEvent, this, EKeys::LeftMouseButton).NativeReply;
     }
 
     return Super::NativeOnMouseButtonDown(InGeometry, MouseEvent);
@@ -73,7 +72,8 @@ bool UInventoryItemWidget::NativeOnDrop(const FGeometry& InGeometry, const FDrag
 FReply UInventoryItemWidget::NativeOnMouseButtonUp(const FGeometry& InGeometry, const FPointerEvent& MouseEvent)
 {
     if (!PlayerController) { PlayerController = UGameplayStatics::GetPlayerController(GetWorld(), 0); }
-    FInputModeGameOnly InputMode;
+    //FInputModeGameOnly InputMode;
+    FInputModeGameAndUI InputMode;
     PlayerController->SetInputMode(InputMode);
     return FReply::Handled();
 }
@@ -83,17 +83,17 @@ void UInventoryItemWidget::NativeOnMouseEnter(const FGeometry& InGeometry, const
     if (Item && bIsWidgetUsability) { InventoryWidget->ShowItemInfo(Item.Get()); }
 }
 
-void UInventoryItemWidget::NativeOnMouseLeave(const FPointerEvent& InMouseEvent)
+void UInventoryItemWidget::NativeOnMouseLeave(const FPointerEvent& InMouseEvent) ////////////////
 {
-    if (Item && bIsWidgetUsability) { InventoryWidget->ShowItemInfo(nullptr); }
+    if (InMouseEvent.GetEffectingButton() != EKeys::RightMouseButton)
+    {
+        if (Item && bIsWidgetUsability) { InventoryWidget->ShowItemInfo(nullptr); }
+    }
 }
 
 FReply UInventoryItemWidget::NativeOnKeyDown(const FGeometry& InGeometry, const FKeyEvent& InKeyEvent)
 {
-    if (InKeyEvent.GetKey() == EKeys::Tab)
-    {
-        return FReply::Handled();
-    }
+    if (InKeyEvent.GetKey() == EKeys::Tab) { return FReply::Handled(); }
     return Super::NativeOnKeyDown(InGeometry, InKeyEvent);
 }
 
@@ -105,16 +105,20 @@ void UInventoryItemWidget::UpdateWidget(UItemBase* ItemRef, bool Clear)
         {
             WidgetImage->SetBrushFromTexture(InventoryWidget->DefaultItemWidgetTexture);
             WidgetTextBlock->SetText(FText());
-            Item.Reset();
             Item->ItemWidget.Reset();
+            Item.Reset();
         }
         else
         {
-            WidgetImage->SetBrushFromTexture(ItemRef->GetItemStaticInfo()->ItemWidgetTexture);
-            WidgetTextBlock->SetText(FText::FromString(FString::Printf(TEXT("%03d"), ItemRef->GetItemDynamicInfo()->QuantityItems)));
-            Item.Reset(ItemRef);// ItemWidget
-            WidgetTextBlock->SetText(FText::AsNumber(ItemRef->GetItemDynamicInfo()->QuantityItems));
+            Item.Reset(ItemRef);
             if (!Item->ItemWidget.IsValid()) { Item->ItemWidget.Reset(this); }
+            if (ItemRef->bUseCustomUpdateWidget) { ItemRef->CustomUpdateWidget(); }
+            else
+            {
+                WidgetImage->SetBrushFromTexture(ItemRef->GetItemStaticInfo()->ItemWidgetTexture);
+                //WidgetTextBlock->SetText(FText::FromString(FString::Printf(TEXT("%03d"), ItemRef->GetItemDynamicInfo()->QuantityItems)));
+                WidgetTextBlock->SetText(FText::AsNumber(ItemRef->GetItemDynamicInfo()->QuantityItems));
+            }
         }
     }
 }
