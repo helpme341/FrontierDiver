@@ -31,7 +31,7 @@ struct FFlashlightItemTableRowInfo : public FItemTableRowInfoBase
 	 
 	FFlashlightItemTableRowInfo()
 	{
-		MaxQuantityItemsInSlot = 1;
+		MaxQuantityItemsInSlot = 1;    // 
 	}
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "CustomFlashlightSettings|SocketNames")
