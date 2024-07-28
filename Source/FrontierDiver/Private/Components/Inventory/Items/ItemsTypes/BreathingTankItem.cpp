@@ -2,7 +2,6 @@
 
 
 #include "Components/Inventory/Items/ItemsTypes/BreathingTankItem.h"
-#include "Components/TextBlock.h"
 
 UBreathingTankItem::UBreathingTankItem()
 {
@@ -12,7 +11,7 @@ UBreathingTankItem::UBreathingTankItem()
 
 void UBreathingTankItem::OnAddItemToInventory()
 {
-    if (ItemWidget.IsValid()) { ItemWidget->WidgetTextBlock->SetText(FText::FromString(FString::Printf(TEXT("%03d"), ItemDynamicInfo->CurrentAir))); }
+    if (ItemWidget.IsValid()) { ItemWidget->WidgetTextBlock->SetText(FText::FromString(FString::Printf(TEXT("%.1f"), ItemDynamicInfo->CurrentAir))); }
 }
 
 void UBreathingTankItem::SetItemDynamicInfo(UItemDynamicInfo* DynamicInfo)

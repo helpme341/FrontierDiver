@@ -8,6 +8,7 @@
 
 
 class UItemBase;
+class UInventoryWidget;
 
 UCLASS()
 class FRONTIERDIVER_API UInventoryItemWidget : public UUserWidget
@@ -54,7 +55,7 @@ public:
 
     TStrongObjectPtr<UItemBase> Item;
 
-    class TStrongObjectPtr<UInventoryWidget> InventoryWidget;
+    TStrongObjectPtr<UInventoryWidget> InventoryWidget;
 
     class APlayerController* PlayerController;
 

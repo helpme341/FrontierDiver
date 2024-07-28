@@ -6,6 +6,7 @@
 #include "Components/Inventory/Items/ItemBase.h"
 #include "Components/Inventory/Items/ItemTmpl.h"
 #include "Components/Inventory/Widgets/InventoryItemWidget.h"
+#include "Components/TextBlock.h"
 #include "BreathingTankItem.generated.h"
 
 UCLASS()
@@ -65,7 +66,7 @@ public:
 	void SetBreathingTankAir(float Amount)
 	{
 		ItemDynamicInfo->CurrentAir = FMath::Clamp(ItemDynamicInfo->CurrentAir + Amount, 0.0f, ItemTableRowInfo->MaxAir);
-		if (ItemWidget.IsValid()) { ItemWidget->WidgetTextBlock->SetText(FText::FromString(FString::Printf(TEXT("%03d"), ItemDynamicInfo->CurrentAir))); }
+		if(ItemWidget.IsValid()) { ItemWidget->WidgetTextBlock->SetText(FText::FromString(FString::Printf(TEXT("%.1f"), ItemDynamicInfo->CurrentAir))); }
 	}
 
 	float GetBreathingTankAir() { return ItemDynamicInfo->CurrentAir; }
