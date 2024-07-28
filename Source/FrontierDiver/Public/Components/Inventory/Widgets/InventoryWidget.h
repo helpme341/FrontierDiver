@@ -11,13 +11,13 @@
 class UInventoryComponent;
 class UTextBlock;
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnUpdateWidgetsInfo, UItemBase*, Item, bool, Clear);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnUpdateWidgetsUsability);
+DECLARE_MULTICAST_DELEGATE_TwoParams(FOnUpdateWidgetsInfo, UItemBase*, bool);
+DECLARE_MULTICAST_DELEGATE(FOnUpdateWidgetsUsability);
 /*
 * true = изменить все
 * false = изменить только не быстрые виджеты
 */
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnUpdateWidgetsVisibility, bool, Hide, bool, UpdateState);
+DECLARE_MULTICAST_DELEGATE_TwoParams(FOnUpdateWidgetsVisibility, bool, bool);
 DECLARE_LOG_CATEGORY_EXTERN(LogInventoryWidget, Log, All);
 
 UCLASS()
@@ -52,13 +52,10 @@ public:
     void ShowItemInfo(UItemBase* Item);
     void DropItemFromWidget(UItemBase* Item);
 
-    UPROPERTY(BlueprintAssignable, Category = "Events")
     FOnUpdateWidgetsInfo OnUpdateWidgetsInfo;
 
-    UPROPERTY(BlueprintAssignable, Category = "Events")
     FOnUpdateWidgetsUsability OnUpdateWidgetsUsability;
 
-    UPROPERTY(BlueprintAssignable, Category = "Events")
     FOnUpdateWidgetsVisibility OnUpdateWidgetsVisibility;
 
     TStrongObjectPtr<UInventoryComponent> InventoryComponent;

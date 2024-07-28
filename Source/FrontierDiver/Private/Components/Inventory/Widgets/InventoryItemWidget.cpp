@@ -25,9 +25,9 @@ void UInventoryItemWidget::NativeConstruct()
     InventoryWidget.Reset(GetTypedOuter<UInventoryWidget>());
     if (InventoryWidget)
     {
-        InventoryWidget->OnUpdateWidgetsInfo.AddDynamic(this, &UInventoryItemWidget::UpdateWidget);
-        InventoryWidget->OnUpdateWidgetsUsability.AddDynamic(this, &UInventoryItemWidget::SetWidgetUsability);
-        InventoryWidget->OnUpdateWidgetsVisibility.AddDynamic(this, &UInventoryItemWidget::SetWidgetVisibility);
+        InventoryWidget->OnUpdateWidgetsInfo.AddUObject(this, &UInventoryItemWidget::UpdateWidget);
+        InventoryWidget->OnUpdateWidgetsUsability.AddUObject(this, &UInventoryItemWidget::SetWidgetUsability);
+        InventoryWidget->OnUpdateWidgetsVisibility.AddUObject(this, &UInventoryItemWidget::SetWidgetVisibility);
     }
     InventoryWidget->GetInventoryComponent()->OnInventoryItemWidgetConstructed();
 }
@@ -101,18 +101,20 @@ void UInventoryItemWidget::UpdateWidget(UItemBase* ItemRef, bool Clear)
 {
     if (ItemRef && ItemRef->ItemID == WidgetID && ItemRef->ItemContainerType == WidgetContainerType)
     {
-        if (!Clear)
-        {
-            WidgetImage->SetBrushFromTexture(ItemRef->GetItemStaticInfo()->ItemWidgetTexture);
-            WidgetTextBlock->SetText(FText::FromString(FString::Printf(TEXT("%03d"), ItemRef->GetItemDynamicInfo()->QuantityItems)));
-            Item.Reset(ItemRef);
-            WidgetTextBlock->SetText(FText::AsNumber(ItemRef->GetItemDynamicInfo()->QuantityItems));
-        }
-        else
+        if (Clear)
         {
             WidgetImage->SetBrushFromTexture(InventoryWidget->DefaultItemWidgetTexture);
             WidgetTextBlock->SetText(FText());
             Item.Reset();
+            Item->ItemWidget.Reset();
+        }
+        else
+        {
+            WidgetImage->SetBrushFromTexture(ItemRef->GetItemStaticInfo()->ItemWidgetTexture);
+            WidgetTextBlock->SetText(FText::FromString(FString::Printf(TEXT("%03d"), ItemRef->GetItemDynamicInfo()->QuantityItems)));
+            Item.Reset(ItemRef);// ItemWidget
+            WidgetTextBlock->SetText(FText::AsNumber(ItemRef->GetItemDynamicInfo()->QuantityItems));
+            if (!Item->ItemWidget.IsValid()) { Item->ItemWidget.Reset(this); }
         }
     }
 }

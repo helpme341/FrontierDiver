@@ -2,5 +2,5 @@
 
 
 #include "Components/Inventory/Items/ItemBase.h"
-#include "Components/Inventory/Widgets/InventoryItemWidget.h"
 #include "Components/Inventory/Items/WorldItem.h"
+#include "Components/Inventory/Widgets/InventoryItemWidget.h"

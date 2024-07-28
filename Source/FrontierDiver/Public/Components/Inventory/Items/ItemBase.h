@@ -82,6 +82,8 @@ struct FItemTableRowInfoBase : public FTableRowBase
     FVector WorldItemScale = FVector(1.0f,1.0f,1.0f);
 };
 
+class UInventoryItemWidget;
+
 /**
  * 
  */
@@ -98,12 +100,18 @@ public:
     UPROPERTY()
     EContainerType ItemContainerType;
 
+    TStrongObjectPtr<UInventoryItemWidget> ItemWidget;
+
     UPROPERTY()
     int32 ItemID = 99;
 
     virtual bool FindDataTableByItemType(UWorld* World) { return false; };
 
     virtual void OnPickupItemToInventory(class AWorldItem* Item) {};
+
+    virtual void OnAddItemToInventory() {};
+
+    virtual void OnRemoveItemFromInventory() {};
 
     virtual const FItemTableRowInfoBase* GetItemStaticInfo() { return nullptr; }
 

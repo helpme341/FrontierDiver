@@ -2,10 +2,17 @@
 
 
 #include "Components/Inventory/Items/ItemsTypes/BreathingTankItem.h"
+#include "Components/TextBlock.h"
 
 UBreathingTankItem::UBreathingTankItem()
 {
 	bIsPlayerCanDropThisItem = true;
+}
+
+
+void UBreathingTankItem::OnAddItemToInventory()
+{
+    if (ItemWidget.IsValid()) { ItemWidget->WidgetTextBlock->SetText(FText::FromString(FString::Printf(TEXT("%03d"), ItemDynamicInfo->CurrentAir))); }
 }
 
 void UBreathingTankItem::SetItemDynamicInfo(UItemDynamicInfo* DynamicInfo)

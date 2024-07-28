@@ -6,6 +6,9 @@
 #include "Blueprint/UserWidget.h"
 #include "InventoryItemWidget.generated.h"
 
+
+class UItemBase;
+
 UCLASS()
 class FRONTIERDIVER_API UInventoryItemWidget : public UUserWidget
 {

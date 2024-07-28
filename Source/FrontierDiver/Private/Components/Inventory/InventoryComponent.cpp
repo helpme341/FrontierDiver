@@ -51,6 +51,7 @@ int UInventoryComponent::AddItemToInventory(UItemBase* Item, UItemBase*& ItemRes
                     Item->ConditionalBeginDestroy();
                     ItemResult = ItemOnInspection;
                     InventoryWidget->UpdateWidgetByItem(ItemOnInspection, false);
+                    ItemOnInspection->OnAddItemToInventory();
                     return 2;
                 }
             }
@@ -61,6 +62,7 @@ int UInventoryComponent::AddItemToInventory(UItemBase* Item, UItemBase*& ItemRes
                 Item->ItemID = Counter;
                 Item->ItemContainerType = ItemContainerType;
                 InventoryWidget->UpdateWidgetByItem(Item, false);
+                Item->OnAddItemToInventory();
                 return 1;
             }
         }
@@ -125,28 +127,15 @@ bool UInventoryComponent::PickupItemToInventory(AWorldItem* Item)
     }
 
     UItemBase* ItemResult;
-    switch (AddItemToInventory(NewItem, ItemResult))
-    {
-    case 0:
-    {
-        NewItem->ConditionalBeginDestroy();
-        return false;
-    }
-    case 1:
+    int32 Result = AddItemToInventory(NewItem, ItemResult);
+
+    if (Result != 0)
     {
         NewItem->OnPickupItemToInventory(Item);
         Item->Destroy();
         return true;
     }
-    case 2:
-    {
-        ItemResult->OnPickupItemToInventory(Item);
-        Item->Destroy();
-        return true;
-    }
-    default:
-        return false;
-    }
+    NewItem->ConditionalBeginDestroy();
     return false;
 }
 

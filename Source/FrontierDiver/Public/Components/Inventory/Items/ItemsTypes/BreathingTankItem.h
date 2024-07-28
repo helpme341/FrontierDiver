@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Components/Inventory/Items/ItemBase.h"
 #include "Components/Inventory/Items/ItemTmpl.h"
+#include "Components/Inventory/Widgets/InventoryItemWidget.h"
 #include "BreathingTankItem.generated.h"
 
 UCLASS()
@@ -32,7 +33,7 @@ struct FBreathingTankItemTableRowInfo : public FItemTableRowInfoBase
 
 };
 
-
+class UTextBlock;
 
 /**
  * 
@@ -54,6 +55,8 @@ public:
 
 	UItemDynamicInfo* GetItemDynamicInfo() 
 		override { return ItemDynamicInfo.Get(); }
+	
+	void OnAddItemToInventory() override;
 
 	void SetItemDynamicInfo(UItemDynamicInfo* DynamicInfo) override;
 
@@ -62,6 +65,7 @@ public:
 	void SetBreathingTankAir(float Amount)
 	{
 		ItemDynamicInfo->CurrentAir = FMath::Clamp(ItemDynamicInfo->CurrentAir + Amount, 0.0f, ItemTableRowInfo->MaxAir);
+		if (ItemWidget.IsValid()) { ItemWidget->WidgetTextBlock->SetText(FText::FromString(FString::Printf(TEXT("%03d"), ItemDynamicInfo->CurrentAir))); }
 	}
 
 	float GetBreathingTankAir() { return ItemDynamicInfo->CurrentAir; }
