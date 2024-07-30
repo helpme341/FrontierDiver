@@ -82,6 +82,31 @@ struct FItemTableRowInfoBase : public FTableRowBase
     FVector WorldItemScale = FVector(1.0f,1.0f,1.0f);
 };
 
+USTRUCT(BlueprintType)
+struct FBaseItemInfo
+{
+    GENERATED_BODY()
+
+
+    FBaseItemInfo(EContainerType ItemContainerType, int32 ItemID)
+    {
+        FBaseItemInfo::ItemID = ItemID;
+        FBaseItemInfo::ItemContainerType = ItemContainerType;
+    }
+
+
+    FBaseItemInfo() {}
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ItemInfoBase")
+    int32 ItemID = 99;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ItemInfoBase")
+    EContainerType ItemContainerType = EContainerType::None;
+
+    bool IsValid() { return (ItemID != -1 && ItemContainerType != EContainerType::None); }
+};
+
+
 class UInventoryItemWidget;
 
 /**
@@ -102,13 +127,9 @@ public:
 
     bool bUseCustomUpdateItemInfo;
 
-    UPROPERTY()
-    EContainerType ItemContainerType;
+    FBaseItemInfo BaseItemInfo;
 
     TStrongObjectPtr<UInventoryItemWidget> ItemWidget;
-
-    UPROPERTY()
-    int32 ItemID = 99;
 
     virtual bool FindDataTableByItemType(UWorld* World) { return false; };
 

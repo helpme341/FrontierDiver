@@ -9,12 +9,10 @@
 #include "Components/Inventory/InventoryComponent.h"
 #include "Components/Inventory/Widgets/InventoryDragDropOperation.h"
 #include "Blueprint/WidgetBlueprintLibrary.h"
-#include "Components/Inventory/Widgets/DragItemWidget.h"
 
 UInventoryItemWidget::UInventoryItemWidget(const FObjectInitializer& ObjectInitializer)
     : Super(ObjectInitializer)
 {
-    bIsFocusable = true;
     SetIsEnabled(true);
 }
 
@@ -36,43 +34,48 @@ FReply UInventoryItemWidget::NativeOnMouseButtonDown(const FGeometry& InGeometry
 {
     if (Item && bIsWidgetUsability)
     {
-        if (MouseEvent.GetEffectingButton() == EKeys::RightMouseButton)
+        if (MouseEvent.IsMouseButtonDown(EKeys::LeftMouseButton)) { return UWidgetBlueprintLibrary::DetectDragIfPressed(MouseEvent, this, EKeys::LeftMouseButton).NativeReply; }
+        else if (MouseEvent.IsMouseButtonDown(EKeys::RightMouseButton))
         {
             InventoryWidget->DropItemFromWidget(Item.Get());
             return FReply::Handled();
         }
     }
-    
-    if (MouseEvent.GetEffectingButton() == EKeys::LeftMouseButton)
-    {
-        UInventoryDragDropOperation* DragDropOp = Cast<UInventoryDragDropOperation>(UWidgetBlueprintLibrary::CreateDragDropOperation(UInventoryDragDropOperation::StaticClass()));
-        if (DragDropOp)
-        {
-            UDragItemWidget* DraggedWidget = CreateWidget<UDragItemWidget>(GetWorld(), InventoryWidget->DragItemWidget);
-            DragDropOp->Item = Item;
-            DragDropOp->DefaultDragVisual = DraggedWidget;
-            return FReply::Handled();
-        }
-        return UWidgetBlueprintLibrary::DetectDragIfPressed(MouseEvent, this, EKeys::LeftMouseButton).NativeReply;
-    }
-
     return Super::NativeOnMouseButtonDown(InGeometry, MouseEvent);
 }
+
+void UInventoryItemWidget::NativeOnDragDetected(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent, UDragDropOperation*& OutOperation)
+{
+    Super::NativeOnDragDetected(InGeometry, InMouseEvent, OutOperation);
+
+    // Создаем объект DragDropOperation
+    UInventoryDragDropOperation* DragDropOp = NewObject<UInventoryDragDropOperation>(this, UInventoryDragDropOperation::StaticClass());
+    if (DragDropOp)
+    {
+        DragDropOp->Item = Item;
+        DragDropOp->DefaultDragVisual = this;
+        DragDropOp->Offset = FVector2D(0.6f, 0.3f);
+        OutOperation = DragDropOp;
+    }
+}
+
 
 bool UInventoryItemWidget::NativeOnDrop(const FGeometry& InGeometry, const FDragDropEvent& InDragDropEvent, UDragDropOperation* InOperation)
 {
     if (UInventoryDragDropOperation* DragDropOperation = Cast<UInventoryDragDropOperation>(InOperation))
     {
-        //InventoryWidget->InventoryComponent->AddItemToInventory()
-        return true; // Возвращаем true, если операция была успешной
+        return InventoryWidget->InventoryComponent->MoveItemFromStartSlotToTargetSlot(DragDropOperation->Item->BaseItemInfo, Item.IsValid() ? Item->BaseItemInfo : FBaseItemInfo());
     }
     return Super::NativeOnDrop(InGeometry, InDragDropEvent, InOperation);
 }
 
-FReply UInventoryItemWidget::NativeOnMouseButtonUp(const FGeometry& InGeometry, const FPointerEvent& MouseEvent)
+void UInventoryItemWidget::NativeOnDragCancelled(const FDragDropEvent& InDragDropEvent, UDragDropOperation* InOperation)
+{
+}
+
+FReply UInventoryItemWidget::NativeOnMouseButtonUp(const FGeometry& InGeometry, const FPointerEvent& MouseEvent) 
 {
     if (!PlayerController) { PlayerController = UGameplayStatics::GetPlayerController(GetWorld(), 0); }
-    //FInputModeGameOnly InputMode;
     FInputModeGameAndUI InputMode;
     PlayerController->SetInputMode(InputMode);
     return FReply::Handled();
@@ -99,7 +102,7 @@ FReply UInventoryItemWidget::NativeOnKeyDown(const FGeometry& InGeometry, const 
 
 void UInventoryItemWidget::UpdateWidget(UItemBase* ItemRef, bool Clear)
 {
-    if (ItemRef && ItemRef->ItemID == WidgetID && ItemRef->ItemContainerType == WidgetContainerType)
+    if (ItemRef && ItemRef->BaseItemInfo.ItemID == WidgetID && ItemRef->BaseItemInfo.ItemContainerType == WidgetContainerType)
     {
         if (Clear)
         {

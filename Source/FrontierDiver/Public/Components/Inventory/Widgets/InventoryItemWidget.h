@@ -21,10 +21,10 @@ public:
     void NativeConstruct() override;
 
     FReply NativeOnMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& MouseEvent) override;
-    FReply NativeOnMouseButtonUp(const FGeometry& InGeometry, const FPointerEvent& MouseEvent) override;
-    //void NativeOnDragDetected(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent, UDragDropOperation*& OutOperation) override; ////////////
-    bool NativeOnDrop(const FGeometry& InGeometry, const FDragDropEvent& InDragDropEvent, UDragDropOperation* InOperation) override; ////////////////
-
+    void NativeOnDragDetected(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent, UDragDropOperation*& OutOperation) override;
+    void NativeOnDragCancelled(const FDragDropEvent& InDragDropEvent, UDragDropOperation* InOperation) override;
+    FReply NativeOnMouseButtonUp(const FGeometry& InGeometry, const FPointerEvent& MouseEvent) override; /////////////////////////////////////////////
+    bool NativeOnDrop(const FGeometry& InGeometry, const FDragDropEvent& InDragDropEvent, UDragDropOperation* InOperation) override;
     virtual void NativeOnMouseEnter(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent);
     virtual void NativeOnMouseLeave(const FPointerEvent& InMouseEvent);
     virtual FReply NativeOnKeyDown(const FGeometry& InGeometry, const FKeyEvent& InKeyEvent) override;

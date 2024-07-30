@@ -6,7 +6,6 @@
 #include "Blueprint/UserWidget.h"
 #include "Components/Inventory/Widgets/InventoryItemWidget.h"
 #include "Components/Inventory/Items/ItemBase.h"
-#include "Components/Inventory/Widgets/DragItemWidget.h"
 #include "InventoryWidget.generated.h"
 
 class UInventoryComponent;
@@ -28,9 +27,6 @@ class FRONTIERDIVER_API UInventoryWidget : public UUserWidget
 
 public:
     UInventoryWidget(const FObjectInitializer& ObjectInitializer);
-
-    UPROPERTY(EditAnywhere, BlueprintReadWrite)
-    TSubclassOf<UDragItemWidget> DragItemWidget;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite)
     class UTexture2D* DefaultItemWidgetTexture;

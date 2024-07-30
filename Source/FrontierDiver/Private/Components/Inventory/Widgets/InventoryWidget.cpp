@@ -12,7 +12,6 @@ DEFINE_LOG_CATEGORY(LogInventoryWidget);
 UInventoryWidget::UInventoryWidget(const FObjectInitializer& ObjectInitializer)
     : Super(ObjectInitializer)
 {
-    bIsFocusable = false;
 }
 
 void UInventoryWidget::ShowItemInfo(UItemBase* Item)

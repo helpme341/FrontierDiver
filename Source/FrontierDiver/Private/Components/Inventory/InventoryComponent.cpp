@@ -19,58 +19,157 @@ UInventoryComponent::UInventoryComponent()
     
 }
 
+bool UInventoryComponent::AddItemToInventory(UItemBase* Item)
+{
+    UItemBase* ItemResult;
+    return AddItemToInventory(Item, ItemResult) != 0;
+}
+
 /*
-* return 0 =  ошибка добавления оно не возможно
-* return 1 =  предмет был добавлен
-* return 2 =  дредмет был застакан с оналогичным и удален
+* return 0 = ошибка добавления, оно не возможно
+* return 1 = предмет был добавлен
+* return 2 = предмет был застакан с аналогичным и удален
 */
 int UInventoryComponent::AddItemToInventory(UItemBase* Item, UItemBase*& ItemResult)
-{ 
-    if (!Item || Item->ItemID != 99 || !Item->GetItemDynamicInfo() || !Item->FindDataTableByItemType(GetWorld()) || !Item->GetItemStaticInfo() ) { return 0; }
-
-    EContainerType ItemContainerType = EContainerType::None;
-    for (EContainerType Enum : Item->GetItemStaticInfo()->ItemContainerTypes)
+{
+    // Проверка валидности предмета
+    if (!Item || Item->BaseItemInfo.ItemID != 99 || !Item->GetItemDynamicInfo() ||
+        !Item->FindDataTableByItemType(GetWorld()) || !Item->GetItemStaticInfo())
     {
-        if (Inventory.Contains(Enum) && !Inventory[Enum].ContainerInventory.IsEmpty()) { ItemContainerType = Enum; break; }
+        return 0;
     }
-    if (ItemContainerType == EContainerType::None) { return 0; }
 
     bool bCheckQuantity = Item->GetItemStaticInfo()->MaxQuantityItemsInSlot > 1;
 
-    if (Item->GetItemDynamicInfo()->ItemTypeName != "None" && Item->GetItemDynamicInfo()->QuantityItems != 0)
+    // Итерация по типам контейнеров, в которые может быть добавлен предмет
+    for (EContainerType ContainerType : Item->GetItemStaticInfo()->ItemContainerTypes)
     {
-        for (int32 Counter = 0; Counter < Inventory[ItemContainerType].ContainerInventory.Num(); Counter++)
+        if (Inventory.Contains(ContainerType))
         {
-            UItemBase* ItemOnInspection = Inventory[ItemContainerType].ContainerInventory[Counter].Item.Get();
+            auto& ContainerInventory = Inventory[ContainerType].ContainerInventory;
 
-            if (bCheckQuantity && ItemOnInspection && ItemOnInspection->GetItemDynamicInfo()->ItemTypeName == Item->GetItemDynamicInfo()->ItemTypeName && ItemOnInspection->GetClass() == Item->GetClass())
+            // Итерация по элементам инвентаря
+            for (int32 Index = 0; Index < ContainerInventory.Num(); ++Index)
             {
-                if (ItemOnInspection->GetItemDynamicInfo()->QuantityItems + Item->GetItemDynamicInfo()->QuantityItems <= Item->GetItemStaticInfo()->MaxQuantityItemsInSlot)
+                FSharedContainerBase& ExistingItem = ContainerInventory[Index];
+                UItemBase* ItemOnInspection = ExistingItem.Item.Get();
+
+                if (ItemOnInspection)
                 {
-                    ItemOnInspection->GetItemDynamicInfo()->QuantityItems += Item->GetItemDynamicInfo()->QuantityItems;
-                    Item->ConditionalBeginDestroy();
-                    ItemResult = ItemOnInspection;
-                    InventoryWidget->UpdateWidgetByItem(ItemOnInspection, false);
-                    ItemOnInspection->OnAddItemToInventory();
-                    return 2;
+                    // Проверка и добавление предмета при достаточном количестве места
+                    if (bCheckQuantity && ItemOnInspection->GetItemDynamicInfo()->ItemTypeName == Item->GetItemDynamicInfo()->ItemTypeName &&
+                        ItemOnInspection->GetClass() == Item->GetClass())
+                    {
+                        if (ItemOnInspection->GetItemDynamicInfo()->QuantityItems + Item->GetItemDynamicInfo()->QuantityItems <= Item->GetItemStaticInfo()->MaxQuantityItemsInSlot)
+                        {
+                            ItemOnInspection->GetItemDynamicInfo()->QuantityItems += Item->GetItemDynamicInfo()->QuantityItems;
+                            Item->ConditionalBeginDestroy();
+                            ItemResult = ItemOnInspection;
+                            InventoryWidget->UpdateWidgetByItem(ItemOnInspection, false);
+                            ItemOnInspection->OnAddItemToInventory();
+                            return 2;
+                        }
+                    }
                 }
-            }
-
-            if (!ItemOnInspection)
-            {
-                Inventory[ItemContainerType].ContainerInventory[Counter].Item.Reset(Item);
-                Item->ItemID = Counter;
-                Item->ItemContainerType = ItemContainerType;
-                InventoryWidget->UpdateWidgetByItem(Item, false);
-                Item->OnAddItemToInventory();
-                return 1;
+                else
+                {
+                    // Помещение предмета в свободный слот
+                    ContainerInventory[Index].Item.Reset(Item);
+                    ItemResult = Item;
+                    Item->BaseItemInfo.ItemID = Index;
+                    Item->BaseItemInfo.ItemContainerType = ContainerType;
+                    InventoryWidget->UpdateWidgetByItem(Item, false);
+                    Item->OnAddItemToInventory();
+                    return 1;
+                }
             }
         }
     }
-    else
+
+    // Если нет подходящих слотов
+    return 0;
+}
+
+/*
+* return 0 = ошибка добавления, оно не возможно
+* return 1 = предмет был добавлен
+* return 2 = предмет был застакан с аналогичным и удален
+*/
+int UInventoryComponent::AddItemToInventory(UItemBase* Item, UItemBase*& ItemResult, const TArray<FBaseItemInfo>& IgnoreSlotsList)
+{
+    // Проверка валидности предмета
+    if (!Item || Item->BaseItemInfo.ItemID != 99 || !Item->GetItemDynamicInfo() ||
+        !Item->FindDataTableByItemType(GetWorld()) || !Item->GetItemStaticInfo())
     {
-        UE_LOG(LogInventoryComponent, Warning, TEXT("ItemDynamicInfo is nullptr or invalid"));
+        return 0;
     }
+
+    bool bCheckQuantity = Item->GetItemStaticInfo()->MaxQuantityItemsInSlot > 1;
+
+    // Итерация по типам контейнеров, в которые может быть добавлен предмет
+    for (EContainerType ContainerType : Item->GetItemStaticInfo()->ItemContainerTypes)
+    {
+        if (Inventory.Contains(ContainerType))
+        {
+            auto& ContainerInventory = Inventory[ContainerType].ContainerInventory;
+            bool bFoundSlot = false;
+            FBaseItemInfo BaseItemInfo;
+
+            // Итерация по элементам инвентаря
+            for (int32 Index = 0; Index < ContainerInventory.Num(); ++Index)
+            {
+                FSharedContainerBase& ExistingItem = ContainerInventory[Index];
+                UItemBase* ItemOnInspection = ExistingItem.Item.Get();
+
+                // Проверка каждого элемента в списке игнорируемых слотов
+                for (const FBaseItemInfo& IgnoreSlot : IgnoreSlotsList)
+                {
+                    if (ExistingItem.Item && ExistingItem.Item->BaseItemInfo.ItemContainerType == IgnoreSlot.ItemContainerType && ///////////////////// проблема 
+                        ExistingItem.Item->BaseItemInfo.ItemID == IgnoreSlot.ItemID)
+                    {
+                        BaseItemInfo = FBaseItemInfo(ContainerType, IgnoreSlot.ItemID);
+
+                        if (bCheckQuantity && ItemOnInspection && ItemOnInspection->GetItemDynamicInfo()->ItemTypeName == Item->GetItemDynamicInfo()->ItemTypeName &&
+                            ItemOnInspection->GetClass() == Item->GetClass())
+                        {
+                            if (ItemOnInspection->GetItemDynamicInfo()->QuantityItems + Item->GetItemDynamicInfo()->QuantityItems <= Item->GetItemStaticInfo()->MaxQuantityItemsInSlot)
+                            {
+                                ItemOnInspection->GetItemDynamicInfo()->QuantityItems += Item->GetItemDynamicInfo()->QuantityItems;
+                                Item->ConditionalBeginDestroy();
+                                ItemResult = ItemOnInspection;
+                                InventoryWidget->UpdateWidgetByItem(ItemOnInspection, false);
+                                ItemOnInspection->OnAddItemToInventory();
+                                return 2;
+                            }
+                        }
+                        else if (!ItemOnInspection)
+                        {
+                            ContainerInventory[Index].Item.Reset(Item);
+                            ItemResult = Item;
+                            Item->BaseItemInfo = BaseItemInfo;
+                            InventoryWidget->UpdateWidgetByItem(Item, false);
+                            Item->OnAddItemToInventory();
+                            return 1;
+                        }
+                        bFoundSlot = true;
+                        break;
+                    }
+                }
+
+                if (bFoundSlot)
+                {
+                    break;
+                }
+            }
+
+            if (BaseItemInfo.IsValid())
+            {
+                break;
+            }
+        }
+    }
+
+    // Если нет подходящих слотов
     return 0;
 }
 
@@ -79,9 +178,9 @@ int UInventoryComponent::AddItemToInventory(UItemBase* Item, UItemBase*& ItemRes
 * return 1 =  предмет удален из инвеноря 
 * return 2 =  предмет был застакон и из него был удален 1 копия
 */
-int UInventoryComponent::RemoveItemFromInventory(UItemBase* Item)
+int UInventoryComponent::RemoveItemFromInventory(UItemBase* Item, bool RemoveItem)
 {
-    if (!Item || Item->ItemID == 99 || !Item->FindDataTableByItemType(GetWorld()) || !Item->GetItemDynamicInfo() || !Item->GetItemStaticInfo()) { return 0; }
+    if (!Item || Item->BaseItemInfo.ItemID == 99 || !Item->FindDataTableByItemType(GetWorld()) || !Item->GetItemDynamicInfo() || !Item->GetItemStaticInfo()) { return 0; }
 
     if (Item->GetItemStaticInfo()->MaxQuantityItemsInSlot > 1 && Item->GetItemDynamicInfo()->QuantityItems > 1)
     {
@@ -89,11 +188,12 @@ int UInventoryComponent::RemoveItemFromInventory(UItemBase* Item)
         InventoryWidget->UpdateWidgetByItem(Item, false);
         return 2;
     }
-    else if (Inventory.Contains(Item->ItemContainerType))
+    else if (Inventory.Contains(Item->BaseItemInfo.ItemContainerType))
     {
-        Inventory[Item->ItemContainerType].ContainerInventory[Item->ItemID].Item = nullptr;
+        Inventory[Item->BaseItemInfo.ItemContainerType].ContainerInventory[Item->BaseItemInfo.ItemID].Item = nullptr;
         InventoryWidget->UpdateWidgetByItem(Item, true);
-        Item->ConditionalBeginDestroy();
+        if (RemoveItem) { Item->ConditionalBeginDestroy(); }
+        else { Item->BaseItemInfo.ItemID = 99; }
         return 1;
     }
     return 0;
@@ -166,8 +266,8 @@ int UInventoryComponent::DropItemFromInventory(UItemBase* Item)
         return 0;
     }
 
-    ITakeRemoveItemIF* TakeRemoveItemIF = Cast<ITakeRemoveItemIF>(Inventory[Item->ItemContainerType].ContainerInventory[Item->ItemID].Item.Get());
-    int Result = RemoveItemFromInventory(Item);
+    ITakeRemoveItemIF* TakeRemoveItemIF = Cast<ITakeRemoveItemIF>(Inventory[Item->BaseItemInfo.ItemContainerType].ContainerInventory[Item->BaseItemInfo.ItemID].Item.Get());
+    int Result = RemoveItemFromInventory(Item, true);
     if (Result != 0)
     {
         bool ItemHeld = bIsItemHeld && Item == HeldItem.Get();
@@ -202,6 +302,31 @@ int UInventoryComponent::DropItemFromInventory(UItemBase* Item)
     }
     NewWorldItem->Destroy();
     return 0;
+}
+
+bool UInventoryComponent::MoveItemFromStartSlotToTargetSlot(FBaseItemInfo StartSlot, FBaseItemInfo TargetSlot)
+{
+    if (!StartSlot.IsValid() || !Inventory[StartSlot.ItemContainerType].ContainerInventory[StartSlot.ItemID].Item.IsValid()) { return 0; }
+
+    UItemBase* Item = Inventory[StartSlot.ItemContainerType].ContainerInventory[StartSlot.ItemID].Item.Get();
+    FBaseItemInfo IgnoreSlot = Item->BaseItemInfo;
+    int RemoveItemFromInventoryResult = RemoveItemFromInventory(Item, false);
+    if (RemoveItemFromInventoryResult != 0)
+    {
+        if (RemoveItemFromInventoryResult == 2)
+        { 
+            Item = DuplicateObject<UItemBase>(Item, GetOuter());
+            Item->GetItemDynamicInfo()->QuantityItems = 1;
+        }
+    }
+    else { return false; }
+    UItemBase* ItemResult;
+    int AddItemToInventoryResult = AddItemToInventory(Item, ItemResult, TArray<FBaseItemInfo>{IgnoreSlot});
+    if (AddItemToInventoryResult != 0)
+    {
+        return true;
+    }
+    return false;
 }
 
 bool UInventoryComponent::HeldItemToHandsByID(int32 ID)
@@ -390,11 +515,6 @@ void UInventoryComponent::OnInventoryItemWidgetConstructed()
             InventoryWidget->SetNotQuickInventoryVisibility(true);
         }
     }
-}
-
-void UInventoryComponent::BeginPlay()
-{
-    Super::BeginPlay();
 }
 
 void UInventoryComponent::BeginLogic(AFrontierDiverCharacter* Character)

@@ -9,7 +9,6 @@
 UMainWidget::UMainWidget(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 {
-	bIsFocusable = false;
 }
 
 void UMainWidget::NativeConstruct()

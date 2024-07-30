@@ -79,13 +79,18 @@ public:
 	UFUNCTION(BlueprintCallable)
 	bool RemoveBreathingTankItem();
 
-
-	void BeginPlay() override;
 	void BeginLogic(AFrontierDiverCharacter* Character);
+
+	bool AddItemToInventory(UItemBase* Item);
+
 	int AddItemToInventory(UItemBase* Item, UItemBase*& ItemResult);
-	int RemoveItemFromInventory(UItemBase* Item);
+
+	int AddItemToInventory(UItemBase* Item, UItemBase*& ItemResult , const TArray<FBaseItemInfo>& IgnoreSlotsList);
+
+	int RemoveItemFromInventory(UItemBase* Item, bool RemoveItem);
 	bool PickupItemToInventory(AWorldItem* Item);
 	int DropItemFromInventory(UItemBase* Item);
+	bool MoveItemFromStartSlotToTargetSlot(FBaseItemInfo StartSlot, FBaseItemInfo TargetSlot);
 
 	bool FirstInteractWithHeldItem();
 	bool SecondInteractWithHeldItem();
