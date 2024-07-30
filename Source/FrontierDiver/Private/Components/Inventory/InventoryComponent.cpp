@@ -124,8 +124,8 @@ int UInventoryComponent::AddItemToInventory(UItemBase* Item, UItemBase*& ItemRes
                 // Проверка каждого элемента в списке игнорируемых слотов
                 for (const FBaseItemInfo& IgnoreSlot : IgnoreSlotsList)
                 {
-                    if (ExistingItem.Item && ExistingItem.Item->BaseItemInfo.ItemContainerType == IgnoreSlot.ItemContainerType && ///////////////////// проблема 
-                        ExistingItem.Item->BaseItemInfo.ItemID == IgnoreSlot.ItemID)
+                    if (ContainerType == IgnoreSlot.ItemContainerType && Index == IgnoreSlot.ItemID) { break; }
+                    else
                     {
                         BaseItemInfo = FBaseItemInfo(ContainerType, IgnoreSlot.ItemID);
 
