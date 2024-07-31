@@ -28,12 +28,11 @@ public:
     virtual void NativeOnMouseEnter(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent);
     virtual void NativeOnMouseLeave(const FPointerEvent& InMouseEvent);
     virtual FReply NativeOnKeyDown(const FGeometry& InGeometry, const FKeyEvent& InKeyEvent) override;
+    void SetItemInfoVisible(bool Hide);
+
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite)
-    EContainerType WidgetContainerType;
-
-    UPROPERTY(EditAnywhere, BlueprintReadWrite)
-    int32 WidgetID;
+    FSlotInfo WidgetSlotInfo;
 
     UPROPERTY(meta = (BindWidget))
     class UCanvasPanel* WidgetCanvasPanel;
@@ -61,4 +60,7 @@ public:
 
     UPROPERTY()
     bool bIsWidgetUsability;
+
+    UPROPERTY()
+    bool bIsWidgetInfoInHedden;
 };

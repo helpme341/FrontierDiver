@@ -30,7 +30,7 @@ void UInventoryWidget::ShowItemInfo(UItemBase* Item)
         }
         else
         {
-            if (Item->FindDataTableByItemType(GetWorld()) || Item->GetItemStaticInfo())
+            if (Item->FindDataTableForItem(GetWorld()) || Item->GetItemStaticInfo())
             {
                 ItemImage->SetBrushFromTexture(Item->GetItemStaticInfo()->ItemWidgetTexture);
                 ItemDescription->SetText(Item->GetItemStaticInfo()->ItemDescription);

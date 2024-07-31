@@ -17,6 +17,7 @@
 #include "Components/Inventory/Widgets/InventoryWidget.h"
 #include "DrawDebugHelpers.h" 
 #include "Widgets/MainWidget.h"
+#include "Components/Inventory/Items/ItemsTypes/BreathingTankItem.h"
 
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
 
@@ -224,32 +225,6 @@ void AFrontierDiverCharacter::ThirdInteract()
 	// ещё логика
 }
 
-void AFrontierDiverCharacter::OpenCloseInventory()
-{
-	APlayerController* PlayerController = GetWorld()->GetFirstPlayerController();
-	if (PlayerController)
-	{
-		if (InventoryComponent->InventoryWidget->InventoryIsHidden())
-		{
-			// Открытие инвентаря
-			PlayerController->bShowMouseCursor = true;
-			PlayerController->bEnableClickEvents = true;
-			PlayerController->bEnableMouseOverEvents = true;
-			PlayerController->SetInputMode(FInputModeGameAndUI().SetWidgetToFocus(InventoryComponent->InventoryWidget->TakeWidget()).SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock));
-			InventoryComponent->InventoryWidget->SetNotQuickInventoryVisibility(false);
-		}
-		else
-		{
-			// Закрытие инвентаря
-			PlayerController->bShowMouseCursor = false;
-			PlayerController->bEnableClickEvents = false;
-			PlayerController->bEnableMouseOverEvents = false;
-			PlayerController->SetInputMode(FInputModeGameOnly());
-			InventoryComponent->InventoryWidget->SetNotQuickInventoryVisibility(true);
-		}
-	}
-}
-
 void AFrontierDiverCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
@@ -278,7 +253,7 @@ void AFrontierDiverCharacter::SetupPlayerInputComponent(UInputComponent* PlayerI
 
 
 		//Inventory Interact
-		EnhancedInputComponent->BindAction(OpenCloseInventoryAction, ETriggerEvent::Started, this, &AFrontierDiverCharacter::OpenCloseInventory);
+		EnhancedInputComponent->BindAction(OpenCloseInventoryAction, ETriggerEvent::Started, InventoryComponent, &UInventoryComponent::OpenCloseInventory);
 	}
 	else
 	{

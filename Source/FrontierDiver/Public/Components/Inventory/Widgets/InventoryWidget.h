@@ -6,6 +6,7 @@
 #include "Blueprint/UserWidget.h"
 #include "Components/Inventory/Widgets/InventoryItemWidget.h"
 #include "Components/Inventory/Items/ItemBase.h"
+#include "Components/Inventory/Widgets/DraggingItemWidget.h"
 #include "InventoryWidget.generated.h"
 
 class UInventoryComponent;
@@ -30,6 +31,10 @@ public:
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite)
     class UTexture2D* DefaultItemWidgetTexture;
+
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite)
+    TSubclassOf<UDraggingItemWidget>  DraggingItemWidgetClass;
 
     UFUNCTION(BlueprintCallable)
     UInventoryComponent* GetInventoryComponent() { return InventoryComponent.Get(); }

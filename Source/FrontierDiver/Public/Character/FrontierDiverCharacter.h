@@ -138,8 +138,6 @@ public:
 	UPROPERTY(EditInstanceOnly, BlueprintReadOnly, Category = "Settings")
 	EAnimItemBlendType  AnimItemBlendTypeNow;
 
-	void OpenCloseInventory();
-
 protected:
 	/** Called for movement input */
 	void Move(const FInputActionValue& Value);

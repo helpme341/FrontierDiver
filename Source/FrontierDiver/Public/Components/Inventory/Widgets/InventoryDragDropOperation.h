@@ -13,6 +13,7 @@ UCLASS()
 class FRONTIERDIVER_API UInventoryDragDropOperation : public UDragDropOperation
 {
 	GENERATED_BODY()
+
 public:
 
 	class  TStrongObjectPtr<UItemBase> Item;

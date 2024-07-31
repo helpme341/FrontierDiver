@@ -83,29 +83,39 @@ struct FItemTableRowInfoBase : public FTableRowBase
 };
 
 USTRUCT(BlueprintType)
-struct FBaseItemInfo
+struct FSlotInfo
 {
     GENERATED_BODY()
 
 
-    FBaseItemInfo(EContainerType ItemContainerType, int32 ItemID)
+    FSlotInfo(EContainerType ContainerType, int32 ID)
     {
-        FBaseItemInfo::ItemID = ItemID;
-        FBaseItemInfo::ItemContainerType = ItemContainerType;
+        FSlotInfo::ID = ID;
+        FSlotInfo::ContainerType = ContainerType;
     }
 
 
-    FBaseItemInfo() {}
+    FSlotInfo() {}
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ItemInfoBase")
-    int32 ItemID = 99;
+    int32 ID = 99;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ItemInfoBase")
-    EContainerType ItemContainerType = EContainerType::None;
+    EContainerType ContainerType = EContainerType::None;
 
-    bool IsValid() { return (ItemID != -1 && ItemContainerType != EContainerType::None); }
+    bool IsValid() { return (ID != -1 && ContainerType != EContainerType::None); }
+
+    bool operator==(const FSlotInfo& Other) const
+    {
+        return ID == Other.ID && ContainerType == Other.ContainerType;
+    }
+
+    bool operator!=(const FSlotInfo& Other) const
+    {
+        return !(*this == Other);
+    }
+
 };
-
 
 class UInventoryItemWidget;
 
@@ -127,11 +137,11 @@ public:
 
     bool bUseCustomUpdateItemInfo;
 
-    FBaseItemInfo BaseItemInfo;
+    TSharedPtr<FSlotInfo> ItemSlotInfo = MakeShared<FSlotInfo>();
 
     TStrongObjectPtr<UInventoryItemWidget> ItemWidget;
 
-    virtual bool FindDataTableByItemType(UWorld* World) { return false; };
+    virtual bool FindDataTableForItem(UWorld* World) { return false; };
 
     virtual void OnPickupItemToInventory(class AWorldItem* Item) {};
 
@@ -154,11 +164,11 @@ public:
 protected:
     /*FT == ItemTableRowInfo*/
     template<typename T, typename FT = FItemTableRowInfoBase>
-    bool BaseFindDataTableByItemType(UWorld* World);
+    bool BaseFindDataTableForItem(UWorld* World);
 };
 
 template<typename T, typename FT>
-inline bool UItemBase::BaseFindDataTableByItemType(UWorld* World) // переписать 
+inline bool UItemBase::BaseFindDataTableForItem(UWorld* World) // переписать 
 {
     T* Item = Cast<T>(this);
     if (!Item->ItemTableRowInfo.IsValid() && Item->ItemDynamicInfo->ItemTypeName != "None")

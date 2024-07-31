@@ -14,7 +14,7 @@ UFlashlightItem::UFlashlightItem()
 
 const FHeldItemInfo* UFlashlightItem::GetHeldItemInfo()
 {
-    if (FindDataTableByItemType(GetWorld()))
+    if (FindDataTableForItem(GetWorld()))
     {
         return &ItemTableRowInfo->HeldItemInfo;
     }

@@ -9,6 +9,8 @@
 #include "Components/Inventory/InventoryComponent.h"
 #include "Components/Inventory/Widgets/InventoryDragDropOperation.h"
 #include "Blueprint/WidgetBlueprintLibrary.h"
+#include "Components/Inventory/Widgets/DraggingItemWidget.h"
+
 
 UInventoryItemWidget::UInventoryItemWidget(const FObjectInitializer& ObjectInitializer)
     : Super(ObjectInitializer)
@@ -50,27 +52,33 @@ void UInventoryItemWidget::NativeOnDragDetected(const FGeometry& InGeometry, con
 
     // Создаем объект DragDropOperation
     UInventoryDragDropOperation* DragDropOp = NewObject<UInventoryDragDropOperation>(this, UInventoryDragDropOperation::StaticClass());
-    if (DragDropOp)
+    UDraggingItemWidget* DraggingItemWidget = CreateWidget<UDraggingItemWidget>(this, InventoryWidget->DraggingItemWidgetClass);
+    if (DragDropOp && DraggingItemWidget)
     {
         DragDropOp->Item = Item;
-        DragDropOp->DefaultDragVisual = this;
-        DragDropOp->Offset = FVector2D(0.6f, 0.3f);
+        DraggingItemWidget->UpdateWidgetInfo(Item->GetItemStaticInfo()->ItemWidgetTexture, WidgetTextBlock->Text);
+        DragDropOp->DefaultDragVisual = DraggingItemWidget;
+        DragDropOp->Offset = FVector2D(0.2f, 0.0f); // смещение виджета от мышки // 1 в бок 2 в низ
+        SetItemInfoVisible(true);
         OutOperation = DragDropOp;
     }
 }
-
 
 bool UInventoryItemWidget::NativeOnDrop(const FGeometry& InGeometry, const FDragDropEvent& InDragDropEvent, UDragDropOperation* InOperation)
 {
     if (UInventoryDragDropOperation* DragDropOperation = Cast<UInventoryDragDropOperation>(InOperation))
     {
-        return InventoryWidget->InventoryComponent->MoveItemFromStartSlotToTargetSlot(DragDropOperation->Item->BaseItemInfo, Item.IsValid() ? Item->BaseItemInfo : FBaseItemInfo());
+        return InventoryWidget->InventoryComponent->MoveItemFromStartSlotToTargetSlot(*DragDropOperation->Item->ItemSlotInfo.Get(), WidgetSlotInfo);
     }
     return Super::NativeOnDrop(InGeometry, InDragDropEvent, InOperation);
 }
 
 void UInventoryItemWidget::NativeOnDragCancelled(const FDragDropEvent& InDragDropEvent, UDragDropOperation* InOperation)
 {
+    if (UInventoryDragDropOperation* DragDropOperation = Cast<UInventoryDragDropOperation>(InOperation))
+    {
+        SetItemInfoVisible(false);
+    }
 }
 
 FReply UInventoryItemWidget::NativeOnMouseButtonUp(const FGeometry& InGeometry, const FPointerEvent& MouseEvent) 
@@ -100,27 +108,50 @@ FReply UInventoryItemWidget::NativeOnKeyDown(const FGeometry& InGeometry, const 
     return Super::NativeOnKeyDown(InGeometry, InKeyEvent);
 }
 
+void UInventoryItemWidget::SetItemInfoVisible(bool Hide)
+{
+    if (Hide && !bIsWidgetInfoInHedden)
+    {
+        WidgetImage->SetBrushFromTexture(InventoryWidget->DefaultItemWidgetTexture);
+        WidgetTextBlock->SetVisibility(ESlateVisibility::Hidden);
+        bIsWidgetInfoInHedden = true;
+    }
+    else if (!Hide && bIsWidgetInfoInHedden)
+    {
+        if (Item.IsValid() && Item->FindDataTableForItem(GetWorld()))
+        {
+            WidgetImage->SetBrushFromTexture(Item->GetItemStaticInfo()->ItemWidgetTexture);
+            WidgetTextBlock->SetVisibility(ESlateVisibility::Visible);
+            bIsWidgetInfoInHedden = false;
+        }
+    }
+}
+
 void UInventoryItemWidget::UpdateWidget(UItemBase* ItemRef, bool Clear)
 {
-    if (ItemRef && ItemRef->BaseItemInfo.ItemID == WidgetID && ItemRef->BaseItemInfo.ItemContainerType == WidgetContainerType)
+    if (ItemRef && ItemRef->ItemSlotInfo->ID == WidgetSlotInfo.ID && ItemRef->ItemSlotInfo->ContainerType == WidgetSlotInfo.ContainerType)
     {
-        if (Clear)
+        if (ItemRef->FindDataTableForItem(GetWorld()))
         {
-            WidgetImage->SetBrushFromTexture(InventoryWidget->DefaultItemWidgetTexture);
-            WidgetTextBlock->SetText(FText());
-            Item->ItemWidget.Reset();
-            Item.Reset();
-        }
-        else
-        {
-            Item.Reset(ItemRef);
-            if (!Item->ItemWidget.IsValid()) { Item->ItemWidget.Reset(this); }
-            if (ItemRef->bUseCustomUpdateWidget) { ItemRef->CustomUpdateWidget(); }
+            if (Clear)
+            {
+                WidgetImage->SetBrushFromTexture(InventoryWidget->DefaultItemWidgetTexture);
+                WidgetTextBlock->SetText(FText());
+                Item->ItemWidget.Reset();
+                Item.Reset();
+            }
             else
             {
-                WidgetImage->SetBrushFromTexture(ItemRef->GetItemStaticInfo()->ItemWidgetTexture);
-                //WidgetTextBlock->SetText(FText::FromString(FString::Printf(TEXT("%03d"), ItemRef->GetItemDynamicInfo()->QuantityItems)));
-                WidgetTextBlock->SetText(FText::AsNumber(ItemRef->GetItemDynamicInfo()->QuantityItems));
+                Item.Reset(ItemRef);
+                SetItemInfoVisible(false);
+                if (!Item->ItemWidget.IsValid() || Item->ItemWidget.Get() != this) { Item->ItemWidget.Reset(this); }
+                if (ItemRef->bUseCustomUpdateWidget) { ItemRef->CustomUpdateWidget(); }
+                else
+                {
+                    WidgetImage->SetBrushFromTexture(ItemRef->GetItemStaticInfo()->ItemWidgetTexture);
+                    //WidgetTextBlock->SetText(FText::FromString(FString::Printf(TEXT("%03d"), ItemRef->GetItemDynamicInfo()->QuantityItems)));
+                    WidgetTextBlock->SetText(FText::AsNumber(ItemRef->GetItemDynamicInfo()->QuantityItems));
+                }
             }
         }
     }
@@ -128,9 +159,9 @@ void UInventoryItemWidget::UpdateWidget(UItemBase* ItemRef, bool Clear)
 
 void UInventoryItemWidget::SetWidgetUsability()
 {
-    TArray<FSharedContainerBase>& ContainerInventory = InventoryWidget->GetInventoryComponent()->Inventory[WidgetContainerType].ContainerInventory;
+    TArray<FSharedContainerBase>& ContainerInventory = InventoryWidget->GetInventoryComponent()->Inventory[WidgetSlotInfo.ContainerType].ContainerInventory;
 
-    if (ContainerInventory.IsValidIndex(WidgetID))
+    if (ContainerInventory.IsValidIndex(WidgetSlotInfo.ID))
     {
         SetVisibility(ESlateVisibility::Visible);
         bIsWidgetUsability = true;
@@ -146,7 +177,7 @@ void UInventoryItemWidget::SetWidgetVisibility(bool Hide, bool UpdateState)
 {
     if (bIsWidgetUsability)
     {
-        if (!UpdateState && InventoryWidget->GetInventoryComponent()->QuickInventoryContainerType != WidgetContainerType) { SetVisibility(Hide ? ESlateVisibility::Hidden : ESlateVisibility::Visible); }
+        if (!UpdateState && InventoryWidget->GetInventoryComponent()->QuickInventoryContainerType != WidgetSlotInfo.ContainerType) { SetVisibility(Hide ? ESlateVisibility::Hidden : ESlateVisibility::Visible); }
         else if (UpdateState) { SetVisibility(Hide ? ESlateVisibility::Hidden : ESlateVisibility::Visible); }
     }
 }

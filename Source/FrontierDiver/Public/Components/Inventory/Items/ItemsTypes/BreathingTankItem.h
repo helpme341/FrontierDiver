@@ -48,8 +48,8 @@ public:
 
 	UBreathingTankItem();
 
-	bool FindDataTableByItemType(UWorld* World)
-		override { return BaseFindDataTableByItemType<UBreathingTankItem, FBreathingTankItemTableRowInfo>(World); }
+	bool FindDataTableForItem(UWorld* World)
+		override { return BaseFindDataTableForItem<UBreathingTankItem, FBreathingTankItemTableRowInfo>(World); }
 
 	const FItemTableRowInfoBase* GetItemStaticInfo()
 		override { return ItemTableRowInfo.Get(); }

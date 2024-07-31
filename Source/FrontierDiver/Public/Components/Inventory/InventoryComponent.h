@@ -6,7 +6,8 @@
 #include "Components/Base/CharacterComponentBase.h"
 #include "Components/Inventory/Items/ItemBase.h"
 #include "Components/Inventory/Items/WorldItem.h"
-#include <functional> 
+#include "functional"
+#include "Blueprint/WidgetBlueprintLibrary.h"
 #include "InventoryComponent.generated.h"
 
 USTRUCT(BlueprintType)
@@ -65,6 +66,9 @@ public:
 	UFUNCTION(BlueprintCallable)
 	AFrontierDiverCharacter* GetOwnerCharacter() { return DiverCharacter; }
 
+
+	void OpenCloseInventory();
+
 	UFUNCTION(BlueprintCallable)
 	bool HeldItemToHandsByID(int32 ID);
 
@@ -75,22 +79,20 @@ public:
 	UFUNCTION(BlueprintCallable)
 	bool HeldBreathingTankItemByID(int32 ID);
 
-
 	UFUNCTION(BlueprintCallable)
 	bool RemoveBreathingTankItem();
+
 
 	void BeginLogic(AFrontierDiverCharacter* Character);
 
 	bool AddItemToInventory(UItemBase* Item);
-
-	int AddItemToInventory(UItemBase* Item, UItemBase*& ItemResult);
-
-	int AddItemToInventory(UItemBase* Item, UItemBase*& ItemResult , const TArray<FBaseItemInfo>& IgnoreSlotsList);
+	int AddItemToInventory(UItemBase* Item, UItemBase*& OutOperation);
 
 	int RemoveItemFromInventory(UItemBase* Item, bool RemoveItem);
 	bool PickupItemToInventory(AWorldItem* Item);
 	int DropItemFromInventory(UItemBase* Item);
-	bool MoveItemFromStartSlotToTargetSlot(FBaseItemInfo StartSlot, FBaseItemInfo TargetSlot);
+	bool MoveItemFromStartSlotToTargetSlot(FSlotInfo& StartSlot, FSlotInfo& TargetSlot);
+	bool CheckContainerTypesForType(const TSet<EContainerType>& ItemContainerTypes, EContainerType TargetContainerType);
 
 	bool FirstInteractWithHeldItem();
 	bool SecondInteractWithHeldItem();
@@ -109,8 +111,8 @@ public:
 	void OnInventoryItemWidgetConstructed();
 	TStrongObjectPtr<UInventoryWidget> InventoryWidget;
 	TStrongObjectPtr<UItemBase> HeldItem;
-	class TStrongObjectPtr<UBreathingTankItem> HeldBreathingTankItem;
-	
+	TStrongObjectPtr<class UBreathingTankItem> HeldBreathingTankItem;
+
 	UPROPERTY()
 	bool bIsItemHeld;
 

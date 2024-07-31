@@ -64,8 +64,8 @@ public:
 
 	TStrongObjectPtr<AStaticMeshActor> HeldMeshItem;
 
-	bool FindDataTableByItemType(UWorld* World)
-		override { return BaseFindDataTableByItemType<UFlashlightItem, FFlashlightItemTableRowInfo>(World); }
+	bool FindDataTableForItem(UWorld* World)
+		override { return BaseFindDataTableForItem<UFlashlightItem, FFlashlightItemTableRowInfo>(World); }
 
 	const FItemTableRowInfoBase* GetItemStaticInfo()
 		override { return ItemTableRowInfo.Get(); }
