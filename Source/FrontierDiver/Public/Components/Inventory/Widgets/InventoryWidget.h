@@ -36,6 +36,9 @@ public:
     UPROPERTY(EditAnywhere, BlueprintReadWrite)
     TSubclassOf<UDraggingItemWidget>  DraggingItemWidgetClass;
 
+    UPROPERTY(EditAnywhere, BlueprintReadWrite)
+    TSubclassOf<class UInventoryDragDropOperation> InventoryDragDropOperation;
+
     UFUNCTION(BlueprintCallable)
     UInventoryComponent* GetInventoryComponent() { return InventoryComponent.Get(); }
 
@@ -80,6 +83,12 @@ public:
 
     UPROPERTY(meta = (BindWidget))
     UTextBlock* ItemDescription;
+
+    UFUNCTION(BlueprintImplementableEvent)
+    void OnCloseInventory();
+
+    UFUNCTION(BlueprintImplementableEvent)
+    void OnOpenInventory();
 
 protected:
 

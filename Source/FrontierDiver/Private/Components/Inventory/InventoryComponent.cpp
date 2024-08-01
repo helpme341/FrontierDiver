@@ -218,7 +218,6 @@ int UInventoryComponent::DropItemFromInventory(UItemBase* Item)
     return 0;
 }
 
-
 bool UInventoryComponent::MoveItemFromStartSlotToTargetSlot(FSlotInfo& StartSlot, FSlotInfo& TargetSlot)
 {
     if (!StartSlot.IsValid() || !Inventory[StartSlot.ContainerType].ContainerInventory[StartSlot.ID].Item.IsValid()) { return false; }
@@ -303,6 +302,7 @@ void UInventoryComponent::OpenCloseInventory()
             PlayerController->bEnableClickEvents = true;
             PlayerController->bEnableMouseOverEvents = true;
             PlayerController->SetInputMode(FInputModeGameAndUI().SetWidgetToFocus(InventoryWidget->TakeWidget()).SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock));
+            InventoryWidget->OnOpenInventory();
             InventoryWidget->SetNotQuickInventoryVisibility(false);
         }
         else
@@ -312,6 +312,7 @@ void UInventoryComponent::OpenCloseInventory()
             PlayerController->bEnableClickEvents = false;
             PlayerController->bEnableMouseOverEvents = false;
             PlayerController->SetInputMode(FInputModeGameOnly());
+            InventoryWidget->OnCloseInventory();
             InventoryWidget->SetNotQuickInventoryVisibility(true);
         }
     }
@@ -321,7 +322,7 @@ bool UInventoryComponent::HeldItemToHandsByID(int32 ID)
 {
     if (bIsItemHeld || !Inventory[QuickInventoryContainerType].ContainerInventory[ID].Item)
     {
-        return false;
+        return RemoveItemFromHands();
     }
 
     ITakeRemoveItemIF* TakeRemoveItemIF = Cast<ITakeRemoveItemIF>(Inventory[QuickInventoryContainerType].ContainerInventory[ID].Item.Get());

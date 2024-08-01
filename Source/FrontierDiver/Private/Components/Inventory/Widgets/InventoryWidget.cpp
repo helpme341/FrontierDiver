@@ -6,6 +6,7 @@
 #include "Components/Image.h"
 #include "Components/Inventory/InventoryComponent.h"
 #include "Components/Inventory/Items/ItemBase.h"
+#include "Components/Inventory/Widgets/InventoryDragDropOperation.h"
 
 DEFINE_LOG_CATEGORY(LogInventoryWidget);
 

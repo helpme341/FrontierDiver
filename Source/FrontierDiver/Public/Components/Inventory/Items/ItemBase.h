@@ -80,6 +80,9 @@ struct FItemTableRowInfoBase : public FTableRowBase
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "DefaultSettings|WorldItem")
     FVector WorldItemScale = FVector(1.0f,1.0f,1.0f);
+
+
+    bool bUseAutoStaking; ////////////////
 };
 
 USTRUCT(BlueprintType)

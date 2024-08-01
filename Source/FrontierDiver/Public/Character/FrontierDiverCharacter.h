@@ -71,6 +71,10 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* OpenCloseInventoryAction;
 
+	/** Inventory Interact Action */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* InventoryInteractAction;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI", meta = (AllowPrivateAccess = "true"))
 	TSubclassOf<class UMainWidget> MainWidgetClass;
 
@@ -152,6 +156,8 @@ protected:
 	void SecondInteract();
 
 	void ThirdInteract();
+
+	void InventoryInteract(const FInputActionValue& Value);
 
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;

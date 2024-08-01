@@ -51,14 +51,13 @@ void UInventoryItemWidget::NativeOnDragDetected(const FGeometry& InGeometry, con
     Super::NativeOnDragDetected(InGeometry, InMouseEvent, OutOperation);
 
     // Создаем объект DragDropOperation
-    UInventoryDragDropOperation* DragDropOp = NewObject<UInventoryDragDropOperation>(this, UInventoryDragDropOperation::StaticClass());
+    UInventoryDragDropOperation* DragDropOp = NewObject<UInventoryDragDropOperation>(this, InventoryWidget->InventoryDragDropOperation);
     UDraggingItemWidget* DraggingItemWidget = CreateWidget<UDraggingItemWidget>(this, InventoryWidget->DraggingItemWidgetClass);
     if (DragDropOp && DraggingItemWidget)
     {
         DragDropOp->Item = Item;
         DraggingItemWidget->UpdateWidgetInfo(Item->GetItemStaticInfo()->ItemWidgetTexture, WidgetTextBlock->Text);
         DragDropOp->DefaultDragVisual = DraggingItemWidget;
-        DragDropOp->Offset = FVector2D(0.2f, 0.0f); // смещение виджета от мышки // 1 в бок 2 в низ
         SetItemInfoVisible(true);
         OutOperation = DragDropOp;
     }

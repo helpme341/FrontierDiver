@@ -225,6 +225,14 @@ void AFrontierDiverCharacter::ThirdInteract()
 	// ещё логика
 }
 
+void AFrontierDiverCharacter::InventoryInteract(const FInputActionValue& Value)
+{
+	// Извлекаем float из FInputActionValue
+	float Amount = Value.Get<float>();
+
+	InventoryComponent->HeldItemToHandsByID(Amount - 1);
+}
+
 void AFrontierDiverCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
@@ -254,6 +262,9 @@ void AFrontierDiverCharacter::SetupPlayerInputComponent(UInputComponent* PlayerI
 
 		//Inventory Interact
 		EnhancedInputComponent->BindAction(OpenCloseInventoryAction, ETriggerEvent::Started, InventoryComponent, &UInventoryComponent::OpenCloseInventory);
+
+		EnhancedInputComponent->BindAction(InventoryInteractAction, ETriggerEvent::Started, this, &AFrontierDiverCharacter::InventoryInteract);
+
 	}
 	else
 	{
