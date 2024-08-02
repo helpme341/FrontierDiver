@@ -72,6 +72,10 @@ struct FItemTableRowInfoBase : public FTableRowBase
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "DefaultSettings")
     int32 MaxQuantityItemsInSlot = 1;
 
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "DefaultSettings")
+    bool bUseAutoStaking = true;
+
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "DefaultSettings|WorldItem")
     UStaticMesh* WorldItemStaticMesh;
 
@@ -80,9 +84,6 @@ struct FItemTableRowInfoBase : public FTableRowBase
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "DefaultSettings|WorldItem")
     FVector WorldItemScale = FVector(1.0f,1.0f,1.0f);
-
-
-    bool bUseAutoStaking; ////////////////
 };
 
 USTRUCT(BlueprintType)
@@ -165,6 +166,9 @@ public:
     virtual void SetItemDynamicInfo(UItemDynamicInfo* DynamicInfo) {};
 
 protected:
+
+    virtual void PlayItemAnimMontage(UAnimMontage* MontageToPlay, FName& AnimSlot, class UInventoryComponent* Inventory);
+
     /*FT == ItemTableRowInfo*/
     template<typename T, typename FT = FItemTableRowInfoBase>
     bool BaseFindDataTableForItem(UWorld* World);

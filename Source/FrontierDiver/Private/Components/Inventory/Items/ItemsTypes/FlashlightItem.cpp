@@ -52,11 +52,13 @@ void UFlashlightItem::ThirdInteract(UInventoryComponent* Inventory)
                 {
                     ItemDynamicInfo->SpotLight->SetActorHiddenInGame(true);
                     ItemDynamicInfo->bIsFlashlightOn = false;
+                    PlayItemAnimMontage(ItemTableRowInfo->AnimMontageToEndInteract, ItemTableRowInfo->AnimMontageSlot, Inventory);
                 }
                 else if (!ItemDynamicInfo->bIsFlashlightOn)
                 {
                     ItemDynamicInfo->SpotLight->SetActorHiddenInGame(false);
                     ItemDynamicInfo->bIsFlashlightOn = true;
+                    PlayItemAnimMontage(ItemTableRowInfo->AnimMontageToStartInteract, ItemTableRowInfo->AnimMontageSlot, Inventory);
                 }
             }
         }

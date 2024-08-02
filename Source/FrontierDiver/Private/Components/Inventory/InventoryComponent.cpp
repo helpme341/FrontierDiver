@@ -45,6 +45,31 @@ int UInventoryComponent::AddItemToInventory(UItemBase* Item, UItemBase*& ItemRes
         {
             auto& ContainerInventory = Inventory[ContainerType].ContainerInventory;
 
+
+            if (Item->GetItemStaticInfo()->bUseAutoStaking)
+            {
+                for (int32 Index = 0; Index < ContainerInventory.Num(); ++Index)
+                {
+                    FSharedContainerBase& ExistingItem = ContainerInventory[Index];
+                    UItemBase* ItemOnInspection = ExistingItem.Item.Get();
+
+                    if (ItemOnInspection && bCheckQuantity &&
+                        ItemOnInspection->GetItemDynamicInfo()->ItemTypeName == Item->GetItemDynamicInfo()->ItemTypeName &&
+                        ItemOnInspection->GetClass() == Item->GetClass())
+                    {
+                        if (ItemOnInspection->GetItemDynamicInfo()->QuantityItems + Item->GetItemDynamicInfo()->QuantityItems <= Item->GetItemStaticInfo()->MaxQuantityItemsInSlot)
+                        {
+                            ItemOnInspection->GetItemDynamicInfo()->QuantityItems += Item->GetItemDynamicInfo()->QuantityItems;
+                            Item->ConditionalBeginDestroy();
+                            ItemResult = ItemOnInspection;
+                            InventoryWidget->UpdateWidgetByItem(ItemOnInspection, false);
+                            ItemOnInspection->OnAddItemToInventory();
+                            return 2;
+                        }
+                    }
+                }
+            }
+
             // Итерация по элементам инвентаря
             for (int32 Index = 0; Index < ContainerInventory.Num(); ++Index)
             {
@@ -509,6 +534,7 @@ void UInventoryComponent::OnInventoryItemWidgetConstructed()
 void UInventoryComponent::BeginLogic(AFrontierDiverCharacter* Character)
 {
     DiverCharacter = Character;
+    PlayerAnimInstance.Reset(Character->Mesh1P->GetAnimInstance());
     if (InventoryWidgetClass)
     {
         APlayerController* PlayerController = GetWorld()->GetFirstPlayerController();

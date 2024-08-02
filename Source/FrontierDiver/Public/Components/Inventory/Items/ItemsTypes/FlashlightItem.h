@@ -34,6 +34,15 @@ struct FFlashlightItemTableRowInfo : public FItemTableRowInfoBase
 		MaxQuantityItemsInSlot = 1;    // //
 	}
 	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "CustomFlashlightSettings|Animation")
+	UAnimMontage* AnimMontageToStartInteract;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "CustomFlashlightSettings|Animation")
+	FName AnimMontageSlot = "None";
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "CustomFlashlightSettings|Animation")
+	UAnimMontage* AnimMontageToEndInteract;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "CustomFlashlightSettings|SocketNames")
 	FHeldItemInfo HeldItemInfo;
 
@@ -42,6 +51,7 @@ struct FFlashlightItemTableRowInfo : public FItemTableRowInfoBase
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "CustomFlashlightSettings|AttachOffset")
 	FTransform SpotLightAttachOffset;
+
 };
 
 class AWorldItem;

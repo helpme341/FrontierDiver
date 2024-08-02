@@ -112,6 +112,7 @@ public:
 	TStrongObjectPtr<UInventoryWidget> InventoryWidget;
 	TStrongObjectPtr<UItemBase> HeldItem;
 	TStrongObjectPtr<class UBreathingTankItem> HeldBreathingTankItem;
+	TStrongObjectPtr<UAnimInstance> PlayerAnimInstance;
 
 	UPROPERTY()
 	bool bIsItemHeld;
